@@ -1,4 +1,5 @@
-﻿CREATE DATABASE VOLUNTARIADOBD
+﻿DROP DATABASE VOLUNTARIADOBD
+CREATE DATABASE VOLUNTARIADOBD
 GO
 
 
@@ -172,3 +173,138 @@ CREATE TABLE ACT_PRACTICA_ODS(
     CONSTRAINT FK_ACT_PRACTICA_ODS_ODS FOREIGN KEY (NUMODS) REFERENCES ODS(NUMODS)
 )
 
+--INSERTAR DATOS EN TABLA ORGANIZACION
+INSERT INTO ORGANIZACION (NOMBRE, TIPO_ORG, CORREO, TELEFONO, SECTOR, AMBITO, DESCRIPCION)
+VALUES
+('AMAVIR', 'FUNDACION', 'amavir@example.com', '600000001', 'SALUD', 'LOCAL', 'Organizaci�n dedicada a la salud de los mayores.'),
+('ANA', 'ONG', 'ana@example.com', '600000002', 'SOCIAL', 'REGIONAL', 'ONG enfocada en la ayuda social.'),
+('CUATROVIENTOS', 'ASOCIACION', 'cuatrocientos@example.com', '600000003', 'EDUCATIVO', 'NACIONAL', 'Asociaci�n educativa.'),
+('SOLERA', 'ENTIDAD P�BLICA', 'solera@example.com', '600000004', 'AMBIENTAL', 'INTERNACIONAL', 'Entidad p�blica ambiental.'),
+('UNZUTXIKI', 'OTRA', 'unzutxiki@example.com', '600000005', 'CULTURAL', 'LOCAL', 'Organizaci�n cultural local.');
+
+--INSERTAR DATOS EN TABLA CICLO
+INSERT INTO CICLO (CODCICLO, NOMBRE, CURSO)
+VALUES
+('1SC', 'SERVICIOS COMERCIALES', 1),
+('2SC', 'SERVICIOS COMERCIALES', 2),
+('1AAG', 'AUXILIAR ADMINISTRATIVO GENERAL', 1),
+('2AAG', 'AUXILIAR ADMINISTRATIVO GENERAL', 2),
+('1GA', 'GESTI�N ADMINISTRATIVA', 1),
+('2GA', 'GESTI�N ADMINISTRATIVA', 2),
+('1AC', 'ACTIVIDADES COMERCIALES', 1),
+('2AC', 'ACTIVIDADES COMERCIALES', 2),
+('1SMR', 'SISTEMAS MICROINFORM�TICOS Y REDES', 1),
+('2SMR', 'SISTEMAS MICROINFORM�TICOS Y REDES', 2),
+('1AF', 'ADMINISTRACI�N Y FINANZAS', 1),
+('2AF', 'ADMINISTRACI�N Y FINANZAS', 2),
+('1CI', 'COMERCIO INTERNACIONAL', 1),
+('2CI', 'COMERCIO INTERNACIONAL', 2),
+('1GV', 'GESTI�N DE VENTAS', 1),
+('2GV', 'GESTI�N DE VENTAS', 2),
+('1TL', 'TRANSPORTE Y LOG�STICA', 1),
+('2TL', 'TRANSPORTE Y LOG�STICA', 2),
+('1ASIR', 'ADMINISTRACI�N DE SISTEMAS INFORM�TICOS Y REDES', 1),
+('2ASIR', 'ADMINISTRACI�N DE SISTEMAS INFORM�TICOS Y REDES', 2),
+('1DAM', 'DESARROLLO DE APLICACIONES MULTIPLATAFORMA', 1),
+('2DAM', 'DESARROLLO DE APLICACIONES MULTIPLATAFORMA', 2);
+
+--INSERTAR DATOS EN TABLA VOLUNTARIO
+INSERT INTO VOLUNTARIO (NOMBRE, APELLIDO1, APELLIDO2, CORREO, TELEFONO, FECHA_NACIMIENTO, DESCRIPCION, CODCICLO)
+VALUES
+('Juan', 'P�rez', 'Garc�a', 'juan.perez@example.com', '600000006', '1995-05-20', 'Voluntario entusiasta.', '1SMR'),
+('Mar�a', 'L�pez', 'S�nchez', 'maria.lopez@example.com', '600000007', '1998-07-15', 'Interesada en actividades sociales.', '2DAM'),
+('Carlos', 'G�mez', 'Mart�nez', 'carlos.gomez@example.com', '600000008', '1990-03-10', NULL, '1DAM'),
+('Ana', 'Fern�ndez', 'Ruiz', 'ana.fernandez@example.com', '600000009', '2000-01-01', 'Estudiante de marketing.', '1DAM'),
+('Luis', 'Mart�n', 'Hern�ndez', 'luis.martin@example.com', '600000010', '1992-11-25', 'Experiencia en educaci�n.', '2SMR');
+
+--INSERTAR DATOS EN TABLA TIPO_ACTIVIDAD
+INSERT INTO TIPO_ACTIVIDAD (DESCRIPCION)
+VALUES
+('Digital'),
+('Salud'),
+('Educativo'),
+('Ambiental'),
+('Deportivo'),
+('Social'),
+('Cultural'),
+('Tecnico');
+
+
+--INSERTAR DATOS EN TABLA ODS
+INSERT INTO ODS (NUMODS, DESCRIPCION)  
+VALUES  
+(1, 'Fin de la pobreza'),  
+(2, 'Hambre cero'),  
+(3, 'Salud y bienestar'),  
+(4, 'Educaci�n de calidad'),  
+(5, 'Igualdad de g�nero'),  
+(6, 'Agua limpia y saneamiento'),  
+(7, 'Energ�a asequible y no contaminante'),  
+(8, 'Trabajo decente y crecimiento econ�mico'),  
+(9, 'Industria, innovaci�n e infraestructura'),  
+(10, 'Reducci�n de las desigualdades'),  
+(11, 'Ciudades y comunidades sostenibles'),  
+(12, 'Producci�n y consumo responsables'),  
+(13, 'Acci�n por el clima'),  
+(14, 'Vida submarina'),  
+(15, 'Vida de ecosistemas terrestres'),  
+(16, 'Paz, justicia e instituciones s�lidas'),  
+(17, 'Alianzas para lograr los objetivos');  
+
+--INSERTAR DATOS EN TABLA ACTIVIDAD
+INSERT INTO ACTIVIDAD (NOMBRE, DURACION_SESION, FECHA_INICIO, FECHA_FIN, N_MAX_VOLUNTARIOS, CODORG, DESCRIPCION)
+VALUES
+('ACTIVIDAD1', '02:00:00', '2023-10-01', '2023-10-02', 10, 1, 'Taller de salud para mayores'),
+('ACTIVIDAD2','01:30:00', '2023-11-15', '2023-11-15', 5, 2, 'Reparto de alimentos'),
+('ACTIVIDAD3','03:00:00', '2023-12-01', '2023-12-03', 20, 3, 'Jornada educativa'),
+('ACTIVIDAD4','01:00:00', '2024-01-10', '2024-01-10', 15, 4, 'Limpieza de playa'),
+('ACTIVIDAD5','02:30:00', '2024-02-20', '2024-02-21', 8, 5, 'Festival cultural');
+
+
+--INSERTAR DATOS EN TABLA DISPONIBILIDAD
+INSERT INTO DISPONIBILIDAD (CODVOL, DIA, HORA)
+VALUES
+(1, 'LUNES', '3-4'),
+(1, 'MI�RCOLES', '5-6'),
+(2, 'MARTES', '4-5'),
+(2, 'JUEVES', '6-7'),
+(3, 'VIERNES', '7-8'),
+(4, 'S�BADO', '8-9'),
+(5, 'DOMINGO', '9-10');
+
+--INSERTAR DATOS EN TABLA VOL_PARTICIPA_ACT
+INSERT INTO VOL_PARTICIPA_ACT (CODVOL, CODACT)
+VALUES
+(1, 1),  -- Juan participa en Taller de salud
+(2, 2),  -- Mar�a participa en Reparto de alimentos
+(3, 3),  -- Carlos participa en Jornada educativa
+(4, 4),  -- Ana participa en Limpieza de playa
+(5, 5);  -- Luis participa en Festival cultural
+
+--INSERTAR DATOS EN TABLA VOL_PREFIERE_TACT
+INSERT INTO VOL_PREFIERE_TACT (CODVOL, CODTIPO)
+VALUES
+(1, 1),  -- Juan prefiere Educativa
+(2, 2),  -- Mar�a prefiere Social
+(3, 3),  -- Carlos prefiere Ambiental
+(4, 4),  -- Ana prefiere Cultural
+(5, 5);  -- Luis prefiere Deportiva
+
+
+--INSERTAR DATOS EN TABLA ACT_PRACTICA_ODS
+INSERT INTO ACT_PRACTICA_ODS (CODACT, NUMODS)
+VALUES
+(1, 3),  -- Taller de salud (Salud y bienestar)
+(2, 2),  -- Reparto de alimentos (Hambre cero)
+(3, 4),  -- Jornada educativa (Educaci�n de calidad)
+(4, 1),  -- Limpieza de playa (Fin de la pobreza)
+(5, 5);  -- Festival cultural (Igualdad de g�nero)
+
+--INSERTAR DATOS EN TABLA ACT_ASOCIADO_TACT
+INSERT INTO ACT_ASOCIADO_TACT (CODACT, CODTIPO)
+VALUES
+(1, 1),  -- Taller de salud (Educativa)
+(2, 2),  -- Reparto de alimentos (Social)
+(3, 1),  -- Jornada educativa (Educativa)
+(4, 3),  -- Limpieza de playa (Ambiental)
+(5, 4);  -- Festival cultural (Cultural)
