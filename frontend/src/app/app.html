@@ -1,1 +1,14 @@
+<h1>{{ title() }}</h1>
+
+<div style="border: 1px solid #ccc; padding: 1rem; margin: 1rem">
+  <h2>Prueba de Conexión Backend</h2>
+  <ul>
+    @for (usuario of usuarios(); track usuario.id) {
+    <li>{{ usuario.nombre }} (ID: {{ usuario.id }})</li>
+    } @empty {
+    <li>Cargando o sin conexión... (Asegúrate que el backend corre en localhost:8000)</li>
+    }
+  </ul>
+</div>
+
 <router-outlet></router-outlet>
