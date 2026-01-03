@@ -46,6 +46,13 @@ class Organizacion
     #[Assert\Choice(choices: ['LOCAL', 'REGIONAL', 'NACIONAL', 'INTERNACIONAL'])]
     private ?string $AMBITO = null;
 
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    private ?string $PASSWORD = null;
+
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $PERSONA_CONTACTO = null;
+
     #[ORM\Column(length: 500, nullable: true)]
     #[Assert\Length(max: 500)]
     private ?string $DESCRIPCION = null;
@@ -99,7 +106,8 @@ class Organizacion
 
     public function setTELEFONO(string $TELEFONO): static
     {
-        $this->TELEFONO = $TELEFONO;
+        // Sanitize: remove all non-numeric characters
+        $this->TELEFONO = preg_replace('/\D/', '', $TELEFONO);
         return $this;
     }
 
@@ -122,6 +130,28 @@ class Organizacion
     public function setAMBITO(string $AMBITO): static
     {
         $this->AMBITO = $AMBITO;
+        return $this;
+    }
+
+    public function getPASSWORD(): ?string
+    {
+        return $this->PASSWORD;
+    }
+
+    public function setPASSWORD(string $PASSWORD): static
+    {
+        $this->PASSWORD = $PASSWORD;
+        return $this;
+    }
+
+    public function getPERSONA_CONTACTO(): ?string
+    {
+        return $this->PERSONA_CONTACTO;
+    }
+
+    public function setPERSONA_CONTACTO(?string $PERSONA_CONTACTO): static
+    {
+        $this->PERSONA_CONTACTO = $PERSONA_CONTACTO;
         return $this;
     }
 

@@ -1,4 +1,4 @@
-<section class="contact-cta-section py-5 py-md-5 px-4 px-md-5 text-center bg-cuatro-main-blue"
+<section *ngIf="showCta" class="contact-cta-section py-5 py-md-5 px-4 px-md-5 text-center bg-cuatro-main-blue"
     style="background-color: var(--color-cuatrovientos-main-blue);">
 
     <div class="container-fluid py-5">
@@ -23,7 +23,7 @@
         </div>
     </div>
 </section>
-<footer class="bg-cuatro-dark-bg text-cuatro-gray-text py-5 px-4 px-md-5">
+<footer class="bg-cuatro-dark-bg text-cuatro-gray-text py-5 px-4 px-md-5 w-100 m-0" style="width: 100%; max-width: 100%;">
     <div class="container-fluid max-w-7xl mx-auto">
         <div class="row g-4">
 

@@ -21,6 +21,7 @@ class ActivityController extends AbstractController
     {
         // 1. Auto-update status for finished activities
         $activities = $activityRepository->findAll();
+        /*
         $now = new \DateTime();
         $updated = false;
 
@@ -34,6 +35,7 @@ class ActivityController extends AbstractController
         if ($updated) {
             $entityManager->flush();
         }
+        */
 
         // 2. Prepare response
         $data = [];
@@ -48,6 +50,7 @@ class ActivityController extends AbstractController
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
                 'image' => 'assets/images/activity-1.jpg', // Placeholder
                 'organization' => $org ? [
+                    'id' => $org->getCODORG(),
                     'name' => $org->getNOMBRE(),
                     'logo' => 'assets/images/org-default.png'
                 ] : null,

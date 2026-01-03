@@ -13,7 +13,7 @@ class Volunteer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'CODVOL')]
     private ?int $CODVOL = null;
 
     #[ORM\Column(length: 30)]
@@ -58,9 +58,21 @@ class Volunteer
     #[Assert\Length(min: 9, max: 9)]
     private ?string $DNI = null;
 
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    private ?string $PASSWORD = null;
+
     #[ORM\Column(length: 10)]
     #[Assert\Choice(choices: ['ACTIVO', 'SUSPENDIDO', 'PENDIENTE'])]
     private ?string $ESTADO = 'PENDIENTE';
+
+    #[ORM\ManyToMany(targetEntity: Actividad::class, mappedBy: 'voluntarios')]
+    private $actividades;
+
+    public function __construct()
+    {
+        $this->actividades = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     public function getCODVOL(): ?int
     {
@@ -118,7 +130,8 @@ class Volunteer
 
     public function setTELEFONO(string $TELEFONO): static
     {
-        $this->TELEFONO = $TELEFONO;
+        // Sanitize: remove all non-numeric characters
+        $this->TELEFONO = preg_replace('/\D/', '', $TELEFONO);
         return $this;
     }
 
@@ -166,6 +179,17 @@ class Volunteer
         return $this;
     }
 
+    public function getPASSWORD(): ?string
+    {
+        return $this->PASSWORD;
+    }
+
+    public function setPASSWORD(string $PASSWORD): static
+    {
+        $this->PASSWORD = $PASSWORD;
+        return $this;
+    }
+
     public function getESTADO(): ?string
     {
         return $this->ESTADO;
@@ -174,6 +198,31 @@ class Volunteer
     public function setESTADO(string $ESTADO): static
     {
         $this->ESTADO = $ESTADO;
+        return $this;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Actividad>
+     */
+    public function getActividades(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->actividades;
+    }
+
+    public function addActividad(Actividad $actividad): static
+    {
+        if (!$this->actividades->contains($actividad)) {
+            $this->actividades->add($actividad);
+            $actividad->addVoluntario($this);
+        }
+        return $this;
+    }
+
+    public function removeActividad(Actividad $actividad): static
+    {
+        if ($this->actividades->removeElement($actividad)) {
+            $actividad->removeVoluntario($this);
+        }
         return $this;
     }
 }

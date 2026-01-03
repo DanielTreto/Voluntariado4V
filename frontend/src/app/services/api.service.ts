@@ -3,13 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8000/api'; // Ajusta esto si tu backend corre en otro puerto
 
-  constructor() { }
+  constructor() {}
 
   getUsuarios(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/usuarios`);
@@ -45,5 +45,26 @@ export class ApiService {
 
   updateActivityStatus(id: number, status: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/activities/${id}/status`, { status });
+  }
+
+  // Auth Methods
+  login(credentials: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials);
+  }
+
+  registerVolunteer(volunteer: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/volunteers`, volunteer);
+  }
+
+  registerOrganization(org: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/organizations`, org);
+  }
+
+  signUpForActivity(activityId: number, volunteerId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/activities/${activityId}/signup`, { volunteerId });
+  }
+
+  getActivityVolunteers(activityId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/activities/${activityId}/volunteers`);
   }
 }

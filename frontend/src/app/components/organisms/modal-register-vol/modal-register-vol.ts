@@ -1,31 +1,56 @@
-import { Component, output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, inject, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-modal-register-vol',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './modal-register-vol.html',
   styleUrl: './modal-register-vol.scss',
 })
 export class ModalRegisterVol {
   onClose = output();
+  onOpenLogin = output();
+  
+  private apiService = inject(ApiService);
 
-  onOpenLogin = output(); 
+  volunteer = {
+    name: '',
+    surname1: '',
+    surname2: '',
+    email: '',
+    phone: '',
+    dni: '',
+    dateOfBirth: '',
+    description: '',
+    course: '',
+    password: ''
+  };
 
   constructor() {}
 
   closeModal(): void {
-    this.onClose.emit(); // Pide al App Component que cierre el modal
+    this.onClose.emit(); 
   }
 
   openLoginModal(): void {
-    this.onOpenLogin.emit(); // Pide al App Component que muestre el modal de Login
+    this.onOpenLogin.emit();
   }
 
   registerVolunteer(): void {
-    // ⚠️ Lógica de validación y envío de datos de registro iría aquí ⚠️
-    console.log('Datos de voluntario enviados...');
-    
-    // Opcional: Cerrar el modal tras el registro exitoso
-    // this.closeModal();
+    // Basic validation could go here
+    this.apiService.registerVolunteer(this.volunteer).subscribe({
+      next: (response) => {
+        console.log('Volunteer registered', response);
+        alert('Registro completado con éxito');
+        this.closeModal();
+      },
+      error: (error) => {
+        console.error('Error registering volunteer', error);
+        alert(`Error Status: ${error.status}\nError Body: ${JSON.stringify(error.error)}`);
+      }
+    });
   }
 }

@@ -12,7 +12,7 @@ class Actividad
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'CODACT')]
     private ?int $CODACT = null;
 
     #[ORM\Column(length: 70)]
@@ -39,6 +39,17 @@ class Actividad
 
     #[ORM\Column]
     private ?int $CODORG = null;
+
+    #[ORM\ManyToMany(targetEntity: Volunteer::class, inversedBy: 'actividades')]
+    #[ORM\JoinTable(name: 'VOLUNTARIO_ACTIVIDAD')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL')]
+    private $voluntarios;
+
+    public function __construct()
+    {
+        $this->voluntarios = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     #[ORM\Column(length: 500)]
     #[Assert\NotBlank]
@@ -139,6 +150,28 @@ class Actividad
     public function setESTADO(string $ESTADO): static
     {
         $this->ESTADO = $ESTADO;
+        return $this;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Volunteer>
+     */
+    public function getVoluntarios(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->voluntarios;
+    }
+
+    public function addVoluntario(Volunteer $volunteer): static
+    {
+        if (!$this->voluntarios->contains($volunteer)) {
+            $this->voluntarios->add($volunteer);
+        }
+        return $this;
+    }
+
+    public function removeVoluntario(Volunteer $volunteer): static
+    {
+        $this->voluntarios->removeElement($volunteer);
         return $this;
     }
 }

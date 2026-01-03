@@ -68,6 +68,7 @@ class VolunteerController extends AbstractController
 
         $volunteer->setDESCRIPCION($data['description'] ?? null);
         $volunteer->setCODCICLO($data['course'] ?? '');
+        $volunteer->setPASSWORD($data['password'] ?? '');
         $volunteer->setESTADO('PENDIENTE');
 
         // Validation

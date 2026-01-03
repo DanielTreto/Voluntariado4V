@@ -17,7 +17,7 @@ export class App implements OnInit {
   ngOnInit() {
     this.apiService.getUsuarios().subscribe({
       next: (data) => {
-        console.log('Datos recibidos del backend:', data);
+        // console.log('Datos recibidos del backend:', data);
         this.usuarios.set(data);
       },
       error: (err) => console.error('Error al conectar con el backend:', err)

@@ -55,7 +55,9 @@ class OrganizationController extends AbstractController
         $org->setTELEFONO($data['phone'] ?? '');
         $org->setSECTOR($data['sector'] ?? '');
         $org->setAMBITO($data['scope'] ?? '');
+        $org->setPERSONA_CONTACTO($data['contactPerson'] ?? null);
         $org->setDESCRIPCION($data['description'] ?? '');
+        $org->setPASSWORD($data['password'] ?? '');
         $org->setESTADO('PENDIENTE');
 
         // Validation

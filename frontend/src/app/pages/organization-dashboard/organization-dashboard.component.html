@@ -1,0 +1,48 @@
+<div class="org-dashboard-page">
+  <app-dashboard-header></app-dashboard-header>
+  
+  <div class="org-dashboard-content">
+  <header class="dashboard-header">
+    <h1>Panel de Organización</h1>
+    <p>Gestiona tus actividades y visualiza a los voluntarios inscritos.</p>
+  </header>
+
+  <div class="dashboard-content">
+    <div class="activities-section" [class.shrunk]="selectedActivityId">
+      <h2>Mis Actividades</h2>
+      <div class="activities-list">
+        <div *ngFor="let activity of activities" class="activity-item" [class.active]="selectedActivityId === activity.id">
+          <div class="activity-info">
+            <h3>{{ activity.title }}</h3>
+            <span class="status-badge" [ngClass]="activity.status?.toLowerCase()">{{ activity.status }}</span>
+          </div>
+          <p>{{ activity.date }}</p>
+          <button (click)="viewVolunteers(activity.id)" class="btn-secondary">Ver Voluntarios</button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="selectedActivityId" class="volunteers-section">
+      <div class="section-header">
+        <h2>Voluntarios Inscritos</h2>
+        <button (click)="closeVolunteers()" class="btn-close">×</button>
+      </div>
+      
+      <div *ngIf="selectedActivityVolunteers.length === 0" class="no-data">
+        <p>No hay voluntarios inscritos en esta actividad aún.</p>
+      </div>
+
+      <ul *ngIf="selectedActivityVolunteers.length > 0" class="volunteers-list">
+        <li *ngFor="let vol of selectedActivityVolunteers" class="volunteer-item">
+          <div class="volunteer-avatar">{{ vol.name.charAt(0) }}</div>
+          <div class="volunteer-details">
+            <h4>{{ vol.name }}</h4>
+            <p>{{ vol.email }} | {{ vol.phone }}</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    </div>
+  </div>
+  <app-footer [showCta]="false"></app-footer>
+</div>
