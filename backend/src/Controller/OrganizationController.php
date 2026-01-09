@@ -128,4 +128,42 @@ class OrganizationController extends AbstractController
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }
+
+    #[Route('/organizations/{id}/activities', name: 'api_organizations_activities', methods: ['GET'])]
+    public function organizationActivities(int $id, OrganizationRepository $orgRepository, \App\Repository\ActivityRepository $activityRepository): JsonResponse
+    {
+        $org = $orgRepository->find($id);
+        if (!$org) {
+             return new JsonResponse(['error' => 'Organization not found'], 404);
+        }
+
+        $activities = $activityRepository->findBy(['CODORG' => $id]);
+        $data = [];
+
+        foreach ($activities as $act) {
+            $data[] = [
+                'id' => $act->getCODACT(),
+                'title' => $act->getNOMBRE(),
+                'description' => $act->getDESCRIPCION(),
+                'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
+                'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
+                'status' => $act->getESTADO(),
+                'volunteersCount' => $act->getVoluntarios()->count()
+            ];
+        }
+
+        $response = new JsonResponse($data);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/organizations/{id}/activities', name: 'api_organizations_activities_options', methods: ['OPTIONS'])]
+    public function organizationActivitiesOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
 }
