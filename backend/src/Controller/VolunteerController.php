@@ -164,4 +164,40 @@ class VolunteerController extends AbstractController
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }
+
+    #[Route('/volunteers/{id}/activities', name: 'api_volunteers_activities', methods: ['GET'])]
+    public function myActivities(int $id, VolunteerRepository $volunteerRepository): JsonResponse
+    {
+        $volunteer = $volunteerRepository->find($id);
+        if (!$volunteer) {
+             return new JsonResponse(['error' => 'Volunteer not found'], 404);
+        }
+
+        $activities = $volunteer->getActividades();
+        $data = [];
+
+        foreach ($activities as $act) {
+            $data[] = [
+                'id' => $act->getCODACT(),
+                'title' => $act->getNOMBRE(),
+                'description' => $act->getDESCRIPCION(),
+                'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
+                'status' => $act->getESTADO(),
+            ];
+        }
+
+        $response = new JsonResponse($data);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/volunteers/{id}/activities', name: 'api_volunteers_activities_options', methods: ['OPTIONS'])]
+    public function myActivitiesOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
 }

@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Repository\VolunteerRepository;
+use App\Entity\Volunteer;
 
 #[Route('/api')]
 class ActivityController extends AbstractController
@@ -174,6 +176,57 @@ class ActivityController extends AbstractController
         $response = new JsonResponse(null, 204);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+
+    #[Route('/activities/{id}/signup', name: 'api_activities_signup', methods: ['POST'])]
+    public function signup(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, VolunteerRepository $volunteerRepository): JsonResponse
+    {
+        $act = $activityRepository->find($id);
+        if (!$act) {
+            return new JsonResponse(['error' => 'Activity not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $volunteerId = $data['volunteerId'] ?? null;
+
+        if (!$volunteerId) {
+            return new JsonResponse(['error' => 'Volunteer ID is required'], 400);
+        }
+
+        $volunteer = $volunteerRepository->find($volunteerId);
+        if (!$volunteer) {
+            return new JsonResponse(['error' => 'Volunteer not found'], 404);
+        }
+
+        // Validations
+        if ($act->getESTADO() !== 'PENDIENTE' && $act->getESTADO() !== 'EN_PROGRESO') {
+             return new JsonResponse(['error' => 'Activity is not available for signup'], 400);
+        }
+
+        if ($act->getVoluntarios()->count() >= $act->getN_MAX_VOLUNTARIOS()) {
+            return new JsonResponse(['error' => 'Activity is full'], 400);
+        }
+
+        if ($act->getVoluntarios()->contains($volunteer)) {
+             return new JsonResponse(['error' => 'Volunteer already signed up'], 400);
+        }
+
+        $act->addVoluntario($volunteer);
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Signed up successfully'], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/activities/{id}/signup', name: 'api_activities_signup_options', methods: ['OPTIONS'])]
+    public function signupOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }
