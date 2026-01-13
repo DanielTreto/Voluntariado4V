@@ -94,17 +94,24 @@
                                 (click)="toggleDropdown(volunteer.id, $event)">
                                 <i class="bi bi-three-dots"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end" [class.show]="activeDropdownId === volunteer.id"
-                                [style.display]="activeDropdownId === volunteer.id ? 'block' : 'none'">
+                            <ul class="dropdown-menu dropdown-menu-end py-1"
+                                [class.show]="activeDropdownId === volunteer.id"
+                                [style.display]="activeDropdownId === volunteer.id ? 'block' : 'none'"
+                                style="font-size: 0.85rem; min-width: 140px;">
                                 <li>
-                                    <button class="dropdown-item" type="button" (click)="openDetails(volunteer)">
+                                    <button class="dropdown-item py-1 px-2" type="button"
+                                        (click)="openDetails(volunteer)">
                                         <i class="bi bi-eye me-2"></i>Ver más datos
                                     </button>
                                 </li>
-                                <li *ngIf="volunteer.status !== 'suspended'">
-                                    <button class="dropdown-item text-danger" type="button"
-                                        (click)="suspendVolunteer(volunteer)">
-                                        <i class="bi bi-pause-circle me-2"></i>Suspender
+                                <li>
+                                    <button class="dropdown-item py-1 px-2" type="button"
+                                        [class.text-success]="volunteer.status === 'suspended'"
+                                        [class.text-warning]="volunteer.status === 'active'"
+                                        (click)="toggleVolunteerStatus(volunteer)">
+                                        <i class="bi me-2"
+                                            [ngClass]="volunteer.status === 'suspended' ? 'bi-play-circle' : 'bi-pause-circle'"></i>
+                                        {{ volunteer.status === 'suspended' ? 'Activar' : 'Suspender' }}
                                     </button>
                                 </li>
                             </ul>
