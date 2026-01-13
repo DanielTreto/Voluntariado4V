@@ -1,102 +1,432 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <ul class="nav nav-tabs mb-0 border-bottom-0">
-        <li class="nav-item">
-            <button class="nav-link" [class.active]="activeTab === 'active'"
-                (click)="setTab('active')">Actividades</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" [class.active]="activeTab === 'pending'"
-                (click)="setTab('pending')">Solicitudes</button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" [class.active]="activeTab === 'ended'"
-                (click)="setTab('ended')">Finalizadas</button>
-        </li>
-    </ul>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createActivityModal">
-        <i class="bi bi-plus-lg"></i> Nueva Actividad
-    </button>
+<!-- Tabs with "Nueva Actividad" button inside active tab -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <button class="nav-link" [class.active]="activeTab === 'pending'"
+            (click)="setTab('pending')">Solicitudes</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" [class.active]="activeTab === 'active'" (click)="setTab('active')">Actividades</button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" [class.active]="activeTab === 'ended'" (click)="setTab('ended')">Finalizadas</button>
+    </li>
+</ul>
+
+<div *ngIf="errorMessage" class="alert alert-danger mb-3">{{ errorMessage }}</div>
+
+<!-- Solicitudes Tab Content -->
+<div *ngIf="activeTab === 'pending'">
+    <div class="card shadow-sm border-0 rounded-lg p-3 mb-4">
+        <div class="table-responsive">
+            <table class="table table-borderless">
+                <thead>
+                    <tr>
+                        <th>ACTIVIDAD</th>
+                        <th>ORGANIZACIÓN</th>
+                        <th>FECHA</th>
+                        <th>CONTACTO</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let activity of filteredActivities">
+                        <td>
+                            <div class="fw-semibold">{{ activity.title }}</div>
+                            <small class="text-muted">{{ activity.description | slice:0:50 }}...</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img [src]="activity.organization.logo" alt="Logo" class="rounded-circle me-2"
+                                    width="32" height="32">
+                                <span>{{ activity.organization.name }}</span>
+                            </div>
+                        </td>
+                        <td>{{ activity.date }}</td>
+                        <td>
+                            <div *ngIf="activity.organization.email">{{ activity.organization.email }}</div>
+                            <small class="text-muted" *ngIf="activity.organization.phone">{{ activity.organization.phone
+                                }}</small>
+                        </td>
+                        <td>
+                            <button class="btn btn-success btn-sm me-2" (click)="acceptActivity(activity)">
+                                <i class="bi bi-check-lg"></i> Aceptar
+                            </button>
+                            <button class="btn btn-danger btn-sm" (click)="denyActivity(activity)">
+                                <i class="bi bi-x-lg"></i> Denegar
+                            </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="filteredActivities.length === 0">
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            No hay solicitudes pendientes.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-md-6 col-lg-4" *ngFor="let activity of filteredActivities">
-        <div class="card h-100 shadow-sm border-0 rounded-lg overflow-hidden activity-card">
-            <div class="position-relative">
-                <img [src]="activity.image" class="card-img-top" alt="{{ activity.title }}"
-                    style="height: 200px; object-fit: cover;">
-                <div class="position-absolute top-0 end-0 p-2">
-                    <span class="badge bg-white text-dark shadow-sm">{{ activity.type }}</span>
-                </div>
-            </div>
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex align-items-center mb-2">
-                    <img [src]="activity.organization.logo" alt="Org Logo" class="rounded-circle me-2" width="24"
-                        height="24">
-                    <small class="text-muted">{{ activity.organization.name }}</small>
-                </div>
-                <h5 class="card-title fw-bold mb-2">{{ activity.title }}</h5>
-                <p class="card-text text-muted small flex-grow-1">{{ activity.description }}</p>
+<!-- Actividades Tab Content -->
+<div *ngIf="activeTab === 'active'">
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" (click)="openCreateModal()">
+            <i class="bi bi-plus-lg"></i> Nueva Actividad
+        </button>
+    </div>
 
-                <div class="d-flex align-items-center text-muted small mb-3">
-                    <i class="bi bi-geo-alt-fill me-1"></i> {{ activity.location }}
-                </div>
-                <div class="d-flex align-items-center text-muted small mb-3">
-                    <i class="bi bi-calendar-event me-1"></i> {{ activity.date }}
-                </div>
-
-                <div class="mb-3" *ngIf="activeTab === 'active'">
-                    <small class="fw-semibold d-block mb-1">Voluntarios apuntados:</small>
-                    <div class="d-flex align-items-center">
-                        <div class="d-flex me-2">
-                            <app-avatar *ngFor="let vol of activity.volunteers.slice(0, 3)" [src]="vol.avatar"
-                                [alt]="vol.name" [size]="30"
-                                class="me-1 border border-white rounded-circle"></app-avatar>
-                        </div>
-                        <span *ngIf="activity.volunteers.length > 3" class="small text-muted">+{{
-                            activity.volunteers.length - 3 }}</span>
-                        <span *ngIf="activity.volunteers.length === 0" class="small text-muted fst-italic">Sin
-                            voluntarios</span>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" *ngFor="let activity of filteredActivities">
+            <div class="card h-100 shadow-sm border-0 rounded-lg overflow-hidden">
+                <div class="position-relative">
+                    <img [src]="activity.image" class="card-img-top" alt="{{ activity.title }}"
+                        style="height: 180px; object-fit: cover;">
+                    <div class="position-absolute top-0 end-0 p-2">
+                        <span class="badge bg-white text-dark shadow-sm">{{ activity.type }}</span>
                     </div>
                 </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <img [src]="activity.organization.logo" alt="Org Logo" class="rounded-circle me-2" width="24"
+                            height="24">
+                        <small class="text-muted">{{ activity.organization.name }}</small>
+                    </div>
+                    <h6 class="card-title fw-bold mb-2">{{ activity.title }}</h6>
+                    <p class="card-text text-muted small flex-grow-1">{{ activity.description | slice:0:80 }}...</p>
 
-                <div class="d-flex justify-content-between mt-auto pt-3 border-top" *ngIf="activeTab === 'active'">
-                    <button class="btn btn-outline-primary btn-sm" (click)="openEdit(activity)" data-bs-toggle="modal"
-                        data-bs-target="#editActivityModal">
-                        <i class="bi bi-pencil"></i> Modificar
-                    </button>
-                    <button class="btn btn-outline-success btn-sm" (click)="openAddVolunteer(activity)"
-                        data-bs-toggle="modal" data-bs-target="#addVolunteerModal">
-                        <i class="bi bi-person-plus"></i> Añadir
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm" (click)="openDeleteConfirm(activity)"
-                        data-bs-toggle="modal" data-bs-target="#deleteActivityModal">
-                        <i class="bi bi-trash"></i> Borrar
-                    </button>
-                </div>
+                    <div class="d-flex align-items-center text-muted small mb-2">
+                        <i class="bi bi-geo-alt-fill me-1"></i> {{ activity.location }}
+                    </div>
+                    <div class="d-flex align-items-center text-muted small mb-3">
+                        <i class="bi bi-calendar-event me-1"></i> {{ activity.date }}
+                    </div>
 
-                <div class="d-flex justify-content-between mt-auto pt-3 border-top" *ngIf="activeTab === 'pending'">
-                    <button class="btn btn-success flex-grow-1 me-2" (click)="acceptActivity(activity)">
-                        <i class="bi bi-check-lg"></i> Aceptar
-                    </button>
-                    <button class="btn btn-danger flex-grow-1" (click)="denyActivity(activity)">
-                        <i class="bi bi-x-lg"></i> Denegar
-                    </button>
+                    <div class="mb-3">
+                        <small class="fw-semibold d-block mb-1">Voluntarios apuntados:</small>
+                        <div class="d-flex align-items-center">
+                            <div class="d-flex me-2">
+                                <app-avatar *ngFor="let vol of activity.volunteers.slice(0, 3)" [src]="vol.avatar"
+                                    [alt]="vol.name" [size]="28"
+                                    class="me-1 border border-white rounded-circle"></app-avatar>
+                            </div>
+                            <span *ngIf="activity.volunteers.length > 3" class="small text-muted">+{{
+                                activity.volunteers.length - 3 }}</span>
+                            <span *ngIf="activity.volunteers.length === 0" class="small text-muted fst-italic">Sin
+                                voluntarios</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-auto pt-3 border-top">
+                        <button class="btn btn-outline-primary btn-sm" (click)="openEdit(activity)">
+                            <i class="bi bi-pencil"></i> Modificar
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" (click)="openAddVolunteer(activity)">
+                            <i class="bi bi-person-plus"></i> Añadir
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" (click)="openDeleteConfirm(activity)">
+                            <i class="bi bi-trash"></i> Borrar
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+        <div *ngIf="filteredActivities.length === 0" class="col-12 text-center text-muted py-5">
+            <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+            No hay actividades activas.
+        </div>
     </div>
-    <div *ngIf="filteredActivities.length === 0" class="col-12 text-center text-muted py-5">
-        No hay actividades en esta sección.
+</div>
+
+<!-- Finalizadas Tab Content -->
+<div *ngIf="activeTab === 'ended'">
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" *ngFor="let activity of filteredActivities">
+            <div class="card h-100 shadow-sm border-0 rounded-lg overflow-hidden opacity-75">
+                <div class="position-relative">
+                    <img [src]="activity.image" class="card-img-top" alt="{{ activity.title }}"
+                        style="height: 180px; object-fit: cover; filter: grayscale(50%);">
+                    <div class="position-absolute top-0 end-0 p-2">
+                        <span class="badge bg-secondary">Finalizada</span>
+                    </div>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-2">
+                        <img [src]="activity.organization.logo" alt="Org Logo" class="rounded-circle me-2" width="24"
+                            height="24">
+                        <small class="text-muted">{{ activity.organization.name }}</small>
+                    </div>
+                    <h6 class="card-title fw-bold mb-2">{{ activity.title }}</h6>
+                    <p class="card-text text-muted small">{{ activity.description | slice:0:60 }}...</p>
+
+                    <div class="d-flex align-items-center text-muted small mb-2">
+                        <i class="bi bi-calendar-event me-1"></i> {{ activity.date }}
+                    </div>
+
+                    <div class="mt-auto pt-3 border-top">
+                        <button class="btn btn-outline-secondary btn-sm w-100" (click)="openViewDetails(activity)">
+                            <i class="bi bi-eye"></i> Ver más
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="filteredActivities.length === 0" class="col-12 text-center text-muted py-5">
+            <i class="bi bi-check-circle fs-1 d-block mb-2"></i>
+            No hay actividades finalizadas.
+        </div>
+    </div>
+</div>
+
+<!-- Edit Activity Modal -->
+<div class="modal" [class.show]="showEditModal" [class.d-block]="showEditModal"
+    [style.background-color]="showEditModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeEditModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Modificar Actividad</h5>
+                <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="selectedActivity">
+                <form>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" [(ngModel)]="selectedActivity.title" name="title">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" rows="3" [(ngModel)]="selectedActivity.description"
+                                name="description"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" [(ngModel)]="selectedActivity.location"
+                                name="location">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" [(ngModel)]="selectedActivity.date" name="date">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" [(ngModel)]="selectedActivity.type" name="type">
+                                <option value="Medio Ambiente">Medio Ambiente</option>
+                                <option value="Social">Social</option>
+                                <option value="Tecnológico">Tecnológico</option>
+                                <option value="Educativo">Educativo</option>
+                                <option value="Salud">Salud</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Voluntarios apuntados ({{ selectedActivity.volunteers.length
+                                }})</label>
+                            <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                                <div class="d-flex flex-wrap gap-2" *ngIf="selectedActivity.volunteers.length > 0">
+                                    <span class="badge bg-light text-dark border d-flex align-items-center"
+                                        *ngFor="let vol of selectedActivity.volunteers">
+                                        <app-avatar [src]="vol.avatar" [alt]="vol.name" [size]="20"
+                                            class="me-1"></app-avatar>
+                                        {{ vol.name }}
+                                        <button type="button" class="btn-close btn-close-sm ms-2"
+                                            style="font-size: 0.6rem;"
+                                            (click)="removeVolunteerFromActivity(vol)"></button>
+                                    </span>
+                                </div>
+                                <div class="text-muted small text-center py-2"
+                                    *ngIf="selectedActivity.volunteers.length === 0">
+                                    Sin voluntarios asignados
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="saveActivity()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Volunteer Modal -->
+<div class="modal" [class.show]="showAddVolunteerModal" [class.d-block]="showAddVolunteerModal"
+    [style.background-color]="showAddVolunteerModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeAddVolunteerModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Añadir Voluntarios</h5>
+                <button type="button" class="btn-close" (click)="closeAddVolunteerModal()"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Filters -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small">Buscar</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="Nombre del voluntario..."
+                            [(ngModel)]="volunteerSearchTerm">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Curso</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="volunteerFilterCourse">
+                            <option value="">Todos los cursos</option>
+                            <option *ngFor="let course of uniqueCourses" [value]="course">{{ course }}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small">Estado</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="volunteerFilterStatus">
+                            <option value="">Todos</option>
+                            <option value="active">Activo</option>
+                            <option value="suspended">Suspendido</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Volunteers List -->
+                <div class="border rounded" style="max-height: 350px; overflow-y: auto;">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center"
+                            *ngFor="let volunteer of filteredVolunteers">
+                            <div class="d-flex align-items-center">
+                                <app-avatar [src]="volunteer.avatar" [alt]="volunteer.name" [size]="40"
+                                    class="me-3"></app-avatar>
+                                <div>
+                                    <div class="fw-semibold">{{ volunteer.name }}</div>
+                                    <div class="small text-muted">{{ volunteer.course }} • {{ volunteer.email }}</div>
+                                </div>
+                            </div>
+                            <div>
+                                <app-badge [label]="volunteer.status | titlecase" [type]="volunteer.status"
+                                    class="me-2"></app-badge>
+                                <button class="btn btn-sm" [class.btn-success]="!isVolunteerInActivity(volunteer)"
+                                    [class.btn-outline-danger]="isVolunteerInActivity(volunteer)"
+                                    (click)="isVolunteerInActivity(volunteer) ? removeVolunteerFromActivity(volunteer) : addVolunteerToActivity(volunteer)">
+                                    <i class="bi" [ngClass]="isVolunteerInActivity(volunteer) ? 'bi-x' : 'bi-plus'"></i>
+                                    {{ isVolunteerInActivity(volunteer) ? 'Quitar' : 'Añadir' }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="list-group-item text-center text-muted py-4"
+                            *ngIf="filteredVolunteers.length === 0">
+                            No se encontraron voluntarios con esos filtros.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" (click)="closeAddVolunteerModal()">Listo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" [class.show]="showDeleteModal" [class.d-block]="showDeleteModal"
+    [style.background-color]="showDeleteModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeDeleteModal()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-danger">Confirmar Borrado</h5>
+                <button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas borrar la actividad <strong>{{ activityToDelete?.title }}</strong>?</p>
+                <p class="text-muted small mb-0">Esta acción eliminará la actividad de la base de datos permanentemente.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger" (click)="deleteActivity()">Sí, borrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Activity Details Modal (Finalizadas) -->
+<div class="modal" [class.show]="showViewModal" [class.d-block]="showViewModal"
+    [style.background-color]="showViewModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeViewModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Detalles de la Actividad</h5>
+                <button type="button" class="btn-close" (click)="closeViewModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="viewActivity">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <img [src]="viewActivity.image" alt="{{ viewActivity.title }}" class="img-fluid rounded"
+                            style="width: 100%; height: 200px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-7">
+                        <h4 class="fw-bold mb-2">{{ viewActivity.title }}</h4>
+                        <span class="badge bg-secondary mb-3">{{ viewActivity.type }}</span>
+                        <p class="text-muted">{{ viewActivity.description }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-building me-1"></i>Organización</label>
+                            <div class="d-flex align-items-center">
+                                <img [src]="viewActivity.organization.logo" class="rounded-circle me-2" width="24"
+                                    height="24">
+                                <span class="fw-semibold">{{ viewActivity.organization.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-geo-alt me-1"></i>Ubicación</label>
+                            <div class="fw-semibold">{{ viewActivity.location }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-calendar me-1"></i>Fecha</label>
+                            <div class="fw-semibold">{{ viewActivity.date }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-people me-1"></i>Voluntarios</label>
+                            <div class="fw-semibold">{{ viewActivity.volunteers.length }} participantes</div>
+                        </div>
+                    </div>
+                    <div class="col-12" *ngIf="viewActivity.volunteers.length > 0">
+                        <label class="form-label text-muted small">Voluntarios que participaron:</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-light text-dark border" *ngFor="let vol of viewActivity.volunteers">
+                                <app-avatar [src]="vol.avatar" [alt]="vol.name" [size]="18" class="me-1"></app-avatar>
+                                {{ vol.name }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" (click)="closeViewModal()">Cerrar</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <!-- Create Activity Modal -->
-<div class="modal fade" id="createActivityModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+<div class="modal" [class.show]="showCreateModal" [class.d-block]="showCreateModal"
+    [style.background-color]="showCreateModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeCreateModal()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">Nueva Actividad</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" (click)="closeCreateModal()"></button>
             </div>
             <div class="modal-body">
                 <form>
@@ -111,7 +441,7 @@
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Lugar</label>
+                            <label class="form-label">Ubicación</label>
                             <input type="text" class="form-control" [(ngModel)]="newActivity.location"
                                 name="newLocation">
                         </div>
@@ -122,9 +452,9 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Organización</label>
-                        <select class="form-select" [(ngModel)]="selectedOrgName" name="newOrg">
+                        <select class="form-select" [(ngModel)]="selectedOrgId" name="newOrg">
                             <option [ngValue]="null" disabled selected>Elige una organización...</option>
-                            <option *ngFor="let org of allOrganizations" [value]="org.name">{{ org.name }}</option>
+                            <option *ngFor="let org of allOrganizations" [ngValue]="org.id">{{ org.name }}</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -140,100 +470,8 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="createActivity()">Crear
-                    Actividad</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Activity Modal -->
-<div class="modal fade" id="editActivityModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Modificar Actividad</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" *ngIf="selectedActivity">
-                <form>
-                    <div class="mb-3">
-                        <label class="form-label">Título</label>
-                        <input type="text" class="form-control" [(ngModel)]="selectedActivity.title" name="title">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descripción</label>
-                        <textarea class="form-control" rows="3" [(ngModel)]="selectedActivity.description"
-                            name="description"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Lugar</label>
-                        <input type="text" class="form-control" [(ngModel)]="selectedActivity.location" name="location">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Fecha</label>
-                        <input type="date" class="form-control" [(ngModel)]="selectedActivity.date" name="date">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" (click)="saveActivity()">Guardar
-                    Cambios</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Volunteer Modal -->
-<div class="modal fade" id="addVolunteerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Añadir Voluntario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Seleccionar Voluntario</label>
-                    <div class="input-group">
-                        <select class="form-select" [(ngModel)]="selectedVolunteerId">
-                            <option [ngValue]="null" disabled selected>Elige un voluntario...</option>
-                            <option *ngFor="let vol of allVolunteers" [ngValue]="vol.id">{{ vol.name }}</option>
-                        </select>
-                        <button class="btn btn-outline-secondary" type="button" (click)="viewVolunteerInfo()"
-                            [disabled]="!selectedVolunteerId">
-                            <i class="bi bi-info-circle"></i> Info
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" data-bs-dismiss="modal" (click)="addVolunteer()"
-                    [disabled]="!selectedVolunteerId">Añadir</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteActivityModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold text-danger">Confirmar Borrado</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>¿Estás seguro de que deseas borrar la actividad <strong>{{ activityToDelete?.title }}</strong>?</p>
-                <p class="text-muted small mb-0">Esta acción no se puede deshacer.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="deleteActivity()">Sí,
-                    borrar</button>
+                <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="createActivity()">Crear Actividad</button>
             </div>
         </div>
     </div>
