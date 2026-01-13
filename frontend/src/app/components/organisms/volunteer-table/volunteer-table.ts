@@ -158,15 +158,18 @@ export class VolunteerTableComponent implements OnInit {
     this.activeDropdownId = null;
   }
 
-  suspendVolunteer(volunteer: Volunteer) {
-    this.apiService.updateVolunteerStatus(volunteer.id, 'SUSPENDIDO').subscribe({
+  toggleVolunteerStatus(volunteer: Volunteer) {
+    const newStatus = volunteer.status === 'suspended' ? 'ACTIVO' : 'SUSPENDIDO';
+    const newLocalStatus = volunteer.status === 'suspended' ? 'active' : 'suspended';
+
+    this.apiService.updateVolunteerStatus(volunteer.id, newStatus).subscribe({
       next: () => {
-        volunteer.status = 'suspended';
+        volunteer.status = newLocalStatus as any;
         this.closeDropdown();
       },
       error: (err) => {
-        console.error('Error suspending volunteer', err);
-        this.errorMessage = 'Error al suspender voluntario: ' + err.message;
+        console.error('Error toggling volunteer status', err);
+        this.errorMessage = 'Error al cambiar estado: ' + err.message;
       }
     });
   }
