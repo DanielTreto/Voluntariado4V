@@ -16,9 +16,8 @@
             <span class="input-group-text bg-white border-end-0">
                 <i class="bi bi-search text-muted"></i>
             </span>
-            <input type="text" class="form-control border-start-0" 
-                   placeholder="Buscar por nombre, email, teléfono o DNI..." 
-                   [(ngModel)]="searchTerm">
+            <input type="text" class="form-control border-start-0"
+                placeholder="Buscar por nombre, email, teléfono o DNI..." [(ngModel)]="searchTerm">
             <button class="btn btn-outline-secondary" type="button" *ngIf="searchTerm" (click)="searchTerm = ''">
                 <i class="bi bi-x"></i>
             </button>
@@ -39,30 +38,34 @@
                     <th scope="col" style="width: 25%; cursor: pointer;" (click)="sort('name')">
                         <div class="d-flex align-items-center justify-content-between">
                             VOLUNTARIO
-                            <i class="bi" [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'" 
-                               [class.text-primary]="sortColumn === 'name'"></i>
+                            <i class="bi"
+                                [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                [class.text-primary]="sortColumn === 'name'"></i>
                         </div>
                     </th>
                     <th scope="col" style="width: 20%; cursor: pointer;" (click)="sort('email')">
                         <div class="d-flex align-items-center justify-content-between">
                             EMAIL
-                            <i class="bi" [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
-                               [class.text-primary]="sortColumn === 'email'"></i>
+                            <i class="bi"
+                                [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                [class.text-primary]="sortColumn === 'email'"></i>
                         </div>
                     </th>
                     <th scope="col" style="width: 15%; cursor: pointer;" (click)="sort('phone')">
                         <div class="d-flex align-items-center justify-content-between">
                             TELÉFONO
-                            <i class="bi" [ngClass]="sortColumn === 'phone' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
-                               [class.text-primary]="sortColumn === 'phone'"></i>
+                            <i class="bi"
+                                [ngClass]="sortColumn === 'phone' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                [class.text-primary]="sortColumn === 'phone'"></i>
                         </div>
                     </th>
                     <th scope="col" style="width: 15%;">ÚLTIMA ACTIVIDAD</th>
                     <th scope="col" style="width: 10%; cursor: pointer;" (click)="sort('status')">
                         <div class="d-flex align-items-center justify-content-between">
                             ESTADO
-                            <i class="bi" [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
-                               [class.text-primary]="sortColumn === 'status'"></i>
+                            <i class="bi"
+                                [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                [class.text-primary]="sortColumn === 'status'"></i>
                         </div>
                     </th>
                     <th scope="col" style="width: 5%;">ACCIONES</th>
@@ -87,24 +90,22 @@
                     <td>
                         <!-- Actions for Registered Tab -->
                         <div class="dropdown" *ngIf="activeTab === 'registered'">
-                            <button class="btn btn-sm text-muted p-0" type="button" 
-                                    (click)="toggleDropdown(volunteer.id, $event)">
+                            <button class="btn btn-sm text-muted p-0" type="button" data-bs-toggle="dropdown"
+                                aria-expanded="false">
                                 <i class="bi bi-three-dots"></i>
                             </button>
-                            <ul class="dropdown-menu" [class.show]="activeDropdownId === volunteer.id"
-                                style="position: absolute; right: 0;">
+                            <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
-                                    <a class="dropdown-item" href="#" 
-                                       (click)="openDetails(volunteer); closeDropdown(); $event.preventDefault()"
-                                       data-bs-toggle="modal" data-bs-target="#volunteerDetailsModal">
+                                    <button class="dropdown-item" type="button" (click)="openDetails(volunteer)"
+                                        data-bs-toggle="modal" data-bs-target="#volunteerDetailsModal">
                                         <i class="bi bi-eye me-2"></i>Ver más datos
-                                    </a>
+                                    </button>
                                 </li>
                                 <li *ngIf="volunteer.status !== 'suspended'">
-                                    <a class="dropdown-item text-danger" href="#" 
-                                       (click)="suspendVolunteer(volunteer); $event.preventDefault()">
+                                    <button class="dropdown-item text-danger" type="button"
+                                        (click)="suspendVolunteer(volunteer)">
                                         <i class="bi bi-pause-circle me-2"></i>Suspender
-                                    </a>
+                                    </button>
                                 </li>
                             </ul>
                         </div>

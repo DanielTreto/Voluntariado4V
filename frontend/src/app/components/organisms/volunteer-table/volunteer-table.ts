@@ -49,6 +49,9 @@ export class VolunteerTableComponent implements OnInit {
   // Action dropdown
   activeDropdownId: number | null = null;
 
+  // Modal control
+  showDetailsModal: boolean = false;
+
   volunteers: Volunteer[] = [];
 
   ngOnInit() {
@@ -106,7 +109,8 @@ export class VolunteerTableComponent implements OnInit {
     if (this.activeTab === 'requests') {
       result = result.filter(v => v.status === 'pending');
     } else {
-      result = result.filter(v => v.status === 'active');
+      // Show both active AND suspended volunteers in registered tab
+      result = result.filter(v => v.status === 'active' || v.status === 'suspended');
     }
 
     // Filter by search term
