@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ElementRef, ViewChild, inject, OnInit } from '@angular/core';
+import { Component, AfterViewInit, ElementRef, ViewChild, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import Chart from 'chart.js/auto';
 import { ApiService } from '../../../services/api.service';
@@ -16,6 +16,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
   @ViewChild('distributionChart', { static: true }) distributionChartRef!: ElementRef;
 
   private apiService = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   // Metrics
   totalActivities = 0;
@@ -50,6 +51,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
       error: (err) => {
         console.error('Error loading report data', err);
         this.analysisText = 'Error al cargar los datos para el análisis.';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -114,6 +116,9 @@ export class ReportsComponent implements OnInit, AfterViewInit {
 
     console.log('Initializing charts with:', { growthLabels, growthData, statusCounts });
     this.initCharts(growthLabels, growthData, Object.values(statusCounts));
+
+    // Force change detection to update UI bindings
+    this.cdr.detectChanges();
   }
 
   initCharts(growthLabels: string[], growthData: number[], statusData: number[]) {
