@@ -39,6 +39,33 @@ class OrganizationController extends AbstractController
         return $response;
     }
 
+    #[Route('/organizations/{id}', name: 'api_organizations_show', methods: ['GET'])]
+    public function show(int $id, OrganizationRepository $orgRepository): JsonResponse
+    {
+        $org = $orgRepository->find($id);
+
+        if (!$org) {
+            return new JsonResponse(['error' => 'Organization not found'], 404);
+        }
+
+        $data = [
+            'id' => $org->getCODORG(),
+            'name' => $org->getNOMBRE(),
+            'type' => $org->getTIPO_ORG(),
+            'email' => $org->getCORREO(),
+            'phone' => $org->getTELEFONO(),
+            'sector' => $org->getSECTOR(),
+            'scope' => $org->getAMBITO(),
+            'description' => $org->getDESCRIPCION(),
+            'status' => $org->getESTADO(),
+            'contactPerson' => $org->getPERSONA_CONTACTO()
+        ];
+
+        $response = new JsonResponse($data);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
     #[Route('/organizations', name: 'api_organizations_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
@@ -126,6 +153,47 @@ class OrganizationController extends AbstractController
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+
+    #[Route('/organizations/{id}', name: 'api_organizations_update', methods: ['PUT'])]
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, ValidatorInterface $validator): JsonResponse
+    {
+        $org = $orgRepository->find($id);
+
+        if (!$org) {
+            return new JsonResponse(['error' => 'Organization not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if (!$data) {
+             return new JsonResponse(['error' => 'Invalid JSON'], 400);
+        }
+
+        // Update fields if provided
+        if (isset($data['name'])) $org->setNOMBRE($data['name']);
+        if (isset($data['type'])) $org->setTIPO_ORG($data['type']);
+        if (isset($data['email'])) $org->setCORREO($data['email']);
+        if (isset($data['phone'])) $org->setTELEFONO($data['phone']);
+        if (isset($data['sector'])) $org->setSECTOR($data['sector']);
+        if (isset($data['scope'])) $org->setAMBITO($data['scope']);
+        if (isset($data['contactPerson'])) $org->setPERSONA_CONTACTO($data['contactPerson']);
+        if (isset($data['description'])) $org->setDESCRIPCION($data['description']);
+
+        // Validate
+        $errors = $validator->validate($org);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                 $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], 400);
+        }
+
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Organization updated'], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
     }
 

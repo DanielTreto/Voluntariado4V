@@ -41,6 +41,34 @@ class VolunteerController extends AbstractController
         return $response;
     }
 
+    #[Route('/volunteers/{id}', name: 'api_volunteers_show', methods: ['GET'])]
+    public function show(int $id, VolunteerRepository $volunteerRepository): JsonResponse
+    {
+        $v = $volunteerRepository->find($id);
+
+        if (!$v) {
+            return new JsonResponse(['error' => 'Volunteer not found'], 404);
+        }
+
+        $data = [
+            'id' => $v->getCODVOL(),
+            'name' => $v->getNOMBRE(),
+            'surname1' => $v->getAPELLIDO1(),
+            'surname2' => $v->getAPELLIDO2(),
+            'email' => $v->getCORREO(),
+            'phone' => $v->getTELEFONO(),
+            'dni' => $v->getDNI(),
+            'dateOfBirth' => $v->getFECHA_NACIMIENTO()?->format('Y-m-d'),
+            'description' => $v->getDESCRIPCION(),
+            'course' => $v->getCODCICLO(),
+            'status' => $v->getESTADO(),
+        ];
+
+        $response = new JsonResponse($data);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
     #[Route('/volunteers', name: 'api_volunteers_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
     {
@@ -162,6 +190,54 @@ class VolunteerController extends AbstractController
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+
+    #[Route('/volunteers/{id}', name: 'api_volunteers_update', methods: ['PUT'])]
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository, ValidatorInterface $validator): JsonResponse
+    {
+        $volunteer = $volunteerRepository->find($id);
+
+        if (!$volunteer) {
+            return new JsonResponse(['error' => 'Volunteer not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        if (!$data) {
+             return new JsonResponse(['error' => 'Invalid JSON'], 400);
+        }
+
+        // Update fields if provided
+        if (isset($data['name'])) $volunteer->setNOMBRE($data['name']);
+        if (isset($data['surname1'])) $volunteer->setAPELLIDO1($data['surname1']);
+        if (isset($data['surname2'])) $volunteer->setAPELLIDO2($data['surname2']);
+        if (isset($data['email'])) $volunteer->setCORREO($data['email']);
+        if (isset($data['phone'])) $volunteer->setTELEFONO($data['phone']);
+        if (isset($data['dni'])) $volunteer->setDNI($data['dni']);
+        if (isset($data['description'])) $volunteer->setDESCRIPCION($data['description']);
+        if (isset($data['course'])) $volunteer->setCODCICLO($data['course']);
+        if (isset($data['dateOfBirth'])) {
+            try {
+                $volunteer->setFECHA_NACIMIENTO(new \DateTime($data['dateOfBirth']));
+            } catch (\Exception $e) {
+                // Ignore invalid date
+            }
+        }
+
+        // Validate
+        $errors = $validator->validate($volunteer);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], 400);
+        }
+
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Volunteer updated'], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
     }
 

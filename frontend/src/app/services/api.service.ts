@@ -27,8 +27,16 @@ export class ApiService {
     return this.http.patch(`${this.apiUrl}/volunteers/${id}/status`, { status });
   }
 
+  getVolunteer(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/volunteers/${id}`);
+  }
+
   getOrganizations(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/organizations`);
+  }
+
+  getOrganization(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/organizations/${id}`);
   }
 
   updateOrganizationStatus(id: number, status: string): Observable<any> {
@@ -82,5 +90,13 @@ export class ApiService {
 
   getActivityVolunteers(activityId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/activities/${activityId}/volunteers`);
+  }
+
+  updateVolunteer(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/volunteers/${id}`, data);
+  }
+
+  updateOrganization(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/organizations/${id}`, data);
   }
 }
