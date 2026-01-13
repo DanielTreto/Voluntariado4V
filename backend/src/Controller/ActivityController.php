@@ -158,6 +158,53 @@ class ActivityController extends AbstractController
         $response = new JsonResponse(['status' => 'Activity status updated', 'newStatus' => $newStatus], 200);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
+
+    }
+
+    #[Route('/activities/{id}', name: 'api_activities_update', methods: ['PUT'])]
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository): JsonResponse
+    {
+        $act = $activityRepository->find($id);
+
+        if (!$act) {
+            return new JsonResponse(['error' => 'Activity not found'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        
+        if (isset($data['title'])) {
+            $act->setNOMBRE($data['title']);
+        }
+        if (isset($data['description'])) {
+            $act->setDESCRIPCION($data['description']);
+        }
+        if (isset($data['date'])) {
+            try {
+                $act->setFECHA_INICIO(new \DateTime($data['date']));
+                // Keeping end date sync logic simple for now
+                $act->setFECHA_FIN(new \DateTime($data['date'])); 
+            } catch (\Exception $e) {
+                // Ignore invalid date for update or handle error
+            }
+        }
+        
+        // Add other fields as needed
+
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Activity updated'], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/activities/{id}', name: 'api_activities_update_options', methods: ['OPTIONS'])]
+    public function updateOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'PUT, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
     }
 
     #[Route('/activities', name: 'api_activities_options', methods: ['OPTIONS'])]
@@ -262,6 +309,40 @@ class ActivityController extends AbstractController
         $response = new JsonResponse(null, 204);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+    #[Route('/activities/{id}/volunteers/{volunteerId}', name: 'api_activities_remove_volunteer', methods: ['DELETE'])]
+    public function removeVolunteer(int $id, int $volunteerId, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, VolunteerRepository $volunteerRepository): JsonResponse
+    {
+        $act = $activityRepository->find($id);
+        if (!$act) {
+            return new JsonResponse(['error' => 'Activity not found'], 404);
+        }
+
+        $volunteer = $volunteerRepository->find($volunteerId);
+        if (!$volunteer) {
+            return new JsonResponse(['error' => 'Volunteer not found'], 404);
+        }
+
+        if (!$act->getVoluntarios()->contains($volunteer)) {
+             return new JsonResponse(['error' => 'Volunteer is not signed up for this activity'], 400);
+        }
+
+        $act->removeVoluntario($volunteer);
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Volunteer removed successfully'], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/activities/{id}/volunteers/{volunteerId}', name: 'api_activities_remove_volunteer_options', methods: ['OPTIONS'])]
+    public function removeVolunteerOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }
