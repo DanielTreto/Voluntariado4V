@@ -1,20 +1,61 @@
-<div class="row g-4">
-  <div class="col-lg-6">
-    <div class="card shadow-sm border-0 p-4">
-      <h5 class="card-title fw-semibold">Crecimiento de Voluntariados Creados</h5>
-      <p class="card-text text-muted small">Voluntariados creados por trimestre (último año)</p>
-      <div class="chart-container">
-        <canvas #growthChart></canvas>
+<div class="container-fluid p-0">
+  <!-- Summary Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 h-100">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase fw-bold mb-2">Total Actividades</h6>
+          <h2 class="display-6 fw-bold text-primary mb-0">{{ totalActivities }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 h-100">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase fw-bold mb-2">Total Voluntarios</h6>
+          <h2 class="display-6 fw-bold text-success mb-0">{{ totalVolunteers }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 h-100">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase fw-bold mb-2">En Progreso</h6>
+          <h2 class="display-6 fw-bold text-warning mb-0">{{ activeActivities }}</h2>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="col-lg-6">
-    <div class="card shadow-sm border-0 p-4">
-      <h5 class="card-title fw-semibold">Distribución de Eventos por Categoría</h5>
-      <p class="card-text text-muted small">Total de eventos activos</p>
-      <div class="chart-container">
-        <canvas #distributionChart></canvas>
+  <!-- Charts Row -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 p-4 h-100">
+        <h5 class="card-title fw-semibold">Crecimiento Acumulado</h5>
+        <p class="card-text text-muted small">Evolución de actividades creadas por mes</p>
+        <div class="chart-container" style="height: 300px;">
+          <canvas #growthChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 p-4 h-100">
+        <h5 class="card-title fw-semibold">Estado de Actividades</h5>
+        <p class="card-text text-muted small">Distribución actual</p>
+        <div class="chart-container" style="height: 300px;">
+          <canvas #distributionChart></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm border-0 p-4">
+        <h5 class="card-title fw-semibold mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Análisis y Conclusiones</h5>
+        <p class="card-text lead fs-6 text-muted">{{ analysisText }}</p>
       </div>
     </div>
   </div>
