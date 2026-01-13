@@ -76,6 +76,10 @@ export class ApiService {
     return this.http.post<any>(`${this.apiUrl}/activities/${activityId}/signup`, { volunteerId });
   }
 
+  unsubscribeFromActivity(activityId: number, volunteerId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/activities/${activityId}/volunteers/${volunteerId}`);
+  }
+
   getActivityVolunteers(activityId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/activities/${activityId}/volunteers`);
   }

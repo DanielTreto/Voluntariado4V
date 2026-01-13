@@ -281,25 +281,41 @@ export class ActivityListComponent implements OnInit {
   }
 
   addVolunteerToActivity(volunteer: Volunteer) {
-    if (this.selectedActivity) {
+    if (this.selectedActivity && this.selectedActivity.id) {
       if (!this.selectedActivity.volunteers.find(v => v.id === volunteer.id)) {
-        this.selectedActivity.volunteers.push(volunteer);
-        // Update the original activity in the array
-        const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
-        if (index !== -1) {
-          this.activities[index].volunteers = [...this.selectedActivity.volunteers];
-        }
+        this.apiService.signUpForActivity(this.selectedActivity.id, volunteer.id).subscribe({
+          next: () => {
+            this.selectedActivity!.volunteers.push(volunteer);
+            // Update the original activity in the array
+            const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
+            if (index !== -1) {
+              this.activities[index].volunteers = [...this.selectedActivity!.volunteers];
+            }
+          },
+          error: (err) => {
+            console.error('Error adding volunteer', err);
+            alert('Error al añadir voluntario. Inténtalo de nuevo.');
+          }
+        });
       }
     }
   }
 
   removeVolunteerFromActivity(volunteer: Volunteer) {
-    if (this.selectedActivity) {
-      this.selectedActivity.volunteers = this.selectedActivity.volunteers.filter(v => v.id !== volunteer.id);
-      const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
-      if (index !== -1) {
-        this.activities[index].volunteers = [...this.selectedActivity.volunteers];
-      }
+    if (this.selectedActivity && this.selectedActivity.id) {
+      this.apiService.unsubscribeFromActivity(this.selectedActivity.id, volunteer.id).subscribe({
+        next: () => {
+          this.selectedActivity!.volunteers = this.selectedActivity!.volunteers.filter(v => v.id !== volunteer.id);
+          const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
+          if (index !== -1) {
+            this.activities[index].volunteers = [...this.selectedActivity!.volunteers];
+          }
+        },
+        error: (err) => {
+          console.error('Error removing volunteer', err);
+          alert('Error al eliminar voluntario. Inténtalo de nuevo.');
+        }
+      });
     }
   }
 
