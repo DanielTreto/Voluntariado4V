@@ -11,9 +11,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Administrator
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $id = null;
+    #[ORM\Column(length: 20)]
+    private ?string $id = null;
+
+    #[ORM\OneToOne(mappedBy: 'admin', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]
+    private ?Credenciales $credenciales = null;
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
@@ -42,9 +44,15 @@ class Administrator
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $foto = null;
 
-    public function getId(): ?int
+    public function getId(): ?string
     {
         return $this->id;
+    }
+
+    public function setId(string $id): static
+    {
+        $this->id = $id;
+        return $this;
     }
 
     public function getNombre(): ?string
@@ -110,6 +118,27 @@ class Administrator
     public function setFoto(?string $foto): static
     {
         $this->foto = $foto;
+        return $this;
+    }
+    public function getCredenciales(): ?Credenciales
+    {
+        return $this->credenciales;
+    }
+
+    public function setCredenciales(?Credenciales $credenciales): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($credenciales === null && $this->credenciales !== null) {
+            $this->credenciales->setAdmin(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($credenciales !== null && $credenciales->getAdmin() !== $this) {
+            $credenciales->setAdmin($this);
+        }
+
+        $this->credenciales = $credenciales;
+
         return $this;
     }
 }

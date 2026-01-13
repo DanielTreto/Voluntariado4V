@@ -24,4 +24,27 @@ class VolunteerRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    public function findNextId(): string
+    {
+        // Get max ID
+        $qb = $this->createQueryBuilder('v');
+        $qb->select('v.CODVOL')
+           ->orderBy('v.CODVOL', 'DESC')
+           ->setMaxResults(1);
+        
+        $result = $qb->getQuery()->getOneOrNullResult();
+        
+        if (!$result) {
+            return 'vol001';
+        }
+
+        $maxId = $result['CODVOL'];
+        // extract number
+        $num = (int) substr($maxId, 3);
+        $nextNum = $num + 1;
+        
+        // Pad with zeros (3 digits)
+        return 'vol' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+    }
 }

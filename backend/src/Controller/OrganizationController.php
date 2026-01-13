@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\Credenciales;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/api')]
@@ -40,7 +41,7 @@ class OrganizationController extends AbstractController
     }
 
     #[Route('/organizations/{id}', name: 'api_organizations_show', methods: ['GET'])]
-    public function show(int $id, OrganizationRepository $orgRepository): JsonResponse
+    public function show(string $id, OrganizationRepository $orgRepository): JsonResponse
     {
         $org = $orgRepository->find($id);
 
@@ -67,7 +68,7 @@ class OrganizationController extends AbstractController
     }
 
     #[Route('/organizations', name: 'api_organizations_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, OrganizationRepository $orgRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -85,7 +86,20 @@ class OrganizationController extends AbstractController
         $org->setPERSONA_CONTACTO($data['contactPerson'] ?? null);
         $org->setDESCRIPCION($data['description'] ?? '');
         $org->setPASSWORD($data['password'] ?? '');
+        $org->setPASSWORD($data['password'] ?? '');
         $org->setESTADO('PENDIENTE');
+
+        // Generate Custom ID
+        $newId = $orgRepository->findNextId();
+        $org->setCODORG($newId);
+
+        // Create Credentials
+        $cred = new Credenciales();
+        $cred->setOrganizacion($org); // Link directly to object
+        $cred->setUserType('ORGANIZACION');
+        $cred->setCorreo($data['email'] ?? '');
+        $cred->setPassword($data['password'] ?? '');
+        $entityManager->persist($cred);
 
         // Validation
         $errors = $validator->validate($org);
@@ -121,7 +135,7 @@ class OrganizationController extends AbstractController
     }
 
     #[Route('/organizations/{id}/status', name: 'api_organizations_update_status', methods: ['PATCH'])]
-    public function updateStatus(int $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository): JsonResponse
+    public function updateStatus(string $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository): JsonResponse
     {
         $org = $orgRepository->find($id);
 
@@ -157,7 +171,7 @@ class OrganizationController extends AbstractController
     }
 
     #[Route('/organizations/{id}', name: 'api_organizations_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, ValidatorInterface $validator): JsonResponse
+    public function update(string $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, ValidatorInterface $validator): JsonResponse
     {
         $org = $orgRepository->find($id);
 

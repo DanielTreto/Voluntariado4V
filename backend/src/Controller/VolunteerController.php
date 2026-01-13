@@ -8,8 +8,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use App\Entity\Credenciales;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Entity\Ciclo;
+use App\Repository\CicloRepository;
 
 #[Route('/api')]
 class VolunteerController extends AbstractController
@@ -42,7 +45,7 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers/{id}', name: 'api_volunteers_show', methods: ['GET'])]
-    public function show(int $id, VolunteerRepository $volunteerRepository): JsonResponse
+    public function show(string $id, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $v = $volunteerRepository->find($id);
 
@@ -70,7 +73,7 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers', name: 'api_volunteers_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, CicloRepository $cicloRepository, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -95,9 +98,28 @@ class VolunteerController extends AbstractController
         }
 
         $volunteer->setDESCRIPCION($data['description'] ?? null);
-        $volunteer->setCODCICLO($data['course'] ?? '');
+        if (isset($data['course']) && !empty($data['course'])) {
+            $ciclo = $cicloRepository->find($data['course']);
+            if ($ciclo) {
+                $volunteer->setCiclo($ciclo);
+            }
+        }
+
+
         $volunteer->setPASSWORD($data['password'] ?? '');
         $volunteer->setESTADO('PENDIENTE');
+        
+        // Generate Custom ID
+        $newId = $volunteerRepository->findNextId();
+        $volunteer->setCODVOL($newId);
+
+        // Create Credentials
+        $credenciales = new Credenciales();
+        $credenciales->setVoluntario($volunteer); // Link directly to object
+        $credenciales->setUserType('VOLUNTARIO');
+        $credenciales->setCorreo($data['email'] ?? '');
+        $credenciales->setPassword($data['password'] ?? '');
+        $entityManager->persist($credenciales);
 
         // Validation
         $errors = $validator->validate($volunteer);
@@ -133,7 +155,7 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers/{id}', name: 'api_volunteers_delete', methods: ['DELETE'])]
-    public function delete(int $id, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
+    public function delete(string $id, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $volunteer = $volunteerRepository->find($id);
 
@@ -159,7 +181,7 @@ class VolunteerController extends AbstractController
         return $response;
     }
     #[Route('/volunteers/{id}/status', name: 'api_volunteers_update_status', methods: ['PATCH'])]
-    public function updateStatus(int $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
+    public function updateStatus(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $volunteer = $volunteerRepository->find($id);
 
@@ -194,7 +216,7 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers/{id}', name: 'api_volunteers_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository, ValidatorInterface $validator): JsonResponse
+    public function update(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository, ValidatorInterface $validator, CicloRepository $cicloRepository): JsonResponse
     {
         $volunteer = $volunteerRepository->find($id);
 
@@ -215,7 +237,12 @@ class VolunteerController extends AbstractController
         if (isset($data['phone'])) $volunteer->setTELEFONO($data['phone']);
         if (isset($data['dni'])) $volunteer->setDNI($data['dni']);
         if (isset($data['description'])) $volunteer->setDESCRIPCION($data['description']);
-        if (isset($data['course'])) $volunteer->setCODCICLO($data['course']);
+        if (isset($data['course'])) {
+             $ciclo = $cicloRepository->find($data['course']);
+             if ($ciclo) {
+                 $volunteer->setCiclo($ciclo);
+             }
+        }
         if (isset($data['dateOfBirth'])) {
             try {
                 $volunteer->setFECHA_NACIMIENTO(new \DateTime($data['dateOfBirth']));

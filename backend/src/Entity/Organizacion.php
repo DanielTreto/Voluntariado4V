@@ -12,9 +12,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Organizacion
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $CODORG = null;
+    #[ORM\Column(length: 20)]
+    private ?string $CODORG = null;
+
+    #[ORM\OneToOne(mappedBy: 'organizacion', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]
+    private ?Credenciales $credenciales = null;
+
+    #[ORM\OneToMany(mappedBy: 'organizacion', targetEntity: Actividad::class)]
+    private $actividades;
+
+    public function __construct()
+    {
+        $this->actividades = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
@@ -61,9 +71,15 @@ class Organizacion
     #[Assert\Choice(choices: ['ACTIVO', 'SUSPENDIDO', 'PENDIENTE'])]
     private ?string $ESTADO = 'PENDIENTE';
 
-    public function getCODORG(): ?int
+    public function getCODORG(): ?string
     {
         return $this->CODORG;
+    }
+
+    public function setCODORG(string $CODORG): static
+    {
+        $this->CODORG = $CODORG;
+        return $this;
     }
 
     public function getNOMBRE(): ?string
@@ -174,6 +190,27 @@ class Organizacion
     public function setESTADO(string $ESTADO): static
     {
         $this->ESTADO = $ESTADO;
+        return $this;
+    }
+    public function getCredenciales(): ?Credenciales
+    {
+        return $this->credenciales;
+    }
+
+    public function setCredenciales(?Credenciales $credenciales): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($credenciales === null && $this->credenciales !== null) {
+            $this->credenciales->setOrganizacion(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($credenciales !== null && $credenciales->getOrganizacion() !== $this) {
+            $credenciales->setOrganizacion($this);
+        }
+
+        $this->credenciales = $credenciales;
+
         return $this;
     }
 }

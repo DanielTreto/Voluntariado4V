@@ -24,4 +24,24 @@ class OrganizationRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    public function findNextId(): string
+    {
+        $qb = $this->createQueryBuilder('o');
+        $qb->select('o.CODORG')
+           ->orderBy('o.CODORG', 'DESC')
+           ->setMaxResults(1);
+        
+        $result = $qb->getQuery()->getOneOrNullResult();
+        
+        if (!$result) {
+            return 'org001';
+        }
+
+        $maxId = $result['CODORG'];
+        $num = (int) substr($maxId, 3);
+        $nextNum = $num + 1;
+        
+        return 'org' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+    }
 }

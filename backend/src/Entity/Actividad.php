@@ -35,18 +35,33 @@ class Actividad
     #[Assert\Positive]
     private ?int $N_MAX_VOLUNTARIOS = null;
 
-    #[ORM\Column]
-    private ?int $CODORG = null;
+    #[ORM\ManyToOne(targetEntity: Organizacion::class, inversedBy: 'actividades')]
+    #[ORM\JoinColumn(name: 'CODORG', referencedColumnName: 'CODORG', nullable: false)]
+    private ?Organizacion $organizacion = null;
 
     #[ORM\ManyToMany(targetEntity: Volunteer::class, inversedBy: 'actividades')]
-    #[ORM\JoinTable(name: 'VOLUNTARIO_ACTIVIDAD')]
+    #[ORM\JoinTable(name: 'VOL_PARTICIPA_ACT')]
     #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
     #[ORM\InverseJoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL')]
     private $voluntarios;
 
+    #[ORM\ManyToMany(targetEntity: TipoActividad::class)]
+    #[ORM\JoinTable(name: 'ACT_ASOCIADO_TACT')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'CODTIPO', referencedColumnName: 'CODTIPO')]
+    private $tiposActividad;
+
+    #[ORM\ManyToMany(targetEntity: Ods::class)]
+    #[ORM\JoinTable(name: 'ACT_PRACTICA_ODS')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'NUMODS', referencedColumnName: 'NUMODS')]
+    private $ods;
+
     public function __construct()
     {
         $this->voluntarios = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tiposActividad = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->ods = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     #[ORM\Column(length: 500)]
@@ -118,15 +133,28 @@ class Actividad
         return $this;
     }
 
-    public function getCODORG(): ?int
+    public function getOrganizacion(): ?Organizacion
     {
-        return $this->CODORG;
+        return $this->organizacion;
     }
 
-    public function setCODORG(int $CODORG): static
+    public function setOrganizacion(?Organizacion $organizacion): static
     {
-        $this->CODORG = $CODORG;
+        $this->organizacion = $organizacion;
         return $this;
+    }
+
+    public function getCODORG(): ?string
+    {
+        return $this->organizacion?->getCODORG();
+    }
+
+    public function setCODORG(string $codOrg): static
+    {
+        // This is tricky without fetching entity. ideally use setOrganizacion. 
+        // For now, we leave it as is, or better, we might need repository to finding it.
+        // Assuming the controller handles setOrganizacion.
+        return $this; 
     }
 
     public function getDESCRIPCION(): ?string

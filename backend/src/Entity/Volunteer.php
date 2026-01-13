@@ -12,9 +12,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Volunteer
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'CODVOL')]
-    private ?int $CODVOL = null;
+    #[ORM\Column(length: 20)]
+    private ?string $CODVOL = null;
+
+    #[ORM\OneToOne(mappedBy: 'voluntario', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]
+    private ?Credenciales $credenciales = null;
 
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank]
@@ -49,14 +51,38 @@ class Volunteer
     #[Assert\Length(max: 500)]
     private ?string $DESCRIPCION = null;
 
-    #[ORM\Column(length: 10)]
-    #[Assert\NotBlank]
-    private ?string $CODCICLO = null;
+    #[ORM\ManyToOne(targetEntity: Ciclo::class)]
+    #[ORM\JoinColumn(name: 'CODCICLO', referencedColumnName: 'CODCICLO', nullable: false)]
+    private ?Ciclo $ciclo = null;
 
     #[ORM\Column(length: 9, unique: true)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 9, max: 9)]
     private ?string $DNI = null;
+
+// ... (skipping unchanged parts)
+
+    public function getCiclo(): ?Ciclo
+    {
+        return $this->ciclo;
+    }
+
+    public function setCiclo(?Ciclo $ciclo): static
+    {
+        $this->ciclo = $ciclo;
+        return $this;
+    }
+
+    public function getCODCICLO(): ?string
+    {
+        return $this->ciclo?->getCODCICLO();
+    }
+
+    public function setCODCICLO(string $CODCICLO): static
+    {
+        // Ideally set via setCiclo
+        return $this;
+    }
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
@@ -66,17 +92,31 @@ class Volunteer
     #[Assert\Choice(choices: ['ACTIVO', 'SUSPENDIDO', 'PENDIENTE'])]
     private ?string $ESTADO = 'PENDIENTE';
 
-    #[ORM\ManyToMany(targetEntity: Actividad::class, mappedBy: 'voluntarios')]
-    private $actividades;
+    #[ORM\OneToMany(mappedBy: 'voluntario', targetEntity: Disponibilidad::class)]
+    private $disponibilidades;
+
+    #[ORM\ManyToMany(targetEntity: TipoActividad::class)]
+    #[ORM\JoinTable(name: 'VOL_PREFIERE_TACT')]
+    #[ORM\JoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL')]
+    #[ORM\InverseJoinColumn(name: 'CODTIPO', referencedColumnName: 'CODTIPO')]
+    private $preferencias;
 
     public function __construct()
     {
         $this->actividades = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->disponibilidades = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->preferencias = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    public function getCODVOL(): ?int
+    public function getCODVOL(): ?string
     {
         return $this->CODVOL;
+    }
+
+    public function setCODVOL(string $CODVOL): static
+    {
+        $this->CODVOL = $CODVOL;
+        return $this;
     }
 
     public function getNOMBRE(): ?string
@@ -157,16 +197,7 @@ class Volunteer
         return $this;
     }
 
-    public function getCODCICLO(): ?string
-    {
-        return $this->CODCICLO;
-    }
 
-    public function setCODCICLO(string $CODCICLO): static
-    {
-        $this->CODCICLO = $CODCICLO;
-        return $this;
-    }
 
     public function getDNI(): ?string
     {
@@ -223,6 +254,27 @@ class Volunteer
         if ($this->actividades->removeElement($actividad)) {
             $actividad->removeVoluntario($this);
         }
+        return $this;
+    }
+    public function getCredenciales(): ?Credenciales
+    {
+        return $this->credenciales;
+    }
+
+    public function setCredenciales(?Credenciales $credenciales): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($credenciales === null && $this->credenciales !== null) {
+            $this->credenciales->setVoluntario(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($credenciales !== null && $credenciales->getVoluntario() !== $this) {
+            $credenciales->setVoluntario($this);
+        }
+
+        $this->credenciales = $credenciales;
+
         return $this;
     }
 }

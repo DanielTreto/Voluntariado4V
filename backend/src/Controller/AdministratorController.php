@@ -17,7 +17,7 @@ use App\Entity\Organizacion;
 class AdministratorController extends AbstractController
 {
     #[Route('/admin/{id}', name: 'api_admin_show', methods: ['GET'])]
-    public function show(int $id, AdministratorRepository $repo): JsonResponse
+    public function show(string $id, AdministratorRepository $repo): JsonResponse
     {
         $admin = $repo->find($id);
 
@@ -38,7 +38,7 @@ class AdministratorController extends AbstractController
     }
 
     #[Route('/admin/{id}', name: 'api_admin_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, EntityManagerInterface $em, AdministratorRepository $repo, ValidatorInterface $validator): JsonResponse
+    public function update(string $id, Request $request, EntityManagerInterface $em, AdministratorRepository $repo, ValidatorInterface $validator): JsonResponse
     {
         $admin = $repo->find($id);
 

@@ -102,14 +102,14 @@ class ActivityController extends AbstractController
         if (isset($data['organizationId'])) {
             $org = $orgRepository->find($data['organizationId']);
             if ($org) {
-                $actividad->setCODORG($org->getCODORG());
+                $actividad->setOrganizacion($org);
             }
         } else {
             // Fallback for testing if no logic provided
             // In real app, authenticated user's org
             $orgs = $orgRepository->findAll();
             if (count($orgs) > 0) {
-                $actividad->setCODORG($orgs[0]->getCODORG());
+                $actividad->setOrganizacion($orgs[0]);
             }
         }
 
@@ -313,7 +313,7 @@ class ActivityController extends AbstractController
         return $response;
     }
     #[Route('/activities/{id}/volunteers/{volunteerId}', name: 'api_activities_remove_volunteer', methods: ['DELETE'])]
-    public function removeVolunteer(int $id, int $volunteerId, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, VolunteerRepository $volunteerRepository): JsonResponse
+    public function removeVolunteer(int $id, string $volunteerId, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $act = $activityRepository->find($id);
         if (!$act) {

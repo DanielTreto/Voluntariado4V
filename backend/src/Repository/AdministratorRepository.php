@@ -30,6 +30,26 @@ class AdministratorRepository extends ServiceEntityRepository
         }
     }
 
+    public function findNextId(): string
+    {
+        $qb = $this->createQueryBuilder('a');
+        $qb->select('a.id')
+           ->orderBy('a.id', 'DESC')
+           ->setMaxResults(1);
+        
+        $result = $qb->getQuery()->getOneOrNullResult();
+        
+        if (!$result) {
+            return 'adm001';
+        }
+
+        $maxId = $result['id'];
+        $num = (int) substr($maxId, 3);
+        $nextNum = $num + 1;
+        
+        return 'adm' . str_pad((string)$nextNum, 3, '0', STR_PAD_LEFT);
+    }
+
     public function remove(Administrator $entity, bool $flush = false): void
     {
         $this->getEntityManager()->remove($entity);
