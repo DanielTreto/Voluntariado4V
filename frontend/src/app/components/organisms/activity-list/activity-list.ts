@@ -4,7 +4,8 @@ import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { combineLatest } from 'rxjs';
 
 interface Volunteer {
   id: number;
@@ -88,14 +89,17 @@ export class ActivityListComponent implements OnInit {
   selectedOrgId: number | null = null;
 
   ngOnInit() {
-    this.loadActivities();
+    this.loadData();
     this.loadVolunteers();
     this.loadOrganizations();
   }
 
-  loadActivities() {
-    this.apiService.getActivities().subscribe({
-      next: (data) => {
+  loadData() {
+    combineLatest([
+      this.apiService.getActivities(),
+      this.route.queryParams
+    ]).subscribe({
+      next: ([data, params]) => {
         console.log('Activities received:', data);
         this.activities = data.map((act: any) => ({
           id: act.id,
@@ -111,26 +115,24 @@ export class ActivityListComponent implements OnInit {
           status: this.mapStatus(act.status)
         }));
 
-        // Check for deep link to open activity
-        this.route.queryParams.subscribe(params => {
-          const openId = params['openId'];
-          if (openId) {
-            const activityToOpen = this.activities.find(a => a.id == openId);
-            if (activityToOpen) {
-              this.activeTab = activityToOpen.status;
+        const openId = params['openId'];
+        if (openId) {
+          const activityToOpen = this.activities.find(a => a.id == openId);
+          if (activityToOpen) {
+            console.log('Opening activity from link:', activityToOpen.title);
+            this.activeTab = activityToOpen.status;
 
-              // Open appropriate modal based on status
-              if (activityToOpen.status === 'ended') {
-                this.openViewDetails(activityToOpen);
-              } else {
-                this.openEdit(activityToOpen);
-              }
+            // Open appropriate modal based on status
+            if (activityToOpen.status === 'ended') {
+              this.openViewDetails(activityToOpen);
+            } else {
+              this.openEdit(activityToOpen);
             }
           }
-        });
+        }
       },
       error: (err) => {
-        console.error('Error loading activities', err);
+        console.error('Error loading data', err);
         this.errorMessage = 'Error: ' + err.message;
       }
     });
@@ -379,7 +381,7 @@ export class ActivityListComponent implements OnInit {
     this.apiService.createActivity(payload).subscribe({
       next: (response) => {
         console.log('Activity created', response);
-        this.loadActivities();
+        this.loadData();
         this.closeCreateModal();
       },
       error: (err) => {
