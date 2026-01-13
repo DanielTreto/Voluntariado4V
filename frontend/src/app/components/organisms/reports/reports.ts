@@ -57,16 +57,18 @@ export class ReportsComponent implements OnInit, AfterViewInit {
   processData(activities: any[], volunteers: any[]) {
     this.totalActivities = activities.length;
     this.totalVolunteers = volunteers.length;
-    this.activeActivities = activities.filter(a => a.ESTADO === 'EN_PROGRESO').length;
+    this.activeActivities = activities.filter(a => a.status === 'EN_PROGRESO').length;
 
     // Calculate Growth (Activities by Month)
     const activitiesByMonth: { [key: string]: number } = {};
     activities.forEach(act => {
       // Handle potential date format issues
-      const dateStr = act.FECHA_INICIO;
+      const dateStr = act.date;
+      if (!dateStr) return; // Skip if no date exists
+
       let date = new Date(dateStr);
       if (isNaN(date.getTime())) {
-        // Try manual parsing if format is YYYY-MM-DD and browser fails (unlikely but safe)
+        // Try manual parsing if format is YYYY-MM-DD
         const parts = dateStr.split('-');
         if (parts.length === 3) {
           date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
@@ -99,7 +101,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
       'DENEGADA': 0
     };
     activities.forEach(a => {
-      const status = a.ESTADO as keyof typeof statusCounts;
+      const status = a.status as keyof typeof statusCounts;
       if (statusCounts[status] !== undefined) {
         statusCounts[status]++;
       }
