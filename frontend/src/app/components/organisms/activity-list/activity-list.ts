@@ -4,6 +4,7 @@ import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
+import { ActivatedRoute } from '@angular/router';
 
 interface Volunteer {
   id: number;
@@ -47,6 +48,8 @@ interface Activity {
 })
 export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
+  private route = inject(ActivatedRoute);
+
   activeTab: 'pending' | 'active' | 'ended' = 'pending';
 
   allVolunteers: Volunteer[] = [];
@@ -107,6 +110,24 @@ export class ActivityListComponent implements OnInit {
           type: act.type || 'Social',
           status: this.mapStatus(act.status)
         }));
+
+        // Check for deep link to open activity
+        this.route.queryParams.subscribe(params => {
+          const openId = params['openId'];
+          if (openId) {
+            const activityToOpen = this.activities.find(a => a.id == openId);
+            if (activityToOpen) {
+              this.activeTab = activityToOpen.status;
+
+              // Open appropriate modal based on status
+              if (activityToOpen.status === 'ended') {
+                this.openViewDetails(activityToOpen);
+              } else {
+                this.openEdit(activityToOpen);
+              }
+            }
+          }
+        });
       },
       error: (err) => {
         console.error('Error loading activities', err);

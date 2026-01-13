@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { Router } from '@angular/router';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-event-calendar',
@@ -10,27 +11,118 @@ import { Router } from '@angular/router';
   templateUrl: './event-calendar.html',
   styleUrl: './event-calendar.css'
 })
-export class EventCalendarComponent {
-  constructor(private router: Router) { }
+export class EventCalendarComponent implements OnInit {
+  private router = inject(Router);
+  private apiService = inject(ApiService);
 
-  currentMonth = 'Diciembre 2025';
+  currentDate: Date = new Date();
+  monthLabel: string = '';
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  calendarDays: any[] = [];
+  activities: any[] = [];
 
-  // Days of December 2025 (Starts on Monday)
-  days = Array.from({ length: 31 }, (_, i) => i + 1);
+  // Day Details Modal
+  selectedDay: any = null;
+  dayActivities: any[] = [];
+  showDayModal: boolean = false;
 
-  // Events matching active activities
-  events: { [key: number]: { title: string, type: string }[] } = {
-    5: [{ title: 'Limpieza de Playa', type: 'success' }],      // Medio Ambiente -> success (green)
-    10: [{ title: 'Taller de Programación', type: 'primary' }], // Tecnológico -> primary (blue)
-    15: [{ title: 'Reparto de Alimentos', type: 'warning' }]    // Social -> warning (yellow)
-  };
-
-  getEventsForDay(day: number) {
-    return this.events[day] || [];
+  ngOnInit() {
+    this.updateMonthLabel();
+    this.loadActivities();
   }
 
-  navigateToActivities() {
-    this.router.navigate(['/activities']);
+  loadActivities() {
+    this.apiService.getActivities().subscribe({
+      next: (data) => {
+        this.activities = data;
+        this.generateCalendar();
+      },
+      error: (err) => console.error('Error loading activities', err)
+    });
+  }
+
+  generateCalendar() {
+    const year = this.currentDate.getFullYear();
+    const month = this.currentDate.getMonth();
+
+    // First day of the month
+    const firstDay = new Date(year, month, 1);
+    // Last day of the month
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Days in month
+    const daysInMonth = lastDay.getDate();
+
+    // Day of week of first day (0=Sunday, 1=Monday... but we want 1=Monday, 7=Sunday)
+    let startingDay = firstDay.getDay();
+    if (startingDay === 0) startingDay = 7; // Adjust Sunday to 7
+
+    this.calendarDays = [];
+
+    // Previous month padding
+    for (let i = 1; i < startingDay; i++) {
+      this.calendarDays.push({ day: '', events: [], empty: true });
+    }
+
+    // Current month days
+    for (let i = 1; i <= daysInMonth; i++) {
+      const dateString = `${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+      const dayEvents = this.activities.filter(a => a.date === dateString);
+
+      this.calendarDays.push({
+        day: i,
+        date: dateString,
+        events: dayEvents,
+        empty: false
+      });
+    }
+  }
+
+  updateMonthLabel() {
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    this.monthLabel = `${months[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+  }
+
+  prevMonth() {
+    this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+    this.updateMonthLabel();
+    this.generateCalendar();
+  }
+
+  nextMonth() {
+    this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+    this.updateMonthLabel();
+    this.generateCalendar();
+  }
+
+  openDayDetails(dayParam: any) {
+    if (dayParam.empty || dayParam.events.length === 0) return;
+    this.selectedDay = dayParam;
+    this.dayActivities = dayParam.events;
+    this.showDayModal = true;
+  }
+
+  closeDayModal() {
+    this.showDayModal = false;
+    this.selectedDay = null;
+  }
+
+  navigateToActivity(activity: any) {
+    // Navigate to activities page with query param to open this activity
+    this.router.navigate(['/activities'], { queryParams: { openId: activity.id } });
+  }
+
+  getEventTypeClass(type: string): string {
+    const classes: any = {
+      'Medio Ambiente': 'success',
+      'Social': 'warning',
+      'Tecnológico': 'primary',
+      'Educativo': 'info',
+      'Salud': 'danger'
+    };
+    return classes[type] || 'secondary';
   }
 }
