@@ -10,6 +10,24 @@
 </ul>
 
 <div class="tab-content">
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control border-start-0" placeholder="Buscar por nombre o email..."
+                [(ngModel)]="searchTerm">
+            <button class="btn btn-outline-secondary" type="button" *ngIf="searchTerm" (click)="searchTerm = ''">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+    </div>
+
     <!-- Pending Organizations Tab -->
     <div *ngIf="activeTab === 'pending'" class="tab-pane fade show active">
         <div class="card shadow-sm border-0 rounded-lg overflow-hidden p-3">
@@ -17,8 +35,22 @@
                 <table class="table table-borderless table-custom">
                     <thead>
                         <tr>
-                            <th scope="col">ORGANIZACIÓN</th>
-                            <th scope="col">EMAIL DE CONTACTO</th>
+                            <th scope="col" style="cursor: pointer;" (click)="sort('name')">
+                                <div class="d-flex align-items-center">
+                                    ORGANIZACIÓN
+                                    <i class="bi ms-2"
+                                        [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                        [class.text-primary]="sortColumn === 'name'"></i>
+                                </div>
+                            </th>
+                            <th scope="col" style="cursor: pointer;" (click)="sort('email')">
+                                <div class="d-flex align-items-center">
+                                    EMAIL DE CONTACTO
+                                    <i class="bi ms-2"
+                                        [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                        [class.text-primary]="sortColumn === 'email'"></i>
+                                </div>
+                            </th>
                             <th scope="col">FECHA DE SOLICITUD</th>
                             <th scope="col">ESTADO</th>
                             <th scope="col">ACCIONES</th>
@@ -44,7 +76,10 @@
                             </td>
                         </tr>
                         <tr *ngIf="pendingOrgs.length === 0">
-                            <td colspan="5" class="text-center text-muted py-4">No hay solicitudes pendientes.</td>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No hay solicitudes pendientes.
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -59,10 +94,38 @@
                 <table class="table table-borderless table-custom">
                     <thead>
                         <tr>
-                            <th scope="col">ORGANIZACIÓN</th>
-                            <th scope="col">EMAIL DE CONTACTO</th>
-                            <th scope="col">VOLUNTARIADOS CREADOS</th>
-                            <th scope="col">ESTADO</th>
+                            <th scope="col" style="cursor: pointer;" (click)="sort('name')">
+                                <div class="d-flex align-items-center">
+                                    ORGANIZACIÓN
+                                    <i class="bi ms-2"
+                                        [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                        [class.text-primary]="sortColumn === 'name'"></i>
+                                </div>
+                            </th>
+                            <th scope="col" style="cursor: pointer;" (click)="sort('email')">
+                                <div class="d-flex align-items-center">
+                                    EMAIL DE CONTACTO
+                                    <i class="bi ms-2"
+                                        [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                        [class.text-primary]="sortColumn === 'email'"></i>
+                                </div>
+                            </th>
+                            <th scope="col" style="cursor: pointer;" (click)="sort('activitiesCount')">
+                                <div class="d-flex align-items-center">
+                                    VOLUNTARIADOS CREADOS
+                                    <i class="bi ms-2"
+                                        [ngClass]="sortColumn === 'activitiesCount' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                        [class.text-primary]="sortColumn === 'activitiesCount'"></i>
+                                </div>
+                            </th>
+                            <th scope="col" style="cursor: pointer;" (click)="sort('status')">
+                                <div class="d-flex align-items-center">
+                                    ESTADO
+                                    <i class="bi ms-2"
+                                        [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                                        [class.text-primary]="sortColumn === 'status'"></i>
+                                </div>
+                            </th>
                             <th scope="col">ACCIONES</th>
                         </tr>
                     </thead>
@@ -76,23 +139,38 @@
                                 </div>
                             </td>
                             <td>{{ org.email }}</td>
-                            <td>{{ org.volunteersCreated }}</td>
+                            <td>{{ org.activitiesCount }}</td>
                             <td><app-badge [label]="org.status | titlecase" [type]="org.status"></app-badge></td>
                             <td>
                                 <div class="dropdown">
-                                    <button class="btn btn-sm text-muted p-0" type="button" data-bs-toggle="dropdown"
-                                        aria-expanded="false">
+                                    <button class="btn btn-sm text-muted p-0" type="button"
+                                        (click)="toggleDropdown(org.id, $event)">
                                         <i class="bi bi-three-dots"></i>
                                     </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="#" (click)="openDetails(org)"
-                                                data-bs-toggle="modal" data-bs-target="#orgDetailsModal">Ver más</a>
+                                    <ul class="dropdown-menu dropdown-menu-end py-1"
+                                        [class.show]="activeDropdownId === org.id"
+                                        [style.display]="activeDropdownId === org.id ? 'block' : 'none'"
+                                        style="font-size: 0.85rem; min-width: 140px;">
+                                        <li>
+                                            <button class="dropdown-item py-1 px-2" type="button"
+                                                (click)="openDetails(org)">
+                                                <i class="bi bi-eye me-2"></i>Ver más datos
+                                            </button>
                                         </li>
-                                        <li *ngIf="org.status !== 'suspended'"><a class="dropdown-item text-danger"
-                                                href="#" (click)="openSuspendConfirm(org)" data-bs-toggle="modal"
-                                                data-bs-target="#suspendOrgModal">Suspender</a></li>
+                                        <li>
+                                            <button class="dropdown-item py-1 px-2 text-danger" type="button"
+                                                (click)="darDeBaja(org)">
+                                                <i class="bi bi-x-circle me-2"></i>Dar de baja
+                                            </button>
+                                        </li>
                                     </ul>
                                 </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="registeredOrgs.length === 0">
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                No hay organizaciones registradas.
                             </td>
                         </tr>
                     </tbody>
@@ -103,15 +181,17 @@
 </div>
 
 <!-- Organization Details Modal -->
-<div class="modal fade" id="orgDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal" [class.show]="showDetailsModal" [class.d-block]="showDetailsModal"
+    [style.background-color]="showDetailsModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeDetailsModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Detalles de la Organización</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Datos de la Organización</h5>
+                <button type="button" class="btn-close" (click)="closeDetailsModal()"></button>
             </div>
             <div class="modal-body" *ngIf="selectedOrg">
-                <div class="d-flex align-items-center mb-4">
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
                     <img [src]="selectedOrg.logo" [alt]="selectedOrg.name"
                         style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-right: 1.5rem;">
                     <div>
@@ -120,63 +200,92 @@
                     </div>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">NIF Empresa</label>
-                        <div class="fw-semibold">{{ selectedOrg.nif || 'N/A' }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-building me-1"></i>Tipo
+                            </label>
+                            <div class="fw-semibold">{{ selectedOrg.type || 'N/A' }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Persona de Contacto</label>
-                        <div class="fw-semibold">{{ selectedOrg.contactPerson || 'N/A' }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-envelope me-1"></i>Email
+                            </label>
+                            <div class="fw-semibold">{{ selectedOrg.email }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Localidad</label>
-                        <div class="fw-semibold">{{ selectedOrg.location || 'N/A' }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-telephone me-1"></i>Teléfono
+                            </label>
+                            <div class="fw-semibold">{{ selectedOrg.phone || 'N/A' }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Actividad Económica</label>
-                        <div class="fw-semibold">{{ selectedOrg.economicActivity || 'N/A' }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-briefcase me-1"></i>Sector
+                            </label>
+                            <div class="fw-semibold">{{ selectedOrg.sector || 'N/A' }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Teléfono</label>
-                        <div class="fw-semibold">{{ selectedOrg.phone || 'N/A' }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-globe me-1"></i>Ámbito
+                            </label>
+                            <div class="fw-semibold">{{ selectedOrg.scope || 'N/A' }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Correo Electrónico</label>
-                        <div class="fw-semibold">{{ selectedOrg.email }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-calendar-event me-1"></i>Actividades creadas
+                            </label>
+                            <div class="fw-semibold">{{ selectedOrg.activitiesCount }}</div>
+                        </div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label text-muted small">Breve descripción</label>
-                        <div class="p-3 bg-light rounded">{{ selectedOrg.description || 'Sin descripción disponible.' }}
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-chat-text me-1"></i>Descripción
+                            </label>
+                            <div class="fw-semibold">{{ selectedOrg.description || 'Sin descripción disponible.' }}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Suspend Organization Confirmation Modal -->
-<div class="modal fade" id="suspendOrgModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold text-danger">Confirmar Suspensión</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <!-- Activities Section -->
+                <div class="mt-4" *ngIf="selectedOrg.activities && selectedOrg.activities.length > 0">
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-calendar-check me-2"></i>Actividades organizadas ({{ selectedOrg.activitiesCount
+                        }})
+                    </h6>
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center"
+                            *ngFor="let activity of selectedOrg.activities">
+                            <div>
+                                <div class="fw-semibold">{{ activity.title }}</div>
+                                <small class="text-muted">{{ activity.date }}</small>
+                            </div>
+                            <app-badge [label]="activity.status | titlecase"
+                                [type]="activity.status === 'PENDIENTE' ? 'pending' : (activity.status === 'EN_PROGRESO' ? 'active' : 'inactive')"></app-badge>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-center text-muted"
+                    *ngIf="!selectedOrg.activities || selectedOrg.activities.length === 0">
+                    <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
+                    Esta organización no ha creado actividades.
+                </div>
             </div>
-            <div class="modal-body">
-                <p>¿Estás seguro de que deseas suspender a la organización <strong>{{ orgToSuspend?.name }}</strong>?
-                </p>
-                <p class="text-muted small mb-0">Esta acción cambiará su estado a "Suspendido" y restringirá su acceso.
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="suspendOrg()">Sí,
-                    suspender</button>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">Cerrar</button>
             </div>
         </div>
     </div>
