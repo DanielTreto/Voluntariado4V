@@ -33,7 +33,7 @@ interface Activity {
 @Component({
   selector: 'app-activity-list',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule],
+  imports: [CommonModule, AvatarComponent, FormsModule],
   templateUrl: './activity-list.html',
   styleUrl: './activity-list.css'
 })

@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-event-calendar',
   standalone: true,
-  imports: [CommonModule, BadgeComponent],
+  imports: [CommonModule],
   templateUrl: './event-calendar.html',
   styleUrl: './event-calendar.css'
 })
