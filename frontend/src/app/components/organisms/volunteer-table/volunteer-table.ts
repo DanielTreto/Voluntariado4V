@@ -8,6 +8,8 @@ import { ApiService } from '../../../services/api.service';
 interface Volunteer {
   id: number;
   name: string;
+  firstName: string;
+  lastName: string;
   project: string;
   email: string;
   phone: string;
@@ -17,6 +19,8 @@ interface Volunteer {
   dni: string;
   address: string;
   course: string;
+  dateOfBirth: string;
+  description: string;
   availability: string[];
   interests: string[];
 }
@@ -35,6 +39,16 @@ export class VolunteerTableComponent implements OnInit {
   volunteerToDeactivate: Volunteer | null = null;
   errorMessage: string = '';
 
+  // Sorting
+  sortColumn: string = 'name';
+  sortDirection: 'asc' | 'desc' = 'asc';
+
+  // Search filter
+  searchTerm: string = '';
+
+  // Action dropdown
+  activeDropdownId: number | null = null;
+
   volunteers: Volunteer[] = [];
 
   ngOnInit() {
@@ -45,21 +59,29 @@ export class VolunteerTableComponent implements OnInit {
     this.apiService.getVolunteers().subscribe({
       next: (data) => {
         console.log('Volunteers received:', data);
-        this.volunteers = data.map((v: any) => ({
-          id: v.id,
-          name: `${v.name} ${v.surname1 || ''} ${v.surname2 || ''}`.trim(),
-          project: v.course || 'Sin Asignar',
-          email: v.email,
-          phone: v.phone,
-          lastActivity: 'Reciente',
-          status: this.mapStatus(v.status),
-          avatar: 'assets/images/volunteer-avatar.png',
-          dni: v.dni,
-          address: 'No disponible', 
-          course: v.course,
-          availability: [], 
-          interests: []
-        }));
+        this.volunteers = data.map((v: any) => {
+          const firstName = v.name || '';
+          const lastName = `${v.surname1 || ''} ${v.surname2 || ''}`.trim();
+          return {
+            id: v.id,
+            name: `${firstName} ${lastName}`.trim(),
+            firstName: firstName,
+            lastName: lastName,
+            project: v.course || 'Sin Asignar',
+            email: v.email,
+            phone: v.phone,
+            lastActivity: 'Reciente',
+            status: this.mapStatus(v.status),
+            avatar: 'assets/images/volunteer-avatar.png',
+            dni: v.dni,
+            address: 'No disponible',
+            course: v.course,
+            dateOfBirth: v.dateOfBirth || 'No disponible',
+            description: v.description || 'Sin descripción',
+            availability: [],
+            interests: []
+          };
+        });
       },
       error: (err) => {
         console.error('Error loading volunteers', err);
@@ -78,10 +100,71 @@ export class VolunteerTableComponent implements OnInit {
   }
 
   get filteredVolunteers() {
+    let result = this.volunteers;
+
+    // Filter by tab
     if (this.activeTab === 'requests') {
-      return this.volunteers.filter(v => v.status === 'pending');
+      result = result.filter(v => v.status === 'pending');
+    } else {
+      result = result.filter(v => v.status === 'active');
     }
-    return this.volunteers.filter(v => v.status === 'active');
+
+    // Filter by search term
+    if (this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase();
+      result = result.filter(v =>
+        v.name.toLowerCase().includes(term) ||
+        v.email.toLowerCase().includes(term) ||
+        v.phone.includes(term) ||
+        v.dni.toLowerCase().includes(term)
+      );
+    }
+
+    // Sort
+    result = [...result].sort((a, b) => {
+      let valA = (a as any)[this.sortColumn] || '';
+      let valB = (b as any)[this.sortColumn] || '';
+
+      if (typeof valA === 'string') valA = valA.toLowerCase();
+      if (typeof valB === 'string') valB = valB.toLowerCase();
+
+      if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }
+
+  sort(column: string) {
+    if (this.sortColumn === column) {
+      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.sortColumn = column;
+      this.sortDirection = 'asc';
+    }
+  }
+
+  toggleDropdown(volunteerId: number, event: Event) {
+    event.stopPropagation();
+    this.activeDropdownId = this.activeDropdownId === volunteerId ? null : volunteerId;
+  }
+
+  closeDropdown() {
+    this.activeDropdownId = null;
+  }
+
+  suspendVolunteer(volunteer: Volunteer) {
+    this.apiService.updateVolunteerStatus(volunteer.id, 'SUSPENDIDO').subscribe({
+      next: () => {
+        volunteer.status = 'suspended';
+        this.closeDropdown();
+      },
+      error: (err) => {
+        console.error('Error suspending volunteer', err);
+        this.errorMessage = 'Error al suspender voluntario: ' + err.message;
+      }
+    });
   }
 
   setTab(tab: 'requests' | 'registered') {
@@ -112,8 +195,8 @@ export class VolunteerTableComponent implements OnInit {
           this.volunteerToDeactivate = null;
         },
         error: (err) => {
-           console.error('Error suspending volunteer', err);
-           this.errorMessage = 'Error al suspender voluntario: ' + err.message;
+          console.error('Error suspending volunteer', err);
+          this.errorMessage = 'Error al suspender voluntario: ' + err.message;
         }
       });
     }

@@ -10,6 +10,21 @@
 </ul>
 
 <div class="card shadow-sm border-0 rounded-lg overflow-hidden p-3">
+    <!-- Search Bar -->
+    <div class="mb-3">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control border-start-0" 
+                   placeholder="Buscar por nombre, email, teléfono o DNI..." 
+                   [(ngModel)]="searchTerm">
+            <button class="btn btn-outline-secondary" type="button" *ngIf="searchTerm" (click)="searchTerm = ''">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+
     <div *ngIf="errorMessage" class="alert alert-danger">
         {{ errorMessage }} <br>
         <small>Verifica que el backend esté corriendo en http://localhost:8000</small>
@@ -21,32 +36,36 @@
                     <th scope="col" style="width: 50px;">
                         <input class="form-check-input" type="checkbox">
                     </th>
-                    <th scope="col" style="width: 25%;">
+                    <th scope="col" style="width: 25%; cursor: pointer;" (click)="sort('name')">
                         <div class="d-flex align-items-center justify-content-between">
-                            VOLUNTEER
-                            <i class="bi bi-chevron-down text-muted" style="cursor: pointer;"></i>
+                            VOLUNTARIO
+                            <i class="bi" [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'" 
+                               [class.text-primary]="sortColumn === 'name'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 20%;">
+                    <th scope="col" style="width: 20%; cursor: pointer;" (click)="sort('email')">
                         <div class="d-flex align-items-center justify-content-between">
                             EMAIL
-                            <i class="bi bi-chevron-down text-muted" style="cursor: pointer;"></i>
+                            <i class="bi" [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                               [class.text-primary]="sortColumn === 'email'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 15%;">
+                    <th scope="col" style="width: 15%; cursor: pointer;" (click)="sort('phone')">
                         <div class="d-flex align-items-center justify-content-between">
-                            PHONE
-                            <i class="bi bi-chevron-down text-muted" style="cursor: pointer;"></i>
+                            TELÉFONO
+                            <i class="bi" [ngClass]="sortColumn === 'phone' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                               [class.text-primary]="sortColumn === 'phone'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 15%;">LAST ACTIVITY</th>
-                    <th scope="col" style="width: 10%;">
+                    <th scope="col" style="width: 15%;">ÚLTIMA ACTIVIDAD</th>
+                    <th scope="col" style="width: 10%; cursor: pointer;" (click)="sort('status')">
                         <div class="d-flex align-items-center justify-content-between">
-                            STATUS
-                            <i class="bi bi-chevron-down text-muted" style="cursor: pointer;"></i>
+                            ESTADO
+                            <i class="bi" [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
+                               [class.text-primary]="sortColumn === 'status'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 5%;">ACTIONS</th>
+                    <th scope="col" style="width: 5%;">ACCIONES</th>
                 </tr>
             </thead>
             <tbody>
@@ -66,19 +85,30 @@
                     <td>{{ volunteer.lastActivity }}</td>
                     <td><app-badge [label]="volunteer.status | titlecase" [type]="volunteer.status"></app-badge></td>
                     <td>
+                        <!-- Actions for Registered Tab -->
                         <div class="dropdown" *ngIf="activeTab === 'registered'">
-                            <button class="btn btn-sm text-muted p-0" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">
+                            <button class="btn btn-sm text-muted p-0" type="button" 
+                                    (click)="toggleDropdown(volunteer.id, $event)">
                                 <i class="bi bi-three-dots"></i>
                             </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" (click)="openDetails(volunteer)"
-                                        data-bs-toggle="modal" data-bs-target="#volunteerDetailsModal">Ver más</a></li>
-                                <li *ngIf="volunteer.status !== 'suspended'"><a class="dropdown-item text-danger"
-                                        href="#" (click)="openDeactivateConfirm(volunteer)" data-bs-toggle="modal"
-                                        data-bs-target="#deactivateConfirmModal">Dar de baja</a></li>
+                            <ul class="dropdown-menu" [class.show]="activeDropdownId === volunteer.id"
+                                style="position: absolute; right: 0;">
+                                <li>
+                                    <a class="dropdown-item" href="#" 
+                                       (click)="openDetails(volunteer); closeDropdown(); $event.preventDefault()"
+                                       data-bs-toggle="modal" data-bs-target="#volunteerDetailsModal">
+                                        <i class="bi bi-eye me-2"></i>Ver más datos
+                                    </a>
+                                </li>
+                                <li *ngIf="volunteer.status !== 'suspended'">
+                                    <a class="dropdown-item text-danger" href="#" 
+                                       (click)="suspendVolunteer(volunteer); $event.preventDefault()">
+                                        <i class="bi bi-pause-circle me-2"></i>Suspender
+                                    </a>
+                                </li>
                             </ul>
                         </div>
+                        <!-- Actions for Requests Tab -->
                         <div *ngIf="activeTab === 'requests'" class="d-flex">
                             <button class="btn btn-success btn-sm me-2" (click)="acceptVolunteer(volunteer)"
                                 title="Aceptar"><i class="bi bi-check-lg"></i></button>
@@ -87,16 +117,22 @@
                         </div>
                     </td>
                 </tr>
+                <tr *ngIf="filteredVolunteers.length === 0">
+                    <td colspan="7" class="text-center text-muted py-4">
+                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                        No se encontraron voluntarios
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
     <div class="d-flex justify-content-between align-items-center mt-3 p-3">
-        <div class="text-muted small">Showing {{ filteredVolunteers.length }} volunteers</div>
+        <div class="text-muted small">Mostrando {{ filteredVolunteers.length }} voluntarios</div>
         <nav aria-label="Pagination">
             <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
                 <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
             </ul>
         </nav>
     </div>
@@ -106,12 +142,12 @@
 <div class="modal fade" id="volunteerDetailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Detalles del Voluntario</h5>
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Datos del Voluntario</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" *ngIf="selectedVolunteer">
-                <div class="d-flex align-items-center mb-4">
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
                     <app-avatar [src]="selectedVolunteer.avatar" [alt]="selectedVolunteer.name" [size]="80"
                         class="me-4"></app-avatar>
                     <div>
@@ -121,44 +157,82 @@
                     </div>
                 </div>
 
-                <div class="row g-3">
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">DNI</label>
-                        <div class="fw-semibold">{{ selectedVolunteer.dni }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-person me-1"></i>Nombre
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.firstName }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Teléfono</label>
-                        <div class="fw-semibold">{{ selectedVolunteer.phone }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-person me-1"></i>Apellidos
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.lastName }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Email</label>
-                        <div class="fw-semibold">{{ selectedVolunteer.email }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-card-text me-1"></i>DNI
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.dni }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Dirección</label>
-                        <div class="fw-semibold">{{ selectedVolunteer.address }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-telephone me-1"></i>Teléfono
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.phone }}</div>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small">Curso</label>
-                        <div class="fw-semibold">{{ selectedVolunteer.course }}</div>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-envelope me-1"></i>Email
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.email }}</div>
+                        </div>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label text-muted small">Disponibilidad</label>
-                        <div>
-                            <span *ngFor="let time of selectedVolunteer.availability"
-                                class="badge bg-light text-dark border me-1">{{ time }}</span>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-calendar me-1"></i>Fecha de Nacimiento
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.dateOfBirth }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-book me-1"></i>Curso
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.course }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-geo-alt me-1"></i>Dirección
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.address }}</div>
                         </div>
                     </div>
                     <div class="col-12">
-                        <label class="form-label text-muted small">Áreas de Interés</label>
-                        <div>
-                            <span *ngFor="let interest of selectedVolunteer.interests"
-                                class="badge bg-info text-white me-1">{{ interest }}</span>
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-chat-text me-1"></i>Descripción
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.description }}</div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
             </div>
         </div>
@@ -170,17 +244,17 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold text-danger">Confirmar Baja</h5>
+                <h5 class="modal-title fw-bold text-danger">Confirmar Suspensión</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p>¿Estás seguro de que deseas dar de baja a <strong>{{ volunteerToDeactivate?.name }}</strong>?</p>
+                <p>¿Estás seguro de que deseas suspender a <strong>{{ volunteerToDeactivate?.name }}</strong>?</p>
                 <p class="text-muted small mb-0">Esta acción cambiará su estado a "Suspendido".</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="deactivateVolunteer()">Sí,
-                    dar de baja</button>
+                    suspender</button>
             </div>
         </div>
     </div>
