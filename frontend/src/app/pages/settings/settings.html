@@ -1,6 +1,6 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Ajustes de Perfil</h2>
+        <h2>Ajustes de Administrador</h2>
     </div>
 
     <!-- Messages -->
@@ -14,28 +14,16 @@
         <button type="button" class="btn-close" (click)="errorMessage = null"></button>
     </div>
 
-    <!-- User Type Toggle (For Dev/Testing flexibility) -->
-    <div class="mb-4">
-        <div class="btn-group" role="group">
-            <input type="radio" class="btn-check" name="userType" id="orgRadio" autocomplete="off"
-                [checked]="userType === 'organization'" (change)="setUserType('organization')">
-            <label class="btn btn-outline-primary" for="orgRadio">Organización</label>
-
-            <input type="radio" class="btn-check" name="userType" id="volRadio" autocomplete="off"
-                [checked]="userType === 'volunteer'" (change)="setUserType('volunteer')">
-            <label class="btn btn-outline-primary" for="volRadio">Voluntario</label>
-        </div>
-    </div>
-
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
             <form [formGroup]="settingsForm" (ngSubmit)="onSubmit()" *ngIf="settingsForm">
 
-                <!-- Profile Picture Section (Visual Only for now) -->
+                <!-- Profile Picture Section (Visual Only) -->
                 <div class="text-center mb-4">
                     <div class="position-relative d-inline-block">
-                        <img [src]="settingsForm.get('photoUrl')?.value || 'assets/images/org-default.png'"
-                            alt="Profile" class="rounded-circle img-thumbnail"
+                        <img [src]="settingsForm.get('photoUrl')?.value || 'assets/images/admin-default.png'"
+                            onerror="this.src='assets/images/org-default.png'" alt="Profile"
+                            class="rounded-circle img-thumbnail"
                             style="width: 120px; height: 120px; object-fit: cover;">
                         <button type="button"
                             class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle"
@@ -52,96 +40,23 @@
                 </div>
 
                 <div class="row g-3">
-                    <!-- Common Fields -->
                     <div class="col-md-6">
                         <label class="form-label">Nombre</label>
                         <input type="text" class="form-control" formControlName="name">
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Apellidos</label>
+                        <input type="text" class="form-control" formControlName="apellidos">
+                    </div>
 
-                    <!-- Organization Specific -->
-                    <ng-container *ngIf="userType === 'organization'">
-                        <div class="col-md-6">
-                            <label class="form-label">Tipo Organización</label>
-                            <select class="form-select" formControlName="type">
-                                <option value="ONG">ONG</option>
-                                <option value="FUNDACIÓN">FUNDACIÓN</option>
-                                <option value="ASOCIACIÓN">ASOCIACIÓN</option>
-                                <option value="ENTIDAD PÚBLICA">ENTIDAD PÚBLICA</option>
-                                <option value="OTRA">OTRA</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Sector</label>
-                            <select class="form-select" formControlName="sector">
-                                <option value="SOCIAL">SOCIAL</option>
-                                <option value="SALUD">SALUD</option>
-                                <option value="EDUCATIVO">EDUCATIVO</option>
-                                <option value="AMBIENTAL">AMBIENTAL</option>
-                                <option value="CULTURAL">CULTURAL</option>
-                                <option value="DEPORTIVO">DEPORTIVO</option>
-                                <option value="TECNOLÓGICO">TECNOLÓGICO</option>
-                                <option value="OTRO">OTRO</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Ámbito</label>
-                            <select class="form-select" formControlName="scope">
-                                <option value="LOCAL">LOCAL</option>
-                                <option value="REGIONAL">REGIONAL</option>
-                                <option value="NACIONAL">NACIONAL</option>
-                                <option value="INTERNACIONAL">INTERNACIONAL</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">Persona de Contacto</label>
-                            <input type="text" class="form-control" formControlName="contactPerson">
-                        </div>
-                    </ng-container>
-
-                    <!-- Volunteer Specific -->
-                    <ng-container *ngIf="userType === 'volunteer'">
-                        <div class="col-md-3">
-                            <label class="form-label">Primer Apellido</label>
-                            <input type="text" class="form-control" formControlName="surname1">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Segundo Apellido</label>
-                            <input type="text" class="form-control" formControlName="surname2">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">DNI</label>
-                            <input type="text" class="form-control" formControlName="dni">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Fecha de Nacimiento</label>
-                            <input type="date" class="form-control" formControlName="dateOfBirth">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Ciclo Formativo</label>
-                            <input type="text" class="form-control" formControlName="course">
-                        </div>
-                    </ng-container>
-
-                    <!-- Contact Info -->
                     <div class="col-md-6">
                         <label class="form-label">Correo Electrónico</label>
                         <input type="email" class="form-control" formControlName="email">
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Teléfono</label>
                         <input type="tel" class="form-control" formControlName="phone">
                     </div>
-
-                    <!-- Description -->
-                    <div class="col-12">
-                        <label class="form-label">Descripción / Biografía</label>
-                        <textarea class="form-control" rows="4" formControlName="description"></textarea>
-                    </div>
-
                 </div>
 
                 <div class="d-flex justify-content-end mt-4">

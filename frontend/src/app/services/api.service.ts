@@ -39,6 +39,14 @@ export class ApiService {
     return this.http.get<any>(`${this.apiUrl}/organizations/${id}`);
   }
 
+  getAdmin(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/admin/${id}`);
+  }
+
+  updateAdmin(id: number, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/admin/${id}`, data);
+  }
+
   updateOrganizationStatus(id: number, status: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/organizations/${id}/status`, { status });
   }
