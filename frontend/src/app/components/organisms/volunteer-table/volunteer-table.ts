@@ -177,6 +177,13 @@ export class VolunteerTableComponent implements OnInit {
 
   openDetails(volunteer: Volunteer) {
     this.selectedVolunteer = volunteer;
+    this.showDetailsModal = true;
+    this.closeDropdown();
+  }
+
+  closeDetailsModal() {
+    this.showDetailsModal = false;
+    this.selectedVolunteer = null;
   }
 
   openDeactivateConfirm(volunteer: Volunteer) {
