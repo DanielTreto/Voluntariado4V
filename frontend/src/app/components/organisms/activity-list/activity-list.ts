@@ -294,7 +294,8 @@ export class ActivityListComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error adding volunteer', err);
-            alert('Error al añadir voluntario. Inténtalo de nuevo.');
+            const msg = err.error && err.error.error ? err.error.error : 'Error al añadir voluntario. Inténtalo de nuevo.';
+            alert(msg);
           }
         });
       }

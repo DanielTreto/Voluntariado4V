@@ -249,11 +249,11 @@ class ActivityController extends AbstractController
 
         // Validations
         if ($act->getESTADO() !== 'PENDIENTE' && $act->getESTADO() !== 'EN_PROGRESO') {
-             return new JsonResponse(['error' => 'Activity is not available for signup'], 400);
+             return new JsonResponse(['error' => 'Activity is not available for signup. Status: ' . $act->getESTADO()], 400);
         }
 
         if ($act->getVoluntarios()->count() >= $act->getN_MAX_VOLUNTARIOS()) {
-            return new JsonResponse(['error' => 'Activity is full'], 400);
+            return new JsonResponse(['error' => 'Activity is full. Current: ' . $act->getVoluntarios()->count() . ' Max: ' . $act->getN_MAX_VOLUNTARIOS()], 400);
         }
 
         if ($act->getVoluntarios()->contains($volunteer)) {
