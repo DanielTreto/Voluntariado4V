@@ -51,6 +51,14 @@ export class ApiService {
     return this.http.patch(`${this.apiUrl}/activities/${id}/status`, { status });
   }
 
+  deleteActivity(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/activities/${id}`);
+  }
+
+  updateActivity(id: number, activity: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/activities/${id}`, activity);
+  }
+
   // Auth Methods
   login(credentials: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials);
