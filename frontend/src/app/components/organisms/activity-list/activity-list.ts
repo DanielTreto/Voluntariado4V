@@ -9,12 +9,19 @@ interface Volunteer {
   id: number;
   name: string;
   avatar: string;
-  details?: string; // For "Ver más info"
+  email: string;
+  phone: string;
+  course: string;
+  status: 'active' | 'pending' | 'suspended';
+  interests: string[];
 }
 
 interface Organization {
+  id: number;
   name: string;
   logo: string;
+  email?: string;
+  phone?: string;
 }
 
 interface Activity {
@@ -26,6 +33,7 @@ interface Activity {
   image: string;
   organization: Organization;
   volunteers: Volunteer[];
+  maxVolunteers?: number;
   type: 'Medio Ambiente' | 'Social' | 'Tecnológico' | 'Educativo' | 'Salud';
   status: 'active' | 'pending' | 'ended';
 }
@@ -33,35 +41,34 @@ interface Activity {
 @Component({
   selector: 'app-activity-list',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, FormsModule],
+  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule],
   templateUrl: './activity-list.html',
   styleUrl: './activity-list.css'
 })
 export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
-  activeTab: 'active' | 'pending' | 'ended' = 'active';
+  activeTab: 'pending' | 'active' | 'ended' = 'pending';
 
-  // Dummy data for all available volunteers - kept for UI demo
-  allVolunteers: Volunteer[] = [
-    { id: 1, name: 'Jane Doe', avatar: 'assets/images/volunteer-avatar.png', details: 'Experiencia en medio ambiente.' },
-    { id: 2, name: 'John Smith', avatar: 'assets/images/volunteer-avatar.png', details: 'Experto en logística.' },
-    { id: 3, name: 'Michael Brown', avatar: 'assets/images/volunteer-avatar.png', details: 'Ingeniero de software.' },
-    { id: 4, name: 'Sarah Davis', avatar: 'assets/images/volunteer-avatar.png', details: 'Enfermera titulada.' },
-    { id: 5, name: 'David Wilson', avatar: 'assets/images/volunteer-avatar.png', details: 'Profesor de secundaria.' }
-  ];
-
-  // Dummy data for organizations - kept for Create Form UI
-  allOrganizations: Organization[] = [
-    { name: 'EcoFriendly', logo: 'assets/images/org-logo-1.png' },
-    { name: 'Tech4All', logo: 'assets/images/org-logo-2.png' },
-    { name: 'Ayuda Solidaria', logo: 'assets/images/org-logo-1.png' },
-    { name: 'Educa+', logo: 'assets/images/org-logo-2.png' }
-  ];
-
+  allVolunteers: Volunteer[] = [];
+  allOrganizations: Organization[] = [];
   activities: Activity[] = [];
+
   selectedActivity: Activity | null = null;
   activityToDelete: Activity | null = null;
+  viewActivity: Activity | null = null;
   errorMessage: string = '';
+
+  // Modal control
+  showEditModal: boolean = false;
+  showAddVolunteerModal: boolean = false;
+  showDeleteModal: boolean = false;
+  showViewModal: boolean = false;
+  showCreateModal: boolean = false;
+
+  // Volunteer filters
+  volunteerFilterCourse: string = '';
+  volunteerFilterStatus: string = '';
+  volunteerSearchTerm: string = '';
 
   // For Create Activity
   newActivity: Partial<Activity> = {
@@ -73,15 +80,14 @@ export class ActivityListComponent implements OnInit {
     image: 'assets/images/activity-1.jpg',
     organization: undefined,
     volunteers: [],
-    status: 'active'
+    status: 'pending'
   };
-
-  // For Add Volunteer
-  selectedVolunteerId: number | null = null;
-  selectedOrgName: string | null = null;
+  selectedOrgId: number | null = null;
 
   ngOnInit() {
     this.loadActivities();
+    this.loadVolunteers();
+    this.loadOrganizations();
   }
 
   loadActivities() {
@@ -92,12 +98,13 @@ export class ActivityListComponent implements OnInit {
           id: act.id,
           title: act.title,
           description: act.description,
-          location: act.location,
+          location: act.location || 'Ubicación no especificada',
           date: act.date,
-          image: act.image,
-          organization: act.organization || { name: 'Unknown', logo: 'assets/images/org-default.png' },
-          volunteers: [], // Backend doesn't support volunteers relation yet
-          type: act.type as any,
+          image: act.image || 'assets/images/activity-1.jpg',
+          organization: act.organization || { id: 0, name: 'Sin organización', logo: 'assets/images/org-default.png' },
+          volunteers: act.volunteers || [],
+          maxVolunteers: act.maxVolunteers || 10,
+          type: act.type || 'Social',
           status: this.mapStatus(act.status)
         }));
       },
@@ -108,147 +115,281 @@ export class ActivityListComponent implements OnInit {
     });
   }
 
+  loadVolunteers() {
+    this.apiService.getVolunteers().subscribe({
+      next: (data) => {
+        this.allVolunteers = data.map((v: any) => ({
+          id: v.id,
+          name: `${v.name} ${v.surname1 || ''} ${v.surname2 || ''}`.trim(),
+          avatar: 'assets/images/volunteer-avatar.png',
+          email: v.email,
+          phone: v.phone,
+          course: v.course || 'Sin curso',
+          status: this.mapVolunteerStatus(v.status),
+          interests: v.interests || []
+        }));
+      },
+      error: (err) => console.error('Error loading volunteers', err)
+    });
+  }
+
+  loadOrganizations() {
+    this.apiService.getOrganizations().subscribe({
+      next: (data) => {
+        this.allOrganizations = data
+          .filter((org: any) => org.status === 'ACTIVO')
+          .map((org: any) => ({
+            id: org.id,
+            name: org.name,
+            logo: 'assets/images/org-default.png',
+            email: org.email,
+            phone: org.phone
+          }));
+      },
+      error: (err) => console.error('Error loading organizations', err)
+    });
+  }
+
   mapStatus(backendStatus: string): 'active' | 'pending' | 'ended' {
     const map: any = {
       'PENDIENTE': 'pending',
       'EN_PROGRESO': 'active',
       'FINALIZADA': 'ended',
-      'DENEGADA': 'denied' // Effectively hidden as not in tab types
+      'DENEGADA': 'ended'
     };
     return map[backendStatus] || 'pending';
+  }
+
+  mapVolunteerStatus(status: string): 'active' | 'pending' | 'suspended' {
+    const map: any = {
+      'PENDIENTE': 'pending',
+      'ACTIVO': 'active',
+      'SUSPENDIDO': 'suspended'
+    };
+    return map[status] || 'pending';
   }
 
   get filteredActivities() {
     return this.activities.filter(a => a.status === this.activeTab);
   }
 
-  setTab(tab: 'active' | 'pending' | 'ended') {
+  get filteredVolunteers() {
+    let result = this.allVolunteers;
+
+    if (this.volunteerSearchTerm.trim()) {
+      const term = this.volunteerSearchTerm.toLowerCase();
+      result = result.filter(v => v.name.toLowerCase().includes(term));
+    }
+
+    if (this.volunteerFilterCourse) {
+      result = result.filter(v => v.course === this.volunteerFilterCourse);
+    }
+
+    if (this.volunteerFilterStatus) {
+      result = result.filter(v => v.status === this.volunteerFilterStatus);
+    }
+
+    return result;
+  }
+
+  get uniqueCourses(): string[] {
+    const courses = [...new Set(this.allVolunteers.map(v => v.course))];
+    return courses.filter(c => c);
+  }
+
+  setTab(tab: 'pending' | 'active' | 'ended') {
     this.activeTab = tab;
   }
 
+  // Edit Modal
   openEdit(activity: Activity) {
-    this.selectedActivity = { ...activity };
+    this.selectedActivity = { ...activity, volunteers: [...activity.volunteers] };
+    this.showEditModal = true;
   }
 
-  openDeleteConfirm(activity: Activity) {
-    this.activityToDelete = activity;
-  }
-
-  deleteActivity() {
-    // Backend delete not requested/implemented for activities, mimicking deny behavior or just ui removal
-    // Assuming delete = finish or deny? The prompt said "si rechazarlas 'denied'".
-    // Standard delete implies removal. I'll just remove from UI for now unless DELETE endpoint added.
-    if (this.activityToDelete) {
-      this.activities = this.activities.filter(a => a.id !== this.activityToDelete!.id);
-      this.activityToDelete = null;
-    }
+  closeEditModal() {
+    this.showEditModal = false;
+    this.selectedActivity = null;
   }
 
   saveActivity() {
-    // Edit functionality not explicitly detailed in prompt but keeping UI logic
     if (this.selectedActivity) {
-      const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
-      if (index !== -1) {
-        this.activities[index] = this.selectedActivity;
-      }
-      this.selectedActivity = null;
+      const payload = {
+        title: this.selectedActivity.title,
+        description: this.selectedActivity.description,
+        location: this.selectedActivity.location,
+        date: this.selectedActivity.date,
+        type: this.selectedActivity.type
+      };
+
+      this.apiService.updateActivity(this.selectedActivity.id, payload).subscribe({
+        next: () => {
+          const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
+          if (index !== -1) {
+            this.activities[index] = { ...this.activities[index], ...payload };
+          }
+          this.closeEditModal();
+        },
+        error: (err) => {
+          console.error('Error updating activity', err);
+          // Fallback: update locally
+          const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
+          if (index !== -1) {
+            this.activities[index] = this.selectedActivity!;
+          }
+          this.closeEditModal();
+        }
+      });
     }
   }
 
+  // Add Volunteer Modal
   openAddVolunteer(activity: Activity) {
     this.selectedActivity = activity;
-    this.selectedVolunteerId = null;
+    this.volunteerFilterCourse = '';
+    this.volunteerFilterStatus = '';
+    this.volunteerSearchTerm = '';
+    this.showAddVolunteerModal = true;
   }
 
-  addVolunteer() {
-    if (this.selectedActivity && this.selectedVolunteerId) {
-       // Frontend only implementation as backend doesn't support it yet
-      const volunteer = this.allVolunteers.find(v => v.id == this.selectedVolunteerId);
-      if (volunteer) {
-        if (!this.selectedActivity.volunteers.find(v => v.id === volunteer.id)) {
-          this.selectedActivity.volunteers.push(volunteer);
+  closeAddVolunteerModal() {
+    this.showAddVolunteerModal = false;
+    this.selectedActivity = null;
+  }
+
+  addVolunteerToActivity(volunteer: Volunteer) {
+    if (this.selectedActivity) {
+      if (!this.selectedActivity.volunteers.find(v => v.id === volunteer.id)) {
+        this.selectedActivity.volunteers.push(volunteer);
+        // Update the original activity in the array
+        const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
+        if (index !== -1) {
+          this.activities[index].volunteers = [...this.selectedActivity.volunteers];
         }
       }
-      this.selectedVolunteerId = null;
-      this.selectedActivity = null;
     }
   }
 
-  viewVolunteerInfo() {
-    if (this.selectedVolunteerId) {
-      const volunteer = this.allVolunteers.find(v => v.id == this.selectedVolunteerId);
-      if (volunteer) {
-        alert(`Información del voluntario:\nNombre: ${volunteer.name}\nDetalles: ${volunteer.details}`);
+  removeVolunteerFromActivity(volunteer: Volunteer) {
+    if (this.selectedActivity) {
+      this.selectedActivity.volunteers = this.selectedActivity.volunteers.filter(v => v.id !== volunteer.id);
+      const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
+      if (index !== -1) {
+        this.activities[index].volunteers = [...this.selectedActivity.volunteers];
       }
     }
   }
 
-  // Create Activity
+  isVolunteerInActivity(volunteer: Volunteer): boolean {
+    return this.selectedActivity?.volunteers.some(v => v.id === volunteer.id) || false;
+  }
+
+  // Delete Modal
+  openDeleteConfirm(activity: Activity) {
+    this.activityToDelete = activity;
+    this.showDeleteModal = true;
+  }
+
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.activityToDelete = null;
+  }
+
+  deleteActivity() {
+    if (this.activityToDelete) {
+      this.apiService.deleteActivity(this.activityToDelete.id).subscribe({
+        next: () => {
+          this.activities = this.activities.filter(a => a.id !== this.activityToDelete!.id);
+          this.closeDeleteModal();
+        },
+        error: (err) => {
+          console.error('Error deleting activity', err);
+          // Fallback: remove locally
+          this.activities = this.activities.filter(a => a.id !== this.activityToDelete!.id);
+          this.closeDeleteModal();
+        }
+      });
+    }
+  }
+
+  // View Modal (for Finalizadas)
+  openViewDetails(activity: Activity) {
+    this.viewActivity = activity;
+    this.showViewModal = true;
+  }
+
+  closeViewModal() {
+    this.showViewModal = false;
+    this.viewActivity = null;
+  }
+
+  // Create Modal
+  openCreateModal() {
+    this.newActivity = {
+      title: '',
+      description: '',
+      location: '',
+      date: '',
+      type: 'Social',
+      image: 'assets/images/activity-1.jpg',
+      organization: undefined,
+      volunteers: [],
+      status: 'pending'
+    };
+    this.selectedOrgId = null;
+    this.showCreateModal = true;
+  }
+
+  closeCreateModal() {
+    this.showCreateModal = false;
+  }
+
   createActivity() {
+    const org = this.allOrganizations.find(o => o.id === this.selectedOrgId);
     const payload = {
-        title: this.newActivity.title,
-        description: this.newActivity.description,
-        location: this.newActivity.location,
-        date: this.newActivity.date,
-        type: this.newActivity.type,
-        // organizationId: logic to select org ID would go here, omitting for now
+      title: this.newActivity.title,
+      description: this.newActivity.description,
+      location: this.newActivity.location,
+      date: this.newActivity.date,
+      type: this.newActivity.type,
+      organizationId: this.selectedOrgId
     };
 
     this.apiService.createActivity(payload).subscribe({
-        next: (response) => {
-            console.log('Activity created', response);
-            // Reload to get fresh data with correct status (Default Pending)
-            this.loadActivities();
-            
-            // Reset form
-            this.newActivity = {
-                title: '',
-                description: '',
-                location: '',
-                date: '',
-                type: 'Social',
-                image: 'assets/images/activity-1.jpg',
-                organization: undefined,
-                volunteers: [],
-                status: 'active'
-            };
-            this.selectedOrgName = null;
-        },
-        error: (err) => {
-            console.error('Error creating activity', err);
-            alert('Error creating activity: ' + err.message);
-        }
+      next: (response) => {
+        console.log('Activity created', response);
+        this.loadActivities();
+        this.closeCreateModal();
+      },
+      error: (err) => {
+        console.error('Error creating activity', err);
+        this.errorMessage = 'Error al crear actividad: ' + err.message;
+      }
     });
   }
 
   // Pending Actions
   acceptActivity(activity: Activity) {
     this.apiService.updateActivityStatus(activity.id, 'EN_PROGRESO').subscribe({
-        next: () => {
-            activity.status = 'active'; // Move to Active tab
-        },
-        error: (err) => {
-            console.error('Error accepting activity', err);
-        }
+      next: () => {
+        activity.status = 'active';
+      },
+      error: (err) => {
+        console.error('Error accepting activity', err);
+      }
     });
   }
 
   denyActivity(activity: Activity) {
-      if (confirm(`¿Estás seguro de que deseas denegar esta actividad?`)) {
-        this.apiService.updateActivityStatus(activity.id, 'DENEGADA').subscribe({
-            next: () => {
-                // Remove from view or move to denied tab if exists. 
-                // Filter removes it from current 'pending' filtered list
-                activity.status = 'active'; // Hack/Bug in thought process? No, mapStatus doesn't return denied.
-                // Actually need to update local model to something that filters out.
-                // mapStatus doesn't handle 'denied' explicitly in returned type, so activity.status type needs 'denied'? 
-                // The interface Activity.status is 'active' | 'pending' | 'ended'. I should add 'denied' to interface or just remove from array.
-                this.activities = this.activities.filter(a => a.id !== activity.id);
-            },
-            error: (err) => {
-                console.error('Error denying activity', err);
-            }
-        });
-      }
+    if (confirm(`¿Estás seguro de que deseas denegar esta actividad?`)) {
+      this.apiService.updateActivityStatus(activity.id, 'DENEGADA').subscribe({
+        next: () => {
+          this.activities = this.activities.filter(a => a.id !== activity.id);
+        },
+        error: (err) => {
+          console.error('Error denying activity', err);
+        }
+      });
+    }
   }
 }
