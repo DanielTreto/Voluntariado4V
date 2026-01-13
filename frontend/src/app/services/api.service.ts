@@ -9,7 +9,7 @@ export class ApiService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8000/api'; // Ajusta esto si tu backend corre en otro puerto
 
-  constructor() {}
+  constructor() { }
 
   getUsuarios(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/usuarios`);
@@ -33,6 +33,10 @@ export class ApiService {
 
   updateOrganizationStatus(id: number, status: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/organizations/${id}/status`, { status });
+  }
+
+  getOrganizationActivities(orgId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/organizations/${orgId}/activities`);
   }
 
   getActivities(): Observable<any[]> {
