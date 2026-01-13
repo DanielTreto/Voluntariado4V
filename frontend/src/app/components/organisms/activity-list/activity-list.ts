@@ -51,7 +51,7 @@ export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
   private route = inject(ActivatedRoute);
 
-  activeTab: 'pending' | 'active' | 'ended' = 'pending';
+  activeTab: 'pending' | 'active' | 'ended' = 'active';
 
   allVolunteers: Volunteer[] = [];
   allOrganizations: Organization[] = [];
