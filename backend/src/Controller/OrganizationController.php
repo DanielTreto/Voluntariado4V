@@ -219,7 +219,7 @@ class OrganizationController extends AbstractController
              return new JsonResponse(['error' => 'Organization not found'], 404);
         }
 
-        $activities = $activityRepository->findBy(['CODORG' => $id]);
+        $activities = $activityRepository->findBy(['organizacion' => $id]);
         $data = [];
 
         foreach ($activities as $act) {
