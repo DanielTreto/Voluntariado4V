@@ -12,7 +12,7 @@ class TipoActividad
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: 'CODTIPO')]
     private ?int $CODTIPO = null;
 
     #[ORM\Column(length: 20)]
