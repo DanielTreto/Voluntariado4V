@@ -1,0 +1,77 @@
+<div class="org-settings-container">
+    <div class="header mb-4">
+        <h3><i class="bi bi-gear-fill me-2"></i> Configuración de la Organización</h3>
+        <p class="text-muted">Actualiza la información pública y de contacto de tu organización.</p>
+    </div>
+
+    <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()" class="settings-form">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card p-4 border-0 shadow-sm mb-4">
+                    <h5 class="card-title mb-3">Información General</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre de la Organización</label>
+                        <input type="text" class="form-control" formControlName="NOMBRE">
+                        <div *ngIf="settingsForm.get('NOMBRE')?.invalid && settingsForm.get('NOMBRE')?.touched"
+                            class="text-danger small">
+                            El nombre es obligatorio.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" formControlName="DESCRIPCION" rows="4"></textarea>
+                        <div class="form-text">Breve descripción de la misión y valores.</div>
+                    </div>
+                </div>
+
+                <div class="card p-4 border-0 shadow-sm">
+                    <h5 class="card-title mb-3">Información de Contacto</h5>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Correo Electrónico</label>
+                            <input type="email" class="form-control" formControlName="CORREO">
+                            <div class="form-text">El correo no se puede cambiar aquí.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono</label>
+                            <input type="tel" class="form-control" formControlName="TELEFONO">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Dirección / Sede</label>
+                        <input type="text" class="form-control" formControlName="DIRECCION"
+                            placeholder="Calle, Ciudad, CP">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Sitio Web</label>
+                        <input type="url" class="form-control" formControlName="WEB" placeholder="https://...">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Future: Logo Upload -->
+                <div class="card p-4 border-0 shadow-sm text-center">
+                    <h5 class="card-title mb-3">Logo</h5>
+                    <div class="logo-placeholder mb-3">
+                        <i class="bi bi-building fs-1 text-muted"></i>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Cambiar Logo
+                        (Próximamente)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions mt-4 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary btn-lg" [disabled]="settingsForm.invalid || loading">
+                <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+                Guardar Cambios
+            </button>
+        </div>
+    </form>
+</div>
