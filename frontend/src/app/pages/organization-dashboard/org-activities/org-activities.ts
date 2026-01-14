@@ -2,11 +2,15 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
+import { AvatarComponent } from '../../../components/atoms/avatar/avatar';
+import { BadgeComponent } from '../../../components/atoms/badge/badge';
+
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'app-org-activities',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, AvatarComponent, BadgeComponent],
     templateUrl: './org-activities.html',
     styleUrls: ['./org-activities.css']
 })
@@ -15,13 +19,16 @@ export class OrgActivitiesComponent implements OnInit {
     activities: any[] = [];
     requestForm: FormGroup;
 
-    // Lists for dropdowns (Ideally fetched from API, hardcoded for now or fetched if endpoints exist)
+    // Modal state
+    showViewModal: boolean = false;
+    viewActivity: any = null;
+
+    // Lists for dropdowns
     odsList = [
         { id: 1, name: 'Fin de la Pobreza' },
         { id: 2, name: 'Hambre Cero' },
         { id: 3, name: 'Salud y Bienestar' },
         { id: 4, name: 'Educación de Calidad' },
-        // Add more as needed
     ];
 
     activityTypes = [
@@ -30,22 +37,22 @@ export class OrgActivitiesComponent implements OnInit {
         { id: 3, name: 'Educativa' },
         { id: 4, name: 'Cultural' },
         { id: 5, name: 'Deportiva' }
-        // Add more as needed
     ];
 
     private apiService = inject(ApiService);
     private fb = inject(FormBuilder);
+    private route = inject(ActivatedRoute);
 
     constructor() {
         this.requestForm = this.fb.group({
             NOMBRE: ['', Validators.required],
             DESCRIPCION: ['', [Validators.required, Validators.maxLength(500)]],
+            UBICACION: ['', Validators.required],
             FECHA_INICIO: ['', Validators.required],
             FECHA_FIN: ['', Validators.required],
             DURACION_SESION: ['', Validators.required],
             N_MAX_VOLUNTARIOS: [1, [Validators.required, Validators.min(1)]],
-            // For now assuming backend handles CODORG from logged in user or we send it
-            CODTIPO: [null, Validators.required], // TODO: Bind to backend logic
+            CODTIPO: [null, Validators.required],
             NUMODS: [null, Validators.required]
         });
     }
@@ -62,16 +69,51 @@ export class OrgActivitiesComponent implements OnInit {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         if (!user || user.role !== 'organization') return;
 
-        // Ideally use a specific endpoint getOrganizationActivities(user.id)
-        // As seen in ApiService: getOrganizationActivities(orgId)
         if (user.id) {
             this.apiService.getOrganizationActivities(user.id).subscribe({
                 next: (data) => {
-                    this.activities = data;
+                    // Filter out PENDIENTE status as requested
+                    this.activities = data.filter((act: any) =>
+                        (act.ESTADO || act.status) !== 'PENDIENTE'
+                    ).map((act: any) => ({
+                        ...act,
+                        title: act.NOMBRE || act.title,
+                        description: act.DESCRIPCION || act.description,
+                        date: act.FECHA_INICIO || act.date,
+                        status: act.ESTADO || act.status,
+                        image: act.image || 'assets/images/activity-1.jpg',
+                        volunteers: act.volunteers || [],
+                        type: act.type || 'General',
+                        location: act.UBICACION || act.location
+                    }));
+
+                    // Check for deep link to open modal
+                    this.route.queryParams.subscribe(params => {
+                        const openId = params['openId'];
+                        if (openId) {
+                            const activity = this.activities.find(a => a.id == openId);
+                            if (activity) {
+                                this.openViewDetails(activity);
+                                // Optional: Clear param so reload doesn't reopen? 
+                                // For now leaving it is fine or user might prefer it deep linkable.
+                            }
+                        }
+                    });
                 },
                 error: (err) => console.error('Error loading activities', err)
             });
         }
+    }
+
+    openViewDetails(activity: any) {
+        console.log('Opening details for:', activity);
+        this.viewActivity = activity;
+        this.showViewModal = true;
+    }
+
+    closeViewModal() {
+        this.showViewModal = false;
+        this.viewActivity = null;
     }
 
     submitRequest() {
@@ -83,19 +125,13 @@ export class OrgActivitiesComponent implements OnInit {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const formValue = this.requestForm.value;
 
-        // Prepare payload matching backend entity expectation
-        // Note: Backend expects CODORG (string from session/user ideally), CODTIPO (int), NUMODS (int or array?)
-        // Need to verify how backend expects relations.
-        // Based on previous debug, Actividad uses ManyToMany for ODS and Types.
-        // The simple create endpoint might expect IDs.
-
-        // Construct payload matching Backend ActivityController::create expectations
         const payload = {
             title: formValue.NOMBRE,
             description: formValue.DESCRIPCION,
+            location: formValue.UBICACION,
             date: formValue.FECHA_INICIO,
             duration: formValue.DURACION_SESION,
-            organizationId: user.id || 'org001',
+            organizationId: user.id,
             maxVolunteers: formValue.N_MAX_VOLUNTARIOS
         };
 
@@ -103,14 +139,14 @@ export class OrgActivitiesComponent implements OnInit {
 
         this.apiService.createActivity(payload).subscribe({
             next: (res) => {
-                alert('Solicitud enviada con éxito');
+                alert('Solicitud enviada con éxito. Pendiente de aprobación.');
                 this.requestForm.reset();
                 this.currentTab = 'historial';
-                this.loadActivities();
+                this.loadActivities(); // Refresh list (new one won't show until approved)
             },
             error: (err) => {
                 console.error('Error creating activity', err);
-                alert('Error al enviar la solicitud. Revisa la consola.');
+                alert('Error al enviar la solicitud.');
             }
         });
     }

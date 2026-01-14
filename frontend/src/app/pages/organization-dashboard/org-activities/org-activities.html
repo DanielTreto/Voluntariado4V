@@ -10,42 +10,48 @@
 
     <div class="tab-content" *ngIf="currentTab === 'historial'">
         <h3>Mis Actividades</h3>
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Título</th>
-                        <th>Fecha Inicio</th>
-                        <th>Estado</th>
-                        <th>Voluntarios</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let act of activities">
-                        <td>{{ act.NOMBRE || act.title }}</td>
-                        <td>{{ act.FECHA_INICIO | date:'shortDate' }}</td>
-                        <td>
+        <p class="text-muted mb-4" *ngIf="activities.length > 0">Gestiona tus actividades aceptadas y en curso.</p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" *ngFor="let activity of activities">
+                <div class="card h-100 shadow-sm border-0 rounded-lg overflow-hidden">
+                    <div class="position-relative">
+                        <img [src]="activity.image" class="card-img-top" alt="{{ activity.title }}"
+                            style="height: 180px; object-fit: cover;">
+                        <div class="position-absolute top-0 end-0 p-2">
                             <span class="badge" [ngClass]="{
-                                    'bg-warning': act.ESTADO === 'PENDIENTE',
-                                    'bg-success': act.ESTADO === 'APROBADA' || act.ESTADO === 'EN_PROGRESO',
-                                    'bg-danger': act.ESTADO === 'DENEGADA',
-                                    'bg-secondary': act.ESTADO === 'FINALIZADA'
-                                  }">
-                                {{ act.ESTADO || act.status }}
+                                'bg-success': activity.status === 'APROBADA' || activity.status === 'EN_PROGRESO',
+                                'bg-danger': activity.status === 'DENEGADA',
+                                'bg-secondary': activity.status === 'FINALIZADA'
+                              }">
+                                {{ activity.status }}
                             </span>
-                        </td>
-                        <td>{{ act.voluntarios?.length || 0 }} / {{ act.N_MAX_VOLUNTARIOS }}</td>
-                        <td>
-                            <!-- Future: Edit/Delete buttons -->
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                        </td>
-                    </tr>
-                    <tr *ngIf="activities.length === 0">
-                        <td colspan="5" class="text-center text-muted">No tienes actividades registradas.</td>
-                    </tr>
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h6 class="card-title fw-bold mb-2">{{ activity.title }}</h6>
+                        <p class="card-text text-muted small flex-grow-1">{{ activity.description | slice:0:80 }}...</p>
+
+                        <div class="d-flex align-items-center text-muted small mb-2">
+                            <i class="bi bi-calendar-event me-1"></i> {{ activity.date | date:'mediumDate' }}
+                        </div>
+                        <div class="d-flex align-items-center text-muted small mb-3">
+                            <i class="bi bi-people me-1"></i> {{ activity.volunteers.length }} / {{
+                            activity.maxVolunteers || activity.N_MAX_VOLUNTARIOS }} Voluntarios
+                        </div>
+
+                        <div class="mt-auto pt-3 border-top">
+                            <button class="btn btn-outline-primary btn-sm w-100" (click)="openViewDetails(activity)">
+                                <i class="bi bi-eye"></i> Ver más
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="activities.length === 0" class="col-12 text-center text-muted py-5">
+                <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                No tienes actividades activas o finalizadas.
+            </div>
         </div>
     </div>
 
@@ -69,6 +75,16 @@
                 <div *ngIf="requestForm.get('DESCRIPCION')?.touched && requestForm.get('DESCRIPCION')?.invalid"
                     class="text-danger small">
                     La descripción es obligatoria.
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ubicación</label>
+                <input type="text" class="form-control" formControlName="UBICACION"
+                    placeholder="Ej: Calle Gran Vía 123">
+                <div *ngIf="requestForm.get('UBICACION')?.touched && requestForm.get('UBICACION')?.invalid"
+                    class="text-danger small">
+                    La ubicación es obligatoria.
                 </div>
             </div>
 
@@ -118,5 +134,76 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+
+<!-- View Activity Details Modal -->
+<div class="modal" [class.show]="showViewModal" [class.d-block]="showViewModal"
+    [style.background-color]="showViewModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1" role="dialog"
+    (click)="closeViewModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Detalles de la Actividad</h5>
+                <button type="button" class="btn-close" (click)="closeViewModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="viewActivity">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <img [src]="viewActivity.image" alt="{{ viewActivity.title }}" class="img-fluid rounded"
+                            style="width: 100%; height: 200px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-7">
+                        <h4 class="fw-bold mb-2">{{ viewActivity.title }}</h4>
+                        <span class="badge bg-secondary mb-3">{{ viewActivity.status }}</span>
+                        <p class="text-muted">{{ viewActivity.description }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-geo-alt me-1"></i>Ubicación</label>
+                            <div class="fw-semibold">{{ viewActivity.location || 'No especificada' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-calendar me-1"></i>Fecha</label>
+                            <div class="fw-semibold">{{ viewActivity.date | date:'mediumDate' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-clock me-1"></i>Duración</label>
+                            <div class="fw-semibold">{{ viewActivity.duration || viewActivity.DURACION_SESION || 'N/A'
+                                }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-people me-1"></i>Voluntarios</label>
+                            <div class="fw-semibold">{{ viewActivity.volunteers.length }} apuntados</div>
+                        </div>
+                    </div>
+                    <div class="col-12" *ngIf="viewActivity.volunteers.length > 0">
+                        <label class="form-label text-muted small">Voluntarios participantes:</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-light text-dark border d-flex align-items-center"
+                                *ngFor="let vol of viewActivity.volunteers">
+                                <app-avatar [src]="vol.avatar || 'assets/images/volunteer-avatar.png'" [alt]="vol.name"
+                                    [size]="20" class="me-1"></app-avatar>
+                                {{ vol.name }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" (click)="closeViewModal()">Cerrar</button>
+            </div>
+        </div>
     </div>
 </div>
