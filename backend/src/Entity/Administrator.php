@@ -14,8 +14,7 @@ class Administrator
     #[ORM\Column(name: 'id', type: 'string', length: 20)]
     private ?string $id = null;
 
-    #[ORM\OneToOne(mappedBy: 'admin', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]
-    private ?Credenciales $credenciales = null;
+
 
     #[ORM\Column(length: 50)]
     #[Assert\NotBlank]
@@ -37,9 +36,9 @@ class Administrator
     #[Assert\Regex(pattern: '/^[0-9]+$/', message: 'Only numbers allowed')]
     private ?string $telefono = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 128, unique: true)]
     #[Assert\NotBlank]
-    private ?string $password = null;
+    private ?string $firebaseUid = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $foto = null;
@@ -99,14 +98,14 @@ class Administrator
         return $this;
     }
 
-    public function getPassword(): ?string
+    public function getFirebaseUid(): ?string
     {
-        return $this->password;
+        return $this->firebaseUid;
     }
 
-    public function setPassword(string $password): static
+    public function setFirebaseUid(string $firebaseUid): static
     {
-        $this->password = $password;
+        $this->firebaseUid = $firebaseUid;
         return $this;
     }
 
@@ -120,25 +119,5 @@ class Administrator
         $this->foto = $foto;
         return $this;
     }
-    public function getCredenciales(): ?Credenciales
-    {
-        return $this->credenciales;
-    }
 
-    public function setCredenciales(?Credenciales $credenciales): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($credenciales === null && $this->credenciales !== null) {
-            $this->credenciales->setAdmin(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($credenciales !== null && $credenciales->getAdmin() !== $this) {
-            $credenciales->setAdmin($this);
-        }
-
-        $this->credenciales = $credenciales;
-
-        return $this;
-    }
 }

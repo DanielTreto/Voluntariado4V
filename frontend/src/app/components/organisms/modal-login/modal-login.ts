@@ -31,8 +31,12 @@ export class ModalLogin {
     this.onClose.emit();
   }
 
-  login(): void {
-    this.apiService.login(this.credentials).subscribe({
+  loginWithGoogle(): void {
+    console.log('Initiating Google Login (Simulation)...');
+    // Simulation: In the future, this will use AngularFireAuth to get the token
+    const simulatedToken = "simulated_firebase_token_" + Math.random().toString(36).substr(2);
+    
+    this.apiService.login({ token: simulatedToken }).subscribe({
       next: (response) => {
         console.log('Login successful', response);
         localStorage.setItem('user', JSON.stringify(response));
@@ -48,9 +52,14 @@ export class ModalLogin {
       },
       error: (error) => {
         console.error('Login failed', error);
-        alert('Login fallido: ' + (error.error?.error || 'Credenciales incorrectas'));
+        alert('Login fallido (Simulación): ' + (error.error?.error || 'Error desconocido'));
       }
     });
+  }
+
+  // Legacy login method kept for reference but unused in UI
+  login(): void {
+     // implementation commented out or kept as is
   }
 
   openVolunteerRegister(): void {

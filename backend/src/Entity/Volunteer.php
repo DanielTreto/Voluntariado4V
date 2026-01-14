@@ -15,8 +15,7 @@ class Volunteer
     #[ORM\Column(name: 'CODVOL', type: 'string', length: 20)]
     private ?string $CODVOL = null;
 
-    #[ORM\OneToOne(mappedBy: 'voluntario', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]
-    private ?Credenciales $credenciales = null;
+
 
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank]
@@ -84,9 +83,9 @@ class Volunteer
         return $this;
     }
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 128, unique: true)]
     #[Assert\NotBlank]
-    private ?string $PASSWORD = null;
+    private ?string $firebaseUid = null;
 
     #[ORM\Column(length: 10)]
     #[Assert\Choice(choices: ['ACTIVO', 'SUSPENDIDO', 'PENDIENTE'])]
@@ -213,14 +212,14 @@ class Volunteer
         return $this;
     }
 
-    public function getPASSWORD(): ?string
+    public function getFirebaseUid(): ?string
     {
-        return $this->PASSWORD;
+        return $this->firebaseUid;
     }
 
-    public function setPASSWORD(string $PASSWORD): static
+    public function setFirebaseUid(string $firebaseUid): static
     {
-        $this->PASSWORD = $PASSWORD;
+        $this->firebaseUid = $firebaseUid;
         return $this;
     }
 
@@ -259,25 +258,5 @@ class Volunteer
         }
         return $this;
     }
-    public function getCredenciales(): ?Credenciales
-    {
-        return $this->credenciales;
-    }
 
-    public function setCredenciales(?Credenciales $credenciales): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($credenciales === null && $this->credenciales !== null) {
-            $this->credenciales->setVoluntario(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($credenciales !== null && $credenciales->getVoluntario() !== $this) {
-            $credenciales->setVoluntario($this);
-        }
-
-        $this->credenciales = $credenciales;
-
-        return $this;
-    }
 }
