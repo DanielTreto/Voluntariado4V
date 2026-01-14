@@ -95,7 +95,7 @@ class ActivityController extends AbstractController
             return new JsonResponse(['error' => 'Invalid date format'], 400);
         }
 
-        $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
+        $actividad->setNMaxVoluntarios($data['maxVolunteers'] ?? 10);
         $actividad->setESTADO('PENDIENTE');
 
         // Link Organization
@@ -252,8 +252,8 @@ class ActivityController extends AbstractController
              return new JsonResponse(['error' => 'Activity is not available for signup. Status: ' . $act->getESTADO()], 400);
         }
 
-        if ($act->getVoluntarios()->count() >= $act->getN_MAX_VOLUNTARIOS()) {
-            return new JsonResponse(['error' => 'Activity is full. Current: ' . $act->getVoluntarios()->count() . ' Max: ' . $act->getN_MAX_VOLUNTARIOS()], 400);
+        if ($act->getVoluntarios()->count() >= $act->getNMaxVoluntarios()) {
+            return new JsonResponse(['error' => 'Activity is full. Current: ' . $act->getVoluntarios()->count() . ' Max: ' . $act->getNMaxVoluntarios()], 400);
         }
 
         if ($act->getVoluntarios()->contains($volunteer)) {
