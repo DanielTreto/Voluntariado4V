@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SidebarLinkComponent } from '../../molecules/sidebar-link/sidebar-link';
 import { UserProfileComponent } from '../../molecules/user-profile/user-profile';
@@ -11,13 +11,5 @@ import { UserProfileComponent } from '../../molecules/user-profile/user-profile'
   styleUrl: './sidebar.css'
 })
 export class SidebarComponent {
-  links = [
-    { label: 'Dashboard', icon: 'bi-grid-fill', route: '/dashboard' },
-    { label: 'Volunteers', icon: 'bi-people-fill', route: '/dashboard/volunteers' },
-    { label: 'Organizations', icon: 'bi-building-fill', route: '/dashboard/organizations' },
-    { label: 'Activities', icon: 'bi-list-check', route: '/dashboard/activities' },
-    { label: 'Events', icon: 'bi-calendar-event-fill', route: '/dashboard/events' },
-    { label: 'Reports', icon: 'bi-bar-chart-fill', route: '/dashboard/reports' },
-    { label: 'Settings', icon: 'bi-gear-fill', route: '/dashboard/settings' }
-  ];
+  @Input() links: { label: string, icon: string, route: string }[] = [];
 }
