@@ -132,8 +132,13 @@ export class EventCalendarComponent implements OnInit {
   }
 
   navigateToActivity(activity: any) {
-    // Navigate to activities page with query param to open this activity
-    this.router.navigate(['/dashboard/activities'], { queryParams: { openId: activity.id } });
+    // Check if user is an organization to redirect to their specific dashboard
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user && user.role === 'organization') {
+      this.router.navigate(['/organization-dashboard/activities'], { queryParams: { openId: activity.id } });
+    } else {
+      this.router.navigate(['/dashboard/activities'], { queryParams: { openId: activity.id } });
+    }
   }
 
   getEventTypeClass(type: string): string {
