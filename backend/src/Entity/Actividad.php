@@ -16,29 +16,114 @@ class Actividad
     #[ORM\Column(name: 'CODACT')]
     private ?int $CODACT = null;
 
-    #[ORM\Column(length: 70)]
+    #[ORM\Column(name: 'nombre', length: 70)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 70)]
     private ?string $NOMBRE = null;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(name: 'duracion_sesion', type: 'string', length: 20)]
     #[Assert\NotBlank]
     private ?string $DURACION_SESION = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: 'fecha_inicio', type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank]
     private ?\DateTimeInterface $FECHA_INICIO = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(name: 'fecha_fin', type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank]
     private ?\DateTimeInterface $FECHA_FIN = null;
 
-    #[ORM\Column]
+    #[ORM\Column(name: 'n_max_voluntarios')]
     #[Assert\NotBlank]
     #[Assert\Positive]
     private ?int $N_MAX_VOLUNTARIOS = null;
 
-    // ...
+    #[ORM\ManyToOne(targetEntity: Organizacion::class, inversedBy: 'actividades')]
+    #[ORM\JoinColumn(name: 'CODORG', referencedColumnName: 'CODORG', nullable: false)]
+    private ?Organizacion $organizacion = null;
+
+    #[ORM\ManyToMany(targetEntity: Volunteer::class, inversedBy: 'actividades')]
+    #[ORM\JoinTable(name: 'VOL_PARTICIPA_ACT')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL')]
+    private $voluntarios;
+
+    #[ORM\ManyToMany(targetEntity: TipoActividad::class)]
+    #[ORM\JoinTable(name: 'ACT_ASOCIADO_TACT')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'CODTIPO', referencedColumnName: 'CODTIPO')]
+    private $tiposActividad;
+
+    #[ORM\ManyToMany(targetEntity: Ods::class)]
+    #[ORM\JoinTable(name: 'ACT_PRACTICA_ODS')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'NUMODS', referencedColumnName: 'NUMODS')]
+    private $ods;
+
+    #[ORM\Column(name: 'descripcion', length: 500)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 500)]
+    private ?string $DESCRIPCION = null;
+
+    #[ORM\Column(name: 'estado', length: 20)]
+    #[Assert\Choice(choices: ['PENDIENTE', 'EN_PROGRESO', 'DENEGADA', 'FINALIZADA'])]
+    private ?string $ESTADO = 'PENDIENTE';
+
+    public function __construct()
+    {
+        $this->voluntarios = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tiposActividad = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->ods = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    public function getCODACT(): ?int
+    {
+        return $this->CODACT;
+    }
+
+    public function getNOMBRE(): ?string
+    {
+        return $this->NOMBRE;
+    }
+
+    public function setNOMBRE(string $NOMBRE): static
+    {
+        $this->NOMBRE = $NOMBRE;
+        return $this;
+    }
+
+    public function getDURACION_SESION(): ?string
+    {
+        return $this->DURACION_SESION;
+    }
+
+    public function setDURACION_SESION(string $DURACION_SESION): static
+    {
+        $this->DURACION_SESION = $DURACION_SESION;
+        return $this;
+    }
+
+    public function getFECHA_INICIO(): ?\DateTimeInterface
+    {
+        return $this->FECHA_INICIO;
+    }
+
+    public function setFECHA_INICIO(\DateTimeInterface $FECHA_INICIO): static
+    {
+        $this->FECHA_INICIO = $FECHA_INICIO;
+        return $this;
+    }
+
+    public function getFECHA_FIN(): ?\DateTimeInterface
+    {
+        return $this->FECHA_FIN;
+    }
+
+    public function setFECHA_FIN(\DateTimeInterface $FECHA_FIN): static
+    {
+        $this->FECHA_FIN = $FECHA_FIN;
+        return $this;
+    }
 
     public function getN_MAX_VOLUNTARIOS(): ?int
     {
