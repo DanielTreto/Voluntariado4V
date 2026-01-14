@@ -212,7 +212,7 @@ class OrganizationController extends AbstractController
     }
 
     #[Route('/organizations/{id}/activities', name: 'api_organizations_activities', methods: ['GET'])]
-    public function organizationActivities(int $id, OrganizationRepository $orgRepository, \App\Repository\ActivityRepository $activityRepository): JsonResponse
+    public function organizationActivities(string $id, OrganizationRepository $orgRepository, \App\Repository\ActivityRepository $activityRepository): JsonResponse
     {
         $org = $orgRepository->find($id);
         if (!$org) {

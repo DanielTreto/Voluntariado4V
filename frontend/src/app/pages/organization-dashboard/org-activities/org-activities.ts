@@ -89,11 +89,14 @@ export class OrgActivitiesComponent implements OnInit {
         // Based on previous debug, Actividad uses ManyToMany for ODS and Types.
         // The simple create endpoint might expect IDs.
 
-        // Construct simplified payload for MVP
+        // Construct payload matching Backend ActivityController::create expectations
         const payload = {
-            ...formValue,
-            CODORG: user.id || 'org001', // Fallback for dev
-            // Ensure dates are formatted if needed, usually string 'YYYY-MM-DD' works for simple APIs or Date objects
+            title: formValue.NOMBRE,
+            description: formValue.DESCRIPCION,
+            date: formValue.FECHA_INICIO,
+            duration: formValue.DURACION_SESION,
+            organizationId: user.id || 'org001',
+            maxVolunteers: formValue.N_MAX_VOLUNTARIOS
         };
 
         console.log('Submitting activity:', payload);

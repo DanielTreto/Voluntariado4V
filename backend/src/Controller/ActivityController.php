@@ -95,7 +95,7 @@ class ActivityController extends AbstractController
             return new JsonResponse(['error' => 'Invalid date format'], 400);
         }
 
-        $actividad->setN_MAX_VOLUNTARIOS(10); // Default or from request
+        $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
         $actividad->setESTADO('PENDIENTE');
 
         // Link Organization
