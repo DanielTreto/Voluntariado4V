@@ -110,4 +110,8 @@ export class ApiService {
   getVolunteerActivities(volunteerId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/volunteers/${volunteerId}/activities`);
   }
+
+  getVolunteerRequests(id: number | string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/volunteers/${id}/requests`);
+  }
 }
