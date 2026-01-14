@@ -269,7 +269,7 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers/{id}/activities', name: 'api_volunteers_activities', methods: ['GET'])]
-    public function myActivities(int $id, VolunteerRepository $volunteerRepository): JsonResponse
+    public function myActivities(string $id, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $volunteer = $volunteerRepository->find($id);
         if (!$volunteer) {

@@ -38,13 +38,22 @@ export class VolunteerActivitiesComponent implements OnInit {
   loadActivities() {
     if (!this.userId) return;
 
-    forkJoin({
-      all: this.apiService.getActivities(),
-      mine: this.apiService.getVolunteerActivities(this.userId)
-    }).subscribe({
-      next: (results) => {
+    const observables: any = {
+      all: this.apiService.getActivities()
+    };
+
+    if (this.userRole === 'volunteer') {
+      observables.mine = this.apiService.getVolunteerActivities(this.userId);
+    }
+
+    forkJoin(observables).subscribe({
+      next: (results: any) => {
         // Process my activities to a Set of IDs for O(1) lookup
-        this.myActivityIds = new Set(results.mine.map((a: any) => a.id));
+        if (results.mine) {
+          this.myActivityIds = new Set(results.mine.map((a: any) => a.id));
+        } else {
+          this.myActivityIds = new Set();
+        }
 
         // Filter and process all activities
         if (results.all) {
