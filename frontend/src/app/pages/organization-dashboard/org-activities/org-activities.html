@@ -1,0 +1,122 @@
+<div class="org-activities-container">
+    <div class="tabs-header">
+        <button [class.active]="currentTab === 'historial'" (click)="setTab('historial')">
+            <i class="bi bi-clock-history"></i> Historial
+        </button>
+        <button [class.active]="currentTab === 'solicitud'" (click)="setTab('solicitud')">
+            <i class="bi bi-plus-circle"></i> Nueva Solicitud
+        </button>
+    </div>
+
+    <div class="tab-content" *ngIf="currentTab === 'historial'">
+        <h3>Mis Actividades</h3>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Fecha Inicio</th>
+                        <th>Estado</th>
+                        <th>Voluntarios</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let act of activities">
+                        <td>{{ act.NOMBRE || act.title }}</td>
+                        <td>{{ act.FECHA_INICIO | date:'shortDate' }}</td>
+                        <td>
+                            <span class="badge" [ngClass]="{
+                                    'bg-warning': act.ESTADO === 'PENDIENTE',
+                                    'bg-success': act.ESTADO === 'APROBADA' || act.ESTADO === 'EN_PROGRESO',
+                                    'bg-danger': act.ESTADO === 'DENEGADA',
+                                    'bg-secondary': act.ESTADO === 'FINALIZADA'
+                                  }">
+                                {{ act.ESTADO || act.status }}
+                            </span>
+                        </td>
+                        <td>{{ act.voluntarios?.length || 0 }} / {{ act.N_MAX_VOLUNTARIOS }}</td>
+                        <td>
+                            <!-- Future: Edit/Delete buttons -->
+                            <button class="btn btn-sm btn-outline-primary">Ver</button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="activities.length === 0">
+                        <td colspan="5" class="text-center text-muted">No tienes actividades registradas.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-content request-form-container" *ngIf="currentTab === 'solicitud'">
+        <h3>Solicitar Nueva Actividad</h3>
+        <p class="text-muted mb-4">Completa el formulario para enviar una propuesta al administrador.</p>
+
+        <form [formGroup]="requestForm" (ngSubmit)="submitRequest()">
+            <div class="mb-3">
+                <label class="form-label">Título de la Actividad</label>
+                <input type="text" class="form-control" formControlName="NOMBRE" placeholder="Ej: Taller de Reciclaje">
+                <div *ngIf="requestForm.get('NOMBRE')?.touched && requestForm.get('NOMBRE')?.invalid"
+                    class="text-danger small">
+                    El título es obligatorio.
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Descripción Detallada</label>
+                <textarea class="form-control" formControlName="DESCRIPCION" rows="4"></textarea>
+                <div *ngIf="requestForm.get('DESCRIPCION')?.touched && requestForm.get('DESCRIPCION')?.invalid"
+                    class="text-danger small">
+                    La descripción es obligatoria.
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha Inicio</label>
+                    <input type="date" class="form-control" formControlName="FECHA_INICIO">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" formControlName="FECHA_FIN">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Duración Sesión</label>
+                    <input type="text" class="form-control" formControlName="DURACION_SESION" placeholder="Ej: 2 horas">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Max. Voluntarios</label>
+                    <input type="number" class="form-control" formControlName="N_MAX_VOLUNTARIOS">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tipo de Actividad</label>
+                    <select class="form-select" formControlName="CODTIPO">
+                        <option [ngValue]="null">Selecciona...</option>
+                        <option *ngFor="let type of activityTypes" [value]="type.id">{{ type.name }}</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">ODS Principal</label>
+                    <select class="form-select" formControlName="NUMODS">
+                        <option [ngValue]="null">Selecciona...</option>
+                        <option *ngFor="let ods of odsList" [value]="ods.id">{{ ods.id }} - {{ ods.name }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button type="button" class="btn btn-light me-2" (click)="setTab('historial')">Cancelar</button>
+                <button type="submit" class="btn btn-primary" [disabled]="requestForm.invalid">
+                    Enviar Solicitud <i class="bi bi-send-fill ms-1"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
