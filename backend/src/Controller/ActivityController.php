@@ -47,7 +47,7 @@ class ActivityController extends AbstractController
                 'id' => $act->getCODACT(),
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
-                'location' => 'Ubicación Placeholder', // Missing location in BD
+                'location' => $act->getUBICACION() ?? 'Ubicación no especificada',
                 'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
                 'image' => 'assets/images/activity-1.jpg', // Placeholder
@@ -79,7 +79,8 @@ class ActivityController extends AbstractController
         $actividad = new Actividad();
         $actividad->setNOMBRE($data['title'] ?? '');
         $actividad->setDESCRIPCION($data['description'] ?? '');
-
+        $actividad->setUBICACION($data['location'] ?? null);
+        
         try {
             $actividad->setFECHA_INICIO(new \DateTime($data['date']));
             // Assume 2 hour session if not provided, or logic for end date

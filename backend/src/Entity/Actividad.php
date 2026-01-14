@@ -69,11 +69,26 @@ class Actividad
     #[Assert\Choice(choices: ['PENDIENTE', 'EN_PROGRESO', 'DENEGADA', 'FINALIZADA'])]
     private ?string $ESTADO = 'PENDIENTE';
 
+    #[ORM\Column(name: 'ubicacion', length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $UBICACION = null;
+
     public function __construct()
     {
         $this->voluntarios = new \Doctrine\Common\Collections\ArrayCollection();
         $this->tiposActividad = new \Doctrine\Common\Collections\ArrayCollection();
         $this->ods = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    public function getUBICACION(): ?string
+    {
+        return $this->UBICACION;
+    }
+
+    public function setUBICACION(?string $UBICACION): static
+    {
+        $this->UBICACION = $UBICACION;
+        return $this;
     }
 
     public function getCODACT(): ?int
