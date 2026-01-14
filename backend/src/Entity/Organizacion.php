@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Organizacion
 {
     #[ORM\Id]
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(name: 'CODORG', type: 'string', length: 20)]
     private ?string $CODORG = null;
 
     #[ORM\OneToOne(mappedBy: 'organizacion', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]

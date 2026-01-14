@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Volunteer
 {
     #[ORM\Id]
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(name: 'CODVOL', type: 'string', length: 20)]
     private ?string $CODVOL = null;
 
     #[ORM\OneToOne(mappedBy: 'voluntario', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]
@@ -94,6 +94,9 @@ class Volunteer
 
     #[ORM\OneToMany(mappedBy: 'voluntario', targetEntity: Disponibilidad::class)]
     private $disponibilidades;
+
+    #[ORM\ManyToMany(targetEntity: Actividad::class, mappedBy: 'voluntarios')]
+    private $actividades;
 
     #[ORM\ManyToMany(targetEntity: TipoActividad::class)]
     #[ORM\JoinTable(name: 'VOL_PREFIERE_TACT')]

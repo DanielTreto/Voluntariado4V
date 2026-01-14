@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Administrator
 {
     #[ORM\Id]
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(name: 'id', type: 'string', length: 20)]
     private ?string $id = null;
 
     #[ORM\OneToOne(mappedBy: 'admin', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]

@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Ciclo
 {
     #[ORM\Id]
-    #[ORM\Column(length: 10)]
+    #[ORM\Column(name: 'CODCICLO', type: 'string', length: 10)]
     private ?string $CODCICLO = null;
 
     #[ORM\Column(length: 70)]

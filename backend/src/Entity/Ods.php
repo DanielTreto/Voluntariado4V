@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Ods
 {
     #[ORM\Id]
-    #[ORM\Column]
+    #[ORM\Column(name: 'NUMODS')]
     private ?int $NUMODS = null;
 
     #[ORM\Column(length: 70)]
