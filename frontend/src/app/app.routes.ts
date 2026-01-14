@@ -7,6 +7,8 @@ import { VolunteerDashboardComponent } from './pages/volunteer-dashboard/volunte
 import { OrganizationDashboardComponent } from './pages/organization-dashboard/organization-dashboard';
 import { ORGANIZATION_DASHBOARD_ROUTES } from './pages/organization-dashboard/organization.routes';
 
+import { VOLUNTEER_DASHBOARD_ROUTES } from './pages/volunteer-dashboard/volunteer-dashboard.routes';
+
 export const routes: Routes = [
     {
         path: '',
@@ -14,8 +16,8 @@ export const routes: Routes = [
         pathMatch: 'full'
     },
     { path: 'pagina-principal', component: PaginaPrincipal },
-    { path: 'dashboard', component: DashboardComponent, children: DASHBOARD_CHILD_ROUTES, },
-    { path: 'volunteer-dashboard', component: VolunteerDashboardComponent },
+    { path: 'dashboard', component: DashboardComponent, children: DASHBOARD_CHILD_ROUTES },
+    { path: 'volunteer-dashboard', component: VolunteerDashboardComponent, children: VOLUNTEER_DASHBOARD_ROUTES },
     {
         path: 'organization-dashboard',
         component: OrganizationDashboardComponent,

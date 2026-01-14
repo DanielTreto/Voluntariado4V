@@ -132,10 +132,13 @@ export class EventCalendarComponent implements OnInit {
   }
 
   navigateToActivity(activity: any) {
-    // Check if user is an organization to redirect to their specific dashboard
+    // Check user role and current route to determine redirect
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+
     if (user && user.role === 'organization') {
       this.router.navigate(['/organization-dashboard/activities'], { queryParams: { openId: activity.id } });
+    } else if (this.router.url.includes('volunteer-dashboard')) {
+      this.router.navigate(['/volunteer-dashboard/activities'], { queryParams: { openId: activity.id } });
     } else {
       this.router.navigate(['/dashboard/activities'], { queryParams: { openId: activity.id } });
     }

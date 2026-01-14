@@ -107,4 +107,7 @@ export class ApiService {
   updateOrganization(id: number, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/organizations/${id}`, data);
   }
+  getVolunteerActivities(volunteerId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/volunteers/${volunteerId}/activities`);
+  }
 }
