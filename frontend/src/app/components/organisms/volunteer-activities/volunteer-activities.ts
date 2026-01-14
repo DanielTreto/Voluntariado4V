@@ -14,6 +14,7 @@ import { forkJoin } from 'rxjs';
 export class VolunteerActivitiesComponent implements OnInit {
   activities: any[] = [];
   myActivityIds: Set<number> = new Set();
+  myRequestIds: Set<number> = new Set();
   userId: number | null = null;
   userRole: string | null = null;
   message: string = '';
@@ -44,6 +45,7 @@ export class VolunteerActivitiesComponent implements OnInit {
 
     if (this.userRole === 'volunteer') {
       observables.mine = this.apiService.getVolunteerActivities(this.userId);
+      observables.requests = this.apiService.getVolunteerRequests(this.userId);
     }
 
     forkJoin(observables).subscribe({
@@ -53,6 +55,11 @@ export class VolunteerActivitiesComponent implements OnInit {
           this.myActivityIds = new Set(results.mine.map((a: any) => a.id));
         } else {
           this.myActivityIds = new Set();
+        }
+
+        // Process requests
+        if (results.requests) {
+          this.myRequestIds = new Set(results.requests.map((r: any) => r.activityId));
         }
 
         // Filter and process all activities
@@ -72,12 +79,12 @@ export class VolunteerActivitiesComponent implements OnInit {
 
     this.apiService.signUpForActivity(activityId, this.userId).subscribe({
       next: (res) => {
-        this.message = '¡Te has inscrito correctamente!';
-        setTimeout(() => this.message = '', 3000);
+        this.message = '¡Solicitud enviada correctamente! Espera a que el administrador la acepte.';
+        setTimeout(() => this.message = '', 5000);
         this.loadActivities(); // Reload to update state
       },
       error: (err) => {
-        this.message = 'Error al inscribirse: ' + (err.error?.error || 'Inténtalo de nuevo');
+        this.message = 'Error al enviar solicitud: ' + (err.error?.error || 'Inténtalo de nuevo');
         setTimeout(() => this.message = '', 3000);
       }
     });
@@ -103,5 +110,9 @@ export class VolunteerActivitiesComponent implements OnInit {
 
   isSignedUp(activityId: number): boolean {
     return this.myActivityIds.has(activityId);
+  }
+
+  isRequested(activityId: number): boolean {
+    return this.myRequestIds.has(activityId);
   }
 }
