@@ -303,4 +303,39 @@ class VolunteerController extends AbstractController
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }
+    #[Route('/volunteers/{id}/requests', name: 'api_volunteers_requests', methods: ['GET'])]
+    public function myRequests(string $id, VolunteerRepository $volunteerRepository, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $volunteer = $volunteerRepository->find($id);
+        if (!$volunteer) {
+             return new JsonResponse(['error' => 'Volunteer not found'], 404);
+        }
+
+        $requests = $entityManager->getRepository(\App\Entity\Solicitud::class)->findBy(['volunteer' => $volunteer]);
+        $data = [];
+
+        foreach ($requests as $req) {
+            $data[] = [
+                'id' => $req->getId(),
+                'activityId' => $req->getActividad()->getCODACT(),
+                'status' => $req->getStatus(),
+                'date' => $req->getFechaSolicitud()->format('Y-m-d H:i:s'),
+                'message' => $req->getMensaje() // Optional
+            ];
+        }
+
+        $response = new JsonResponse($data);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/volunteers/{id}/requests', name: 'api_volunteers_requests_options', methods: ['OPTIONS'])]
+    public function myRequestsOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
 }

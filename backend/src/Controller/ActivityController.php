@@ -257,14 +257,32 @@ class ActivityController extends AbstractController
             return new JsonResponse(['error' => 'Activity is full. Current: ' . $act->getVoluntarios()->count() . ' Max: ' . $act->getN_MAX_VOLUNTARIOS()], 400);
         }
 
+        // Check if already signed up (accepted)
         if ($act->getVoluntarios()->contains($volunteer)) {
              return new JsonResponse(['error' => 'Volunteer already signed up'], 400);
         }
 
-        $act->addVoluntario($volunteer);
+        // Check if already requested
+        $existingRequest = $entityManager->getRepository(\App\Entity\Solicitud::class)->findOneBy([
+            'volunteer' => $volunteer,
+            'actividad' => $act
+        ]);
+
+        if ($existingRequest) {
+            return new JsonResponse(['error' => 'Request already pending or processed'], 400);
+        }
+
+        // Create Request
+        $solicitud = new \App\Entity\Solicitud();
+        $solicitud->setVolunteer($volunteer);
+        $solicitud->setActividad($act);
+        $solicitud->setStatus('PENDIENTE');
+        $solicitud->setFechaSolicitud(new \DateTime());
+        
+        $entityManager->persist($solicitud);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Signed up successfully'], 200);
+        $response = new JsonResponse(['status' => 'Request sent successfully'], 200);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         return $response;
     }
