@@ -33,106 +33,21 @@ class Actividad
     #[Assert\NotBlank]
     private ?\DateTimeInterface $FECHA_FIN = null;
 
-    #[ORM\Column(name: 'n_max_voluntarios')]
+    #[ORM\Column]
     #[Assert\NotBlank]
     #[Assert\Positive]
-    private ?int $nMaxVoluntarios = null;
+    private ?int $N_MAX_VOLUNTARIOS = null;
 
-    #[ORM\ManyToOne(targetEntity: Organizacion::class, inversedBy: 'actividades')]
-    #[ORM\JoinColumn(name: 'CODORG', referencedColumnName: 'CODORG', nullable: false)]
-    private ?Organizacion $organizacion = null;
+    // ...
 
-    #[ORM\ManyToMany(targetEntity: Volunteer::class, inversedBy: 'actividades')]
-    #[ORM\JoinTable(name: 'VOL_PARTICIPA_ACT')]
-    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
-    #[ORM\InverseJoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL')]
-    private $voluntarios;
-
-    #[ORM\ManyToMany(targetEntity: TipoActividad::class)]
-    #[ORM\JoinTable(name: 'ACT_ASOCIADO_TACT')]
-    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
-    #[ORM\InverseJoinColumn(name: 'CODTIPO', referencedColumnName: 'CODTIPO')]
-    private $tiposActividad;
-
-    #[ORM\ManyToMany(targetEntity: Ods::class)]
-    #[ORM\JoinTable(name: 'ACT_PRACTICA_ODS')]
-    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
-    #[ORM\InverseJoinColumn(name: 'NUMODS', referencedColumnName: 'NUMODS')]
-    private $ods;
-
-    #[ORM\Column(length: 500)]
-    #[Assert\NotBlank]
-    #[Assert\Length(max: 500)]
-    private ?string $DESCRIPCION = null;
-
-    #[ORM\Column(length: 20)]
-    #[Assert\Choice(choices: ['PENDIENTE', 'EN_PROGRESO', 'DENEGADA', 'FINALIZADA'])]
-    private ?string $ESTADO = 'PENDIENTE';
-
-    public function __construct()
+    public function getN_MAX_VOLUNTARIOS(): ?int
     {
-        $this->voluntarios = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->tiposActividad = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->ods = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this->N_MAX_VOLUNTARIOS;
     }
 
-    public function getCODACT(): ?int
+    public function setN_MAX_VOLUNTARIOS(int $N_MAX_VOLUNTARIOS): static
     {
-        return $this->CODACT;
-    }
-
-    public function getNOMBRE(): ?string
-    {
-        return $this->NOMBRE;
-    }
-
-    public function setNOMBRE(string $NOMBRE): static
-    {
-        $this->NOMBRE = $NOMBRE;
-        return $this;
-    }
-
-    public function getDURACION_SESION(): ?string
-    {
-        return $this->DURACION_SESION;
-    }
-
-    public function setDURACION_SESION(string $DURACION_SESION): static
-    {
-        $this->DURACION_SESION = $DURACION_SESION;
-        return $this;
-    }
-
-    public function getFECHA_INICIO(): ?\DateTimeInterface
-    {
-        return $this->FECHA_INICIO;
-    }
-
-    public function setFECHA_INICIO(\DateTimeInterface $FECHA_INICIO): static
-    {
-        $this->FECHA_INICIO = $FECHA_INICIO;
-        return $this;
-    }
-
-    public function getFECHA_FIN(): ?\DateTimeInterface
-    {
-        return $this->FECHA_FIN;
-    }
-
-    public function setFECHA_FIN(\DateTimeInterface $FECHA_FIN): static
-    {
-        $this->FECHA_FIN = $FECHA_FIN;
-        return $this;
-    }
-
-    public function getNMaxVoluntarios(): ?int
-    {
-        return $this->nMaxVoluntarios;
-    }
-
-    public function setNMaxVoluntarios(int $nMaxVoluntarios): static
-    {
-        $this->nMaxVoluntarios = $nMaxVoluntarios;
+        $this->N_MAX_VOLUNTARIOS = $N_MAX_VOLUNTARIOS;
         return $this;
     }
 
