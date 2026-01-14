@@ -112,7 +112,8 @@ export class EventCalendarComponent implements OnInit {
 
   navigateToActivity(activity: any) {
     // Navigate to activities page with query param to open this activity
-    this.router.navigate(['/dashboard/activities'], { queryParams: { openId: activity.id } });
+    const baseRoute = this.router.url.includes('volunteer-dashboard') ? '/volunteer-dashboard/activities' : '/dashboard/activities';
+    this.router.navigate([baseRoute], { queryParams: { openId: activity.id } });
   }
 
   getEventTypeClass(type: string): string {
