@@ -1,10 +1,13 @@
 <?php
+
 namespace App\Entity;
-use App\Repository\ActivityRepository;  
+
+use App\Repository\ActivityRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-#[ORM\Entity(repositoryClass: ActivityRepository::class)]  
+
+#[ORM\Entity(repositoryClass: ActivityRepository::class)]
 #[ORM\Table(name: 'ACTIVIDAD')]
 class Actividad
 {
@@ -35,7 +38,92 @@ class Actividad
     #[Assert\Positive]
     private ?int $nMaxVoluntarios = null;
 
-    // ... (keeping other fields as is for now to minimize diff, though they should be refactored too)
+    #[ORM\ManyToOne(targetEntity: Organizacion::class, inversedBy: 'actividades')]
+    #[ORM\JoinColumn(name: 'CODORG', referencedColumnName: 'CODORG', nullable: false)]
+    private ?Organizacion $organizacion = null;
+
+    #[ORM\ManyToMany(targetEntity: Volunteer::class, inversedBy: 'actividades')]
+    #[ORM\JoinTable(name: 'VOL_PARTICIPA_ACT')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL')]
+    private $voluntarios;
+
+    #[ORM\ManyToMany(targetEntity: TipoActividad::class)]
+    #[ORM\JoinTable(name: 'ACT_ASOCIADO_TACT')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'CODTIPO', referencedColumnName: 'CODTIPO')]
+    private $tiposActividad;
+
+    #[ORM\ManyToMany(targetEntity: Ods::class)]
+    #[ORM\JoinTable(name: 'ACT_PRACTICA_ODS')]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT')]
+    #[ORM\InverseJoinColumn(name: 'NUMODS', referencedColumnName: 'NUMODS')]
+    private $ods;
+
+    #[ORM\Column(length: 500)]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 500)]
+    private ?string $DESCRIPCION = null;
+
+    #[ORM\Column(length: 20)]
+    #[Assert\Choice(choices: ['PENDIENTE', 'EN_PROGRESO', 'DENEGADA', 'FINALIZADA'])]
+    private ?string $ESTADO = 'PENDIENTE';
+
+    public function __construct()
+    {
+        $this->voluntarios = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tiposActividad = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->ods = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    public function getCODACT(): ?int
+    {
+        return $this->CODACT;
+    }
+
+    public function getNOMBRE(): ?string
+    {
+        return $this->NOMBRE;
+    }
+
+    public function setNOMBRE(string $NOMBRE): static
+    {
+        $this->NOMBRE = $NOMBRE;
+        return $this;
+    }
+
+    public function getDURACION_SESION(): ?string
+    {
+        return $this->DURACION_SESION;
+    }
+
+    public function setDURACION_SESION(string $DURACION_SESION): static
+    {
+        $this->DURACION_SESION = $DURACION_SESION;
+        return $this;
+    }
+
+    public function getFECHA_INICIO(): ?\DateTimeInterface
+    {
+        return $this->FECHA_INICIO;
+    }
+
+    public function setFECHA_INICIO(\DateTimeInterface $FECHA_INICIO): static
+    {
+        $this->FECHA_INICIO = $FECHA_INICIO;
+        return $this;
+    }
+
+    public function getFECHA_FIN(): ?\DateTimeInterface
+    {
+        return $this->FECHA_FIN;
+    }
+
+    public function setFECHA_FIN(\DateTimeInterface $FECHA_FIN): static
+    {
+        $this->FECHA_FIN = $FECHA_FIN;
+        return $this;
+    }
 
     public function getNMaxVoluntarios(): ?int
     {
@@ -66,10 +154,10 @@ class Actividad
 
     public function setCODORG(string $codOrg): static
     {
-        // This is tricky without fetching entity. ideally use setOrganizacion. 
+        // This is tricky without fetching entity. ideally use setOrganizacion.
         // For now, we leave it as is, or better, we might need repository to finding it.
         // Assuming the controller handles setOrganizacion.
-        return $this; 
+        return $this;
     }
 
     public function getDESCRIPCION(): ?string
