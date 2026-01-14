@@ -5,15 +5,20 @@ import { DashboardComponent } from './pages/dashboard/dashboard';
 import { DASHBOARD_CHILD_ROUTES } from './pages/dashboard/dashboard.routes';
 import { VolunteerDashboardComponent } from './pages/volunteer-dashboard/volunteer-dashboard';
 import { OrganizationDashboardComponent } from './pages/organization-dashboard/organization-dashboard';
+import { ORGANIZATION_DASHBOARD_ROUTES } from './pages/organization-dashboard/organization.routes';
 
 export const routes: Routes = [
-    { 
-        path: '', 
-        redirectTo: 'pagina-principal', 
+    {
+        path: '',
+        redirectTo: 'pagina-principal',
         pathMatch: 'full'
     },
     { path: 'pagina-principal', component: PaginaPrincipal },
-    { path: 'dashboard', component: DashboardComponent ,children: DASHBOARD_CHILD_ROUTES,},
+    { path: 'dashboard', component: DashboardComponent, children: DASHBOARD_CHILD_ROUTES, },
     { path: 'volunteer-dashboard', component: VolunteerDashboardComponent },
-    { path: 'organization-dashboard', component: OrganizationDashboardComponent },
+    {
+        path: 'organization-dashboard',
+        component: OrganizationDashboardComponent,
+        children: ORGANIZATION_DASHBOARD_ROUTES
+    },
 ];

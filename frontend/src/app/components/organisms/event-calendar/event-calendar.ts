@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { Router } from '@angular/router';
@@ -26,19 +26,40 @@ export class EventCalendarComponent implements OnInit {
   dayActivities: any[] = [];
   showDayModal: boolean = false;
 
+  @Input() organizationId: number | null = null;
+
   ngOnInit() {
     this.updateMonthLabel();
+
+    // Auto-detect if Organization and not explicitly passed
+    if (!this.organizationId) {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user && user.role === 'organization') {
+        this.organizationId = user.id;
+      }
+    }
+
     this.loadActivities();
   }
 
   loadActivities() {
-    this.apiService.getActivities().subscribe({
-      next: (data) => {
-        this.activities = data;
-        this.generateCalendar();
-      },
-      error: (err) => console.error('Error loading activities', err)
-    });
+    if (this.organizationId) {
+      this.apiService.getOrganizationActivities(this.organizationId).subscribe({
+        next: (data) => {
+          this.activities = data;
+          this.generateCalendar();
+        },
+        error: (err) => console.error('Error loading organization activities', err)
+      });
+    } else {
+      this.apiService.getActivities().subscribe({
+        next: (data) => {
+          this.activities = data;
+          this.generateCalendar();
+        },
+        error: (err) => console.error('Error loading activities', err)
+      });
+    }
   }
 
   generateCalendar() {
