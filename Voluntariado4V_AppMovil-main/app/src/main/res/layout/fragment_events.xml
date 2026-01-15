@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F5F5F5">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Diciembre 2025"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="&lt;"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:padding="0dp"
+            android:insetLeft="0dp"
+            android:layout_marginEnd="8dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="&gt;"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:padding="0dp"
+            android:insetLeft="0dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#EEEEEE"
+        android:paddingVertical="8dp">
+
+        <TextView android:text="Lun" style="@style/CalendarHeader" />
+        <TextView android:text="Mar" style="@style/CalendarHeader" />
+        <TextView android:text="Mié" style="@style/CalendarHeader" />
+        <TextView android:text="Jue" style="@style/CalendarHeader" />
+        <TextView android:text="Vie" style="@style/CalendarHeader" />
+        <TextView android:text="Sáb" style="@style/CalendarHeader" />
+        <TextView android:text="Dom" style="@style/CalendarHeader" />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerCalendar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white" />
+
+</LinearLayout>

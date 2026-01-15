@@ -1,0 +1,92 @@
+package cuatrovientos.voluntariado.adapters;
+
+import android.graphics.Color;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import java.util.List;
+import cuatrovientos.voluntariado.R;
+import cuatrovientos.voluntariado.model.Volunteer;
+
+public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.VolunteerViewHolder> {
+
+    private List<Volunteer> volunteerList;
+
+    public VolunteersAdapter(List<Volunteer> volunteerList) {
+        this.volunteerList = volunteerList;
+    }
+    public void updateList(List<Volunteer> newList) {
+        this.volunteerList = newList;
+        notifyDataSetChanged();
+    }
+
+    @NonNull
+    @Override
+    public VolunteerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_volunteer_card, parent, false);
+        return new VolunteerViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull VolunteerViewHolder holder, int position) {
+        Volunteer volunteer = volunteerList.get(position);
+
+        holder.tvName.setText(volunteer.getName());
+        holder.tvRole.setText(volunteer.getRole());
+        holder.tvEmail.setText(volunteer.getEmail());
+        holder.tvPhone.setText(volunteer.getPhone());
+        holder.tvDate.setText(volunteer.getDate());
+        holder.tvStatus.setText(volunteer.getStatus());
+
+        if (volunteer.getStatus().equals("Active") || volunteer.getStatus().equals("Suspended")) {
+            holder.actionsLayout.setVisibility(View.GONE);
+            holder.btnMoreOptions.setVisibility(View.VISIBLE);
+
+            // Colores para Active/Suspended
+            if (volunteer.getStatus().equals("Active")) {
+                holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9")); // Verde claro
+                holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")); // Verde texto
+            } else {
+                holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE")); // Rojo claro
+                holder.tvStatus.setTextColor(Color.parseColor("#F44336")); // Rojo texto
+            }
+
+        } else {
+            // Es una solicitud pendiente ("Pending")
+            holder.actionsLayout.setVisibility(View.VISIBLE); // Mostrar botones Check/Cruz
+            holder.btnMoreOptions.setVisibility(View.GONE); // Ocultar 3 puntos
+
+            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1"));
+            holder.tvStatus.setTextColor(Color.parseColor("#FFA000"));
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return volunteerList.size();
+    }
+
+    public static class VolunteerViewHolder extends RecyclerView.ViewHolder {
+        TextView tvName, tvRole, tvEmail, tvPhone, tvStatus, tvDate, btnMoreOptions;
+        LinearLayout actionsLayout;
+
+        public VolunteerViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvName = itemView.findViewById(R.id.tvName);
+            tvRole = itemView.findViewById(R.id.tvRole);
+            tvStatus = itemView.findViewById(R.id.chipStatus);
+            tvEmail = itemView.findViewById(R.id.tvEmail);
+            tvPhone = itemView.findViewById(R.id.tvPhone);
+            tvDate = itemView.findViewById(R.id.tvDate);
+
+            // Controles de acción
+            actionsLayout = itemView.findViewById(R.id.actionsLayout);
+            btnMoreOptions = itemView.findViewById(R.id.btnMoreOptions);
+        }
+    }
+}
