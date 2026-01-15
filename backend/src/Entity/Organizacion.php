@@ -15,8 +15,7 @@ class Organizacion
     #[ORM\Column(name: 'CODORG', type: 'string', length: 20)]
     private ?string $CODORG = null;
 
-    #[ORM\OneToOne(mappedBy: 'organizacion', targetEntity: Credenciales::class, cascade: ['persist', 'remove'])]
-    private ?Credenciales $credenciales = null;
+
 
     #[ORM\OneToMany(mappedBy: 'organizacion', targetEntity: Actividad::class)]
     private $actividades;
@@ -56,9 +55,9 @@ class Organizacion
     #[Assert\Choice(choices: ['LOCAL', 'REGIONAL', 'NACIONAL', 'INTERNACIONAL'])]
     private ?string $AMBITO = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 128, unique: true)]
     #[Assert\NotBlank]
-    private ?string $PASSWORD = null;
+    private ?string $firebaseUid = null;
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $PERSONA_CONTACTO = null;
@@ -149,14 +148,14 @@ class Organizacion
         return $this;
     }
 
-    public function getPASSWORD(): ?string
+    public function getFirebaseUid(): ?string
     {
-        return $this->PASSWORD;
+        return $this->firebaseUid;
     }
 
-    public function setPASSWORD(string $PASSWORD): static
+    public function setFirebaseUid(string $firebaseUid): static
     {
-        $this->PASSWORD = $PASSWORD;
+        $this->firebaseUid = $firebaseUid;
         return $this;
     }
 
@@ -192,25 +191,5 @@ class Organizacion
         $this->ESTADO = $ESTADO;
         return $this;
     }
-    public function getCredenciales(): ?Credenciales
-    {
-        return $this->credenciales;
-    }
 
-    public function setCredenciales(?Credenciales $credenciales): static
-    {
-        // unset the owning side of the relation if necessary
-        if ($credenciales === null && $this->credenciales !== null) {
-            $this->credenciales->setOrganizacion(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($credenciales !== null && $credenciales->getOrganizacion() !== $this) {
-            $credenciales->setOrganizacion($this);
-        }
-
-        $this->credenciales = $credenciales;
-
-        return $this;
-    }
 }

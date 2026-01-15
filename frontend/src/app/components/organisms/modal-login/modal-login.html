@@ -4,7 +4,8 @@
     <button (click)="closeModal()" class="btn-close position-absolute top-0 end-0 m-3"></button>
     <h2 class="fs-3 font-max-bold text-center text-cuatro-dark-bg mb-4">Iniciar Sesión</h2>
 
-    <form (ngSubmit)="login()" class="space-y-3">
+    <!-- Email/Password Form -->
+    <form (ngSubmit)="loginWithEmail()" class="space-y-3">
 
         <div class="input-group mb-3 custom-input-group">
             <span class="input-group-text custom-icon-span">
@@ -37,6 +38,13 @@
             Sign in &rarr;
         </button>
     </form>
+
+    <div class="d-grid gap-2 mt-3">
+        <button (click)="loginWithGoogle()" class="btn btn-outline-dark rounded-pill fw-bold py-2 d-flex align-items-center justify-content-center">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="me-2" style="width: 20px; height: 20px;">
+            Sign in with Google
+        </button>
+    </div>
 
     <div class="text-center mt-4">
         <p class="text-secondary small mb-3">¿No tienes una cuenta? - Regístrate</p>
