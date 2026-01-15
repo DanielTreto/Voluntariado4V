@@ -1,6 +1,6 @@
 <div [class.blur-content]="activeModalType">
     <app-header (onLoginClick)="openModal('login')" (onRegisterClick)="openModal('volunteer')"></app-header>
-    <app-home-page></app-home-page>
+    <app-home-page (onOpenRegister)="openModal('volunteer')"></app-home-page>
     <app-footer></app-footer>
 </div>
 <div *ngIf="activeModalType"

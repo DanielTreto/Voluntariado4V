@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, output } from '@angular/core';
 
 @Component({
   selector: 'app-contact-cta-block',
@@ -7,5 +7,9 @@ import { Component } from '@angular/core';
   styleUrl: './contact-cta-block.scss',
 })
 export class ContactCtaBlock {
+  onRegisterClick = output();
 
+  openRegisterModal() {
+    this.onRegisterClick.emit();
+  }
 }
