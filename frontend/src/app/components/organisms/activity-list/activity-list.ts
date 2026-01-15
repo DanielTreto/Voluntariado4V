@@ -188,7 +188,11 @@ export class ActivityListComponent implements OnInit {
           phone: v.phone,
           course: v.course || 'Sin curso',
           status: this.mapVolunteerStatus(v.status),
-          interests: v.interests || []
+          interests: v.interests || [],
+          dni: v.dni,
+          birthDate: v.dateOfBirth,
+          description: v.description,
+          disponibilidades: v.disponibilidades || []
         }));
         this.cdr.detectChanges();
       },
