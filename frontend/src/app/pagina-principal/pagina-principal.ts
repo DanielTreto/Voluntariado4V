@@ -20,12 +20,14 @@ export class PaginaPrincipal {
 
   openModal(type: string): void {
     // Asigna el tipo de modal a la variable para mostrarlo en el template
-    this.activeModalType = type; 
+    this.activeModalType = type;
+    document.body.classList.add('overflow-hidden');
   }
 
   // Ahora el closeModal pone el estado en null
   closeModal(): void {
     this.activeModalType = null;
+    document.body.classList.remove('overflow-hidden');
   }
 
   // Método para manejar la navegación de vuelta desde el modal de registro

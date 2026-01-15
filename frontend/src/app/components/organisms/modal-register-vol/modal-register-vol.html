@@ -3,74 +3,120 @@
   <button (click)="closeModal()" class="btn-close position-absolute top-0 end-0 m-3"></button>
   <h2 class="fs-3 fw-bold text-center text-cuatro-dark-bg mb-4">Registro Voluntario</h2>
 
-  <form (ngSubmit)="registerVolunteer()" class="space-y-3">
+  <form (ngSubmit)="registerVolunteer()" class="space-y-3" #volForm="ngForm">
+    <!-- ROW 1 -->
     <div class="row g-2">
       <div class="col-md-4">
-        <div class="input-group mb-3 custom-input-group">
-          <input type="text" [(ngModel)]="volunteer.name" name="name" placeholder="Nombre"
-            class="form-control custom-input" [class.is-invalid]="errors['name']" required />
+        <div class="mb-3">
+          <div class="input-group custom-input-group">
+            <input type="text" [(ngModel)]="volunteer.name" name="name" #nameModel="ngModel" placeholder="Nombre"
+              class="form-control custom-input"
+              [class.is-invalid]="nameModel.invalid && (nameModel.dirty || nameModel.touched)" required />
+          </div>
+          <div *ngIf="nameModel.invalid && (nameModel.dirty || nameModel.touched)" class="text-danger small mt-1 ps-1">
+            El nombre es obligatorio.
+          </div>
         </div>
-        <div *ngIf="errors['name']" class="text-danger small mb-1 ms-1">{{ errors['name'] }}</div>
       </div>
       <div class="col-md-4">
-        <div class="input-group mb-3 custom-input-group">
-          <input type="text" [(ngModel)]="volunteer.surname1" name="surname1" placeholder="1er Apellido"
-            class="form-control custom-input" [class.is-invalid]="errors['surname1']" required />
+        <div class="mb-3">
+          <div class="input-group custom-input-group">
+            <input type="text" [(ngModel)]="volunteer.surname1" name="surname1" #surname1Model="ngModel"
+              placeholder="1er Apellido" class="form-control custom-input"
+              [class.is-invalid]="surname1Model.invalid && (surname1Model.dirty || surname1Model.touched)" required />
+          </div>
+          <div *ngIf="surname1Model.invalid && (surname1Model.dirty || surname1Model.touched)"
+            class="text-danger small mt-1 ps-1">
+            El 1er apellido es obligatorio.
+          </div>
         </div>
-        <div *ngIf="errors['surname1']" class="text-danger small mb-1 ms-1">{{ errors['surname1'] }}</div>
       </div>
       <div class="col-md-4">
-        <div class="input-group mb-3 custom-input-group">
-          <input type="text" [(ngModel)]="volunteer.surname2" name="surname2" placeholder="2do Apellido"
-            class="form-control custom-input" />
+        <div class="mb-3">
+          <div class="input-group custom-input-group">
+            <input type="text" [(ngModel)]="volunteer.surname2" name="surname2" placeholder="2do Apellido"
+              class="form-control custom-input" />
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="input-group mb-3 custom-input-group">
-      <input type="date" [(ngModel)]="volunteer.dateOfBirth" name="dateOfBirth" class="form-control custom-input"
-        [class.is-invalid]="errors['dateOfBirth']" required />
-    </div>
-    <div *ngIf="errors['dateOfBirth']" class="text-danger small mb-1 ms-1">{{ errors['dateOfBirth'] }}</div>
-
-    <!-- Address removed as it is not in Entity -->
-
-    <div class="input-group mb-3 custom-input-group">
-      <input type="text" [(ngModel)]="volunteer.dni" name="dni" placeholder="DNI" class="form-control custom-input"
-        [class.is-invalid]="errors['dni']" required />
-    </div>
-    <div *ngIf="errors['dni']" class="text-danger small mb-1 ms-1">{{ errors['dni'] }}</div>
-
-    <div class="input-group mb-3 custom-input-group">
-      <input type="tel" [(ngModel)]="volunteer.phone" name="phone" placeholder="Teléfono"
-        class="form-control custom-input" [class.is-invalid]="errors['phone']" required />
-    </div>
-    <div *ngIf="errors['phone']" class="text-danger small mb-1 ms-1">{{ errors['phone'] }}</div>
-
-    <div class="input-group mb-3 custom-input-group">
-      <input type="email" [(ngModel)]="volunteer.email" name="email" placeholder="Correo Electrónico"
-        class="form-control custom-input" [class.is-invalid]="errors['email']" required />
-    </div>
-    <div *ngIf="errors['email']" class="text-danger small mb-2 ms-1">
-      {{ errors['email'] }}
-    </div>
-
-    <div class="input-group mb-3 custom-input-group">
-      <input type="password" [(ngModel)]="volunteer.password" name="password" placeholder="Contraseña"
-        class="form-control custom-input" [class.is-invalid]="errors['password']" required />
-    </div>
-    <div *ngIf="errors['password']" class="text-danger small mb-1 ms-1">{{ errors['password'] }}</div>
-
+    <!-- DATE OF BIRTH -->
     <div class="mb-3">
-      <label for="course" class="form-label small text-secondary">Curso</label>
-      <select [(ngModel)]="volunteer.course" name="course" class="form-select custom-input"
-        [class.is-invalid]="errors['course']" required>
+      <div class="input-group custom-input-group">
+        <input type="date" [(ngModel)]="volunteer.dateOfBirth" name="dateOfBirth" #dobModel="ngModel"
+          class="form-control custom-input"
+          [class.is-invalid]="dobModel.invalid && (dobModel.dirty || dobModel.touched)" required />
+      </div>
+      <div *ngIf="dobModel.invalid && (dobModel.dirty || dobModel.touched)" class="text-danger small mt-1 ps-1">
+        La fecha de nacimiento es obligatoria.
+      </div>
+    </div>
+
+    <!-- DNI -->
+    <div class="mb-3">
+      <div class="input-group custom-input-group">
+        <input type="text" [(ngModel)]="volunteer.dni" name="dni" #dniModel="ngModel" placeholder="DNI"
+          class="form-control custom-input"
+          [class.is-invalid]="dniModel.invalid && (dniModel.dirty || dniModel.touched)" required />
+      </div>
+      <div *ngIf="dniModel.invalid && (dniModel.dirty || dniModel.touched)" class="text-danger small mt-1 ps-1">
+        El DNI es obligatorio.
+      </div>
+    </div>
+
+    <!-- PHONE -->
+    <div class="mb-3">
+      <div class="input-group custom-input-group">
+        <input type="tel" [(ngModel)]="volunteer.phone" name="phone" #phoneModel="ngModel" placeholder="Teléfono"
+          class="form-control custom-input"
+          [class.is-invalid]="phoneModel.invalid && (phoneModel.dirty || phoneModel.touched)" required />
+      </div>
+      <div *ngIf="phoneModel.invalid && (phoneModel.dirty || phoneModel.touched)" class="text-danger small mt-1 ps-1">
+        El teléfono es obligatorio.
+      </div>
+    </div>
+
+    <!-- EMAIL -->
+    <div class="mb-3">
+      <div class="input-group custom-input-group">
+        <input type="email" [(ngModel)]="volunteer.email" name="email" #emailModel="ngModel"
+          placeholder="Correo Electrónico" class="form-control custom-input"
+          [class.is-invalid]="emailModel.invalid && (emailModel.dirty || emailModel.touched)" required email />
+      </div>
+      <div *ngIf="emailModel.invalid && (emailModel.dirty || emailModel.touched)" class="text-danger small mt-1 ps-1">
+        <div *ngIf="emailModel.errors?.['required']">El email es obligatorio.</div>
+        <div *ngIf="emailModel.errors?.['email']">Formato de email incorrecto.</div>
+      </div>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="mb-3">
+      <div class="input-group custom-input-group">
+        <input type="password" [(ngModel)]="volunteer.password" name="password" #passModel="ngModel"
+          placeholder="Contraseña" class="form-control custom-input"
+          [class.is-invalid]="passModel.invalid && (passModel.dirty || passModel.touched)" required minlength="6" />
+      </div>
+      <div *ngIf="passModel.invalid && (passModel.dirty || passModel.touched)" class="text-danger small mt-1 ps-1">
+        <div *ngIf="passModel.errors?.['required']">La contraseña es obligatoria.</div>
+        <div *ngIf="passModel.errors?.['minlength']">La contraseña debe tener al menos 6 caracteres.</div>
+      </div>
+    </div>
+
+    <!-- COURSE (MY SELECT) -->
+    <div class="mb-3">
+      <label for="course" class="form-label small text-secondary">Ciclo Formativo</label>
+      <select [(ngModel)]="volunteer.course" name="course" #courseModel="ngModel" class="form-select custom-input"
+        [class.is-invalid]="courseModel.invalid && (courseModel.dirty || courseModel.touched)" required>
         <option value="" disabled selected>Selecciona tu ciclo formativo</option>
         <option *ngFor="let cycle of cycles" [value]="cycle.id">
           {{ cycle.id }} - {{ cycle.name }}
         </option>
       </select>
-      <div *ngIf="errors['course']" class="text-danger small mb-1 ms-1">{{ errors['course'] }}</div>
+      <div *ngIf="courseModel.invalid && (courseModel.dirty || courseModel.touched)"
+        class="text-danger small mt-1 ps-1">
+        El ciclo formativo es obligatorio.
+      </div>
     </div>
 
     <div class="mb-4">
@@ -91,7 +137,7 @@
     </div>
 
     <button type="submit" class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
-      style="background-color: var(--color-cuatrovientos-main-blue)" [disabled]="submitting">
+      style="background-color: var(--color-cuatrovientos-main-blue)" [disabled]="volForm.invalid || submitting">
       <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
       Registrarse
     </button>
@@ -102,6 +148,12 @@
       ¿Ya tienes una cuenta?
       <button (click)="openLoginModal()" class="btn btn-link text-primary text-decoration-none small">
         Iniciar Sesión
+      </button>
+    </p>
+    <p class="small text-secondary mb-2">
+      ¿Eres una organización?
+      <button (click)="openRegisterOrgModal()" class="btn btn-link text-primary text-decoration-none small">
+        Regístrate aquí
       </button>
     </p>
   </div>

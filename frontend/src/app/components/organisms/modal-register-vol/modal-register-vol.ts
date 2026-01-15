@@ -13,6 +13,7 @@ import { ApiService } from '../../../services/api.service';
 export class ModalRegisterVol {
   onClose = output();
   onOpenLogin = output();
+  onOpenRegisterOrg = output();
 
   private apiService = inject(ApiService);
 
@@ -29,11 +30,17 @@ export class ModalRegisterVol {
     password: ''
   };
 
-  errors: { [key: string]: string } = {};
   globalError: string = '';
   submitting: boolean = false;
+  errors: { [key: string]: string } = {};
+  cycles: any[] = [];
 
-  constructor() { }
+  constructor() {
+    this.apiService.getCiclos().subscribe({
+      next: (data) => this.cycles = data,
+      error: (e) => console.error('Error fetching cycles', e)
+    });
+  }
 
   closeModal(): void {
     this.onClose.emit();
@@ -43,45 +50,21 @@ export class ModalRegisterVol {
     this.onOpenLogin.emit();
   }
 
-  validateForm(): boolean {
-    this.errors = {};
-    let isValid = true;
-
-    const requiredFields = ['name', 'surname1', 'email', 'phone', 'dni', 'dateOfBirth', 'password', 'course'];
-
-    requiredFields.forEach(field => {
-      if (!(this.volunteer as any)[field]) {
-        this.errors[field] = 'Este campo es obligatorio';
-        isValid = false;
-      }
-    });
-
-    if (this.volunteer.email && !this.isValidEmail(this.volunteer.email)) {
-      this.errors['email'] = 'Formato de correo inválido';
-      isValid = false;
-    }
-
-    return isValid;
+  openRegisterOrgModal(): void {
+    this.onOpenRegisterOrg.emit();
   }
 
-  isValidEmail(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  validateForm(): boolean {
+    return true;
   }
 
   registerVolunteer(): void {
     this.globalError = '';
-
-    if (!this.validateForm()) {
-      return;
-    }
-
     this.submitting = true;
 
     this.apiService.registerVolunteer(this.volunteer).subscribe({
       next: (response) => {
         console.log('Volunteer registered', response);
-        // Success feedback? Maybe just close or show success message inline?
-        // User asked to remove alerts.
         this.closeModal();
       },
       error: (error) => {
