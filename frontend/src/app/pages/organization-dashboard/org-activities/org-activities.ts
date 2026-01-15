@@ -10,7 +10,7 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
     selector: 'app-org-activities',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, AvatarComponent, BadgeComponent],
+    imports: [CommonModule, ReactiveFormsModule, AvatarComponent],
     templateUrl: './org-activities.html',
     styleUrls: ['./org-activities.css']
 })

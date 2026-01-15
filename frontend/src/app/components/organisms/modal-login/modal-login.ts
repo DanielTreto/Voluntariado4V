@@ -13,7 +13,7 @@ import { Auth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword }
   styleUrl: './modal-login.scss',
 })
 export class ModalLogin {
-  onModalClick = output(); 
+  onModalClick = output();
   onRegisterVolClick = output();
   onRegisterOrgClick = output();
   onClose = output();
@@ -27,7 +27,7 @@ export class ModalLogin {
     password: ''
   };
 
-  constructor() {}
+  constructor() { }
 
   closeModal(): void {
     this.onClose.emit();
@@ -56,37 +56,37 @@ export class ModalLogin {
         const token = await user.getIdToken();
         this.sendTokenToBackend(token);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.warn('Firebase Login Error, attempting direct backend login...', error);
         // Fallback or Primary for non-Firebase users: Attempt direct SQL login
-        this.apiService.login({ 
-            email: this.credentials.email, 
-            password: this.credentials.password 
+        this.apiService.login({
+          email: this.credentials.email,
+          password: this.credentials.password
         }).subscribe({
-            next: (response) => {
-                this.handleLoginSuccess(response);
-            },
-            error: (backendError) => {
-                console.error('Backend Login failed', backendError);
-                alert('Login failed: ' + (backendError.error?.error || error.message));
-            }
+          next: (response) => {
+            this.handleLoginSuccess(response);
+          },
+          error: (backendError) => {
+            console.error('Backend Login failed', backendError);
+            alert('Login failed: ' + (backendError.error?.error || error.message));
+          }
         });
       });
   }
 
   private handleLoginSuccess(response: any) {
-        console.log('Login successful', response);
-        localStorage.setItem('user', JSON.stringify(response));
-        this.onModalClick.emit();
-        // Redirect based on role
-        if (response.role === 'volunteer') {
-          this.router.navigate(['/volunteer-dashboard']);
-        } else if (response.role === 'organization') {
-          this.router.navigate(['/organization-dashboard']);
-        } else {
-          this.router.navigate(['/dashboard']);
-        }
-        this.closeModal();
+    console.log('Login successful', response);
+    localStorage.setItem('user', JSON.stringify(response));
+    this.onModalClick.emit();
+    // Redirect based on role
+    if (response.role === 'volunteer') {
+      this.router.navigate(['/volunteer-dashboard']);
+    } else if (response.role === 'organization') {
+      this.router.navigate(['/organization-dashboard']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
+    this.closeModal();
   }
 
   private sendTokenToBackend(token: string) {
@@ -102,7 +102,7 @@ export class ModalLogin {
   }
 
   login(): void {
-     this.loginWithEmail();
+    this.loginWithEmail();
   }
 
   openVolunteerRegister(): void {

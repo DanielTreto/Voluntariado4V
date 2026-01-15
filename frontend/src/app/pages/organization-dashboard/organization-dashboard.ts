@@ -8,7 +8,7 @@ import { SidebarComponent } from '../../components/organisms/sidebar/sidebar';
 @Component({
   selector: 'app-organization-dashboard',
   standalone: true,
-  imports: [CommonModule, DashboardHeaderComponent, Footer, SidebarComponent, RouterOutlet],
+  imports: [CommonModule, DashboardHeaderComponent, SidebarComponent, RouterOutlet],
   templateUrl: './organization-dashboard.html',
   styleUrls: ['./organization-dashboard.scss']
 })
