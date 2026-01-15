@@ -16,9 +16,11 @@
             name="name"
             placeholder="Nombre"
             class="form-control custom-input"
+            [class.is-invalid]="errors['name']"
             required
           />
         </div>
+        <div *ngIf="errors['name']" class="text-danger small mb-1 ms-1">{{ errors['name'] }}</div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
@@ -28,9 +30,11 @@
             name="surname1"
             placeholder="1er Apellido"
             class="form-control custom-input"
+            [class.is-invalid]="errors['surname1']"
             required
           />
         </div>
+        <div *ngIf="errors['surname1']" class="text-danger small mb-1 ms-1">{{ errors['surname1'] }}</div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
@@ -51,9 +55,11 @@
         [(ngModel)]="volunteer.dateOfBirth"
         name="dateOfBirth"
         class="form-control custom-input"
+        [class.is-invalid]="errors['dateOfBirth']"
         required
       />
     </div>
+    <div *ngIf="errors['dateOfBirth']" class="text-danger small mb-1 ms-1">{{ errors['dateOfBirth'] }}</div>
 
     <!-- Address removed as it is not in Entity -->
 
@@ -64,9 +70,11 @@
         name="dni"
         placeholder="DNI"
         class="form-control custom-input"
+        [class.is-invalid]="errors['dni']"
         required
       />
     </div>
+    <div *ngIf="errors['dni']" class="text-danger small mb-1 ms-1">{{ errors['dni'] }}</div>
 
     <div class="input-group mb-3 custom-input-group">
       <input
@@ -75,9 +83,11 @@
         name="phone"
         placeholder="Teléfono"
         class="form-control custom-input"
+        [class.is-invalid]="errors['phone']"
         required
       />
     </div>
+    <div *ngIf="errors['phone']" class="text-danger small mb-1 ms-1">{{ errors['phone'] }}</div>
 
     <div class="input-group mb-3 custom-input-group">
       <input
@@ -86,8 +96,12 @@
         name="email"
         placeholder="Correo Electrónico"
         class="form-control custom-input"
+        [class.is-invalid]="errors['email']"
         required
       />
+    </div>
+    <div *ngIf="errors['email']" class="text-danger small mb-2 ms-1">
+        {{ errors['email'] }}
     </div>
 
     <div class="input-group mb-3 custom-input-group">
@@ -97,9 +111,11 @@
         name="password"
         placeholder="Contraseña"
         class="form-control custom-input"
+        [class.is-invalid]="errors['password']"
         required
       />
     </div>
+    <div *ngIf="errors['password']" class="text-danger small mb-1 ms-1">{{ errors['password'] }}</div>
 
     <div class="mb-3">
       <label for="course" class="form-label small text-secondary">Curso</label>
@@ -109,8 +125,10 @@
         name="course"
         placeholder="Código Ciclo (Ej: DAM2)"
         class="form-control custom-input"
+        [class.is-invalid]="errors['course']"
         required
       />
+      <div *ngIf="errors['course']" class="text-danger small mb-1 ms-1">{{ errors['course'] }}</div>
     </div>
 
     <div class="mb-4">
@@ -130,11 +148,17 @@
       </label>
     </div>
 
+    <div *ngIf="globalError" class="alert alert-danger text-center p-2 mb-3 small" role="alert">
+        {{ globalError }}
+    </div>
+
     <button
       type="submit"
       class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
       style="background-color: var(--color-cuatrovientos-main-blue)"
+      [disabled]="submitting"
     >
+      <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
       Registrarse
     </button>
   </form>
