@@ -30,8 +30,9 @@ export class ModalRegisterVol {
     password: ''
   };
 
-  registerError: string | null = null;
-  registerSuccess: boolean = false;
+  globalError: string = '';
+  submitting: boolean = false;
+  errors: { [key: string]: string } = {};
 
   constructor() {}
 
@@ -48,19 +49,36 @@ export class ModalRegisterVol {
   }
 
   registerVolunteer(): void {
-    this.registerError = null;
-    this.registerSuccess = false;
+    this.globalError = '';
+    this.submitting = true;
 
     // Basic validation is handled by template
     this.apiService.registerVolunteer(this.volunteer).subscribe({
       next: (response) => {
         console.log('Volunteer registered', response);
-        this.registerSuccess = true;
-        setTimeout(() => this.closeModal(), 2000); // Close after success message
+        this.closeModal();
       },
       error: (error) => {
+        this.submitting = false;
         console.error('Error registering volunteer', error);
-        this.registerError = `Error: ${error.error?.message || 'Error en el registro. Verifique los datos.'}`;
+        
+        let msg = 'Error en el registro. Inténtalo de nuevo.';
+        if (error.error && error.error.error) {
+             msg = error.error.error;
+        }
+        
+        // Detect duplicates
+        if (msg.includes('Duplicate') || msg.includes('SQLSTATE[23000]')) {
+             if (msg.includes('CORREO')) {
+                 this.globalError = 'El correo electrónico ya está registrado.';
+             } else if (msg.includes('DNI')) {
+                 this.globalError = 'El DNI ya está registrado.';
+             } else {
+                 this.globalError = 'Ya existe un usuario con estos datos (DNI o Correo).';
+             }
+        } else {
+            this.globalError = msg;
+        }
       }
     });
   }

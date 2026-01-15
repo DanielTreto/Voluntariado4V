@@ -49,13 +49,13 @@ export class ModalLogin {
     console.log('Initiating Google Login...');
     const provider = new GoogleAuthProvider();
     signInWithPopup(this.auth, provider)
-      .then(async (result) => {
+      .then(async (result: any) => {
         const user = result.user;
         const token = await user.getIdToken();
         const email = user.email || ''; 
         this.sendTokenToBackend(token, email);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         this.submitting = false;
         console.error('Google Login Error', error);
         this.loginError = 'Error al iniciar sesión con Google: ' + error.message;
@@ -77,7 +77,7 @@ export class ModalLogin {
 
     // 1. Try Firebase Login
     signInWithEmailAndPassword(this.auth, this.credentials.email, this.credentials.password)
-      .then(async (userCredential) => {
+      .then(async (userCredential: any) => {
         // Firebase Login Success
         const user = userCredential.user;
         const token = await user.getIdToken();

@@ -28,7 +28,6 @@ export class ModalRegisterOrg {
     description: '',
     password: '',
   };
-  errors: { [key: string]: string } = {};
   globalError: string = '';
   submitting: boolean = false;
 
@@ -42,50 +41,17 @@ export class ModalRegisterOrg {
     this.onOpenLogin.emit();
   }
 
-<<<<<<< HEAD
   openRegisterVolModal(): void {
     this.onOpenRegisterVol.emit();
-=======
-  validateForm(): boolean {
-    this.errors = {};
-    let isValid = true;
-    
-    // Required fields check, adjust as needed
-    const requiredFields = ['name', 'type', 'sector', 'scope', 'phone', 'email', 'password', 'description'];
-    
-    requiredFields.forEach(field => {
-      if (!(this.org as any)[field]) {
-        this.errors[field] = 'Este campo es obligatorio';
-        isValid = false;
-      }
-    });
-
-    if (this.org.email && !this.isValidEmail(this.org.email)) {
-      this.errors['email'] = 'Formato de correo inválido';
-      isValid = false;
-    }
-
-    return isValid;
-  }
-
-  isValidEmail(email: string): boolean {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
->>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
   }
 
   registerOrganization(): void {
     this.globalError = '';
-
-    if (!this.validateForm()) {
-        return;
-    }
-
     this.submitting = true;
 
     this.apiService.registerOrganization(this.org).subscribe({
       next: (response) => {
         console.log('Organization registered', response);
-        // alert('Organización registrada con éxito');
         this.closeModal();
       },
       error: (error) => {
