@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, Input } from '@angular/core';
+import { Component, OnInit, inject, Input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { Router } from '@angular/router';
@@ -14,6 +14,7 @@ import { ApiService } from '../../../services/api.service';
 export class EventCalendarComponent implements OnInit {
   private router = inject(Router);
   private apiService = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
 
   currentDate: Date = new Date();
   monthLabel: string = '';
@@ -48,6 +49,7 @@ export class EventCalendarComponent implements OnInit {
         next: (data) => {
           this.activities = data;
           this.generateCalendar();
+          this.cdr.detectChanges();
         },
         error: (err) => console.error('Error loading organization activities', err)
       });
@@ -56,6 +58,7 @@ export class EventCalendarComponent implements OnInit {
         next: (data) => {
           this.activities = data;
           this.generateCalendar();
+          this.cdr.detectChanges();
         },
         error: (err) => console.error('Error loading activities', err)
       });
