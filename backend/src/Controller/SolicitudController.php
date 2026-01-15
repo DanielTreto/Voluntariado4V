@@ -72,7 +72,7 @@ class SolicitudController extends AbstractController
                 'volunteer' => [
                     'id' => $volunteer->getCODVOL(),
                     'name' => $volunteer->getNOMBRE(),
-                    'fullName' => $volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDOS(),
+                    'fullName' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
                     'email' => $volunteer->getCORREO(),
                     'avatar' => $volunteer->getFOTO_PERFIL()
                 ],
