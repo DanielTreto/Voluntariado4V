@@ -259,6 +259,7 @@ export class ActivityListComponent implements OnInit {
 
   setTab(tab: 'pending' | 'requests' | 'active' | 'ended') {
     this.activeTab = tab;
+    this.closeVolunteerInfoModal(); // Ensure modal is closed when switching tabs
     if (tab === 'requests') {
       this.loadRequests();
     }

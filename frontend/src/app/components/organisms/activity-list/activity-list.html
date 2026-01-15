@@ -559,9 +559,9 @@
     </div>
 
     <!-- Volunteer Info Modal -->
-    <div class="modal" [class.show]="showVolunteerInfoModal" [class.d-block]="showVolunteerInfoModal"
-        [style.background-color]="showVolunteerInfoModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
-        (click)="closeVolunteerInfoModal()">
+    <div class="modal" [class.show]="showVolunteerInfoModal" [style.display]="showVolunteerInfoModal ? 'block' : 'none'"
+        [style.background-color]="showVolunteerInfoModal ? 'rgba(0,0,0,0.5)' : 'transparent'" style="z-index: 2000;"
+        tabindex="-1" (click)="closeVolunteerInfoModal()">
         <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
