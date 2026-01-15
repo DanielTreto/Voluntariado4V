@@ -13,6 +13,7 @@ import { ApiService } from '../../../services/api.service';
 export class ModalRegisterOrg {
   onClose = output();
   onOpenLogin = output();
+  onOpenRegisterVol = output();
 
   private apiService = inject(ApiService);
 
@@ -36,6 +37,10 @@ export class ModalRegisterOrg {
 
   openLoginModal(): void {
     this.onOpenLogin.emit();
+  }
+
+  openRegisterVolModal(): void {
+    this.onOpenRegisterVol.emit();
   }
 
   registerOrganization(): void {
