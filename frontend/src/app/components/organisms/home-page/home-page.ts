@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, output } from '@angular/core';
 import { HeroSection } from "../hero-section/hero-section";
 import { EvolutionSeparator } from "../evolution-separator/evolution-separator";
 import { ImpactGrid } from "../impact-grid/impact-grid";
@@ -12,5 +12,9 @@ import { ContactCtaBlock } from "../contact-cta-block/contact-cta-block";
   styleUrl: './home-page.scss',
 })
 export class HomePage {
+  onOpenRegister = output();
 
+  handleRegisterClick() {
+    this.onOpenRegister.emit();
+  }
 }

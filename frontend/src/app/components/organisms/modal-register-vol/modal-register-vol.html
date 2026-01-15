@@ -1,8 +1,5 @@
-<div
-  class="bg-white rounded-3 shadow-lg p-4 p-md-5 position-relative mx-auto"
-  style="max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto"
-  (click)="$event.stopPropagation()"
->
+<div class="bg-white rounded-3 shadow-lg p-4 p-md-5 position-relative mx-auto"
+  style="max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto" (click)="$event.stopPropagation()">
   <button (click)="closeModal()" class="btn-close position-absolute top-0 end-0 m-3"></button>
   <h2 class="fs-3 fw-bold text-center text-cuatro-dark-bg mb-4">Registro Voluntario</h2>
 
@@ -10,117 +7,61 @@
     <div class="row g-2">
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
-          <input
-            type="text"
-            [(ngModel)]="volunteer.name"
-            name="name"
-            placeholder="Nombre"
-            class="form-control custom-input"
-            required
-          />
+          <input type="text" [(ngModel)]="volunteer.name" name="name" placeholder="Nombre"
+            class="form-control custom-input" required />
         </div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
-          <input
-            type="text"
-            [(ngModel)]="volunteer.surname1"
-            name="surname1"
-            placeholder="1er Apellido"
-            class="form-control custom-input"
-            required
-          />
+          <input type="text" [(ngModel)]="volunteer.surname1" name="surname1" placeholder="1er Apellido"
+            class="form-control custom-input" required />
         </div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
-          <input
-            type="text"
-            [(ngModel)]="volunteer.surname2"
-            name="surname2"
-            placeholder="2do Apellido"
-            class="form-control custom-input"
-          />
+          <input type="text" [(ngModel)]="volunteer.surname2" name="surname2" placeholder="2do Apellido"
+            class="form-control custom-input" />
         </div>
       </div>
     </div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="date"
-        [(ngModel)]="volunteer.dateOfBirth"
-        name="dateOfBirth"
-        class="form-control custom-input"
-        required
-      />
+      <input type="date" [(ngModel)]="volunteer.dateOfBirth" name="dateOfBirth" class="form-control custom-input"
+        required />
     </div>
 
     <!-- Address removed as it is not in Entity -->
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="text"
-        [(ngModel)]="volunteer.dni"
-        name="dni"
-        placeholder="DNI"
-        class="form-control custom-input"
-        required
-      />
+      <input type="text" [(ngModel)]="volunteer.dni" name="dni" placeholder="DNI" class="form-control custom-input"
+        required />
     </div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="tel"
-        [(ngModel)]="volunteer.phone"
-        name="phone"
-        placeholder="Teléfono"
-        class="form-control custom-input"
-        required
-      />
+      <input type="tel" [(ngModel)]="volunteer.phone" name="phone" placeholder="Teléfono"
+        class="form-control custom-input" required />
     </div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="email"
-        [(ngModel)]="volunteer.email"
-        name="email"
-        placeholder="Correo Electrónico"
-        class="form-control custom-input"
-        required
-      />
+      <input type="email" [(ngModel)]="volunteer.email" name="email" placeholder="Correo Electrónico"
+        class="form-control custom-input" required />
     </div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="password"
-        [(ngModel)]="volunteer.password"
-        name="password"
-        placeholder="Contraseña"
-        class="form-control custom-input"
-        required
-      />
+      <input type="password" [(ngModel)]="volunteer.password" name="password" placeholder="Contraseña"
+        class="form-control custom-input" required />
     </div>
 
     <div class="mb-3">
       <label for="course" class="form-label small text-secondary">Curso</label>
-      <input
-        type="text"
-        [(ngModel)]="volunteer.course"
-        name="course"
-        placeholder="Código Ciclo (Ej: DAM2)"
-        class="form-control custom-input"
-        required
-      />
+      <input type="text" [(ngModel)]="volunteer.course" name="course" placeholder="Código Ciclo (Ej: DAM2)"
+        class="form-control custom-input" required />
     </div>
 
     <div class="mb-4">
       <label class="form-label small text-secondary">Descripción / Intereses</label>
-      <textarea
-        [(ngModel)]="volunteer.description"
-        name="description"
-        class="form-control custom-input"
-        rows="2"
-      ></textarea>
+      <textarea [(ngModel)]="volunteer.description" name="description" class="form-control custom-input"
+        rows="2"></textarea>
     </div>
 
     <div class="form-check mb-4">
@@ -130,11 +71,8 @@
       </label>
     </div>
 
-    <button
-      type="submit"
-      class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
-      style="background-color: var(--color-cuatrovientos-main-blue)"
-    >
+    <button type="submit" class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
+      style="background-color: var(--color-cuatrovientos-main-blue)">
       Registrarse
     </button>
   </form>
@@ -142,11 +80,14 @@
   <div class="text-center mt-3">
     <p class="small text-secondary mb-2">
       ¿Ya tienes una cuenta?
-      <button
-        (click)="openLoginModal()"
-        class="btn btn-link text-primary text-decoration-none small"
-      >
+      <button (click)="openLoginModal()" class="btn btn-link text-primary text-decoration-none small">
         Iniciar Sesión
+      </button>
+    </p>
+    <p class="small text-secondary mb-2">
+      ¿Eres una organización?
+      <button (click)="openRegisterOrgModal()" class="btn btn-link text-primary text-decoration-none small">
+        Regístrate aquí
       </button>
     </p>
   </div>
