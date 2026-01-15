@@ -73,8 +73,12 @@ export class ActivityListComponent implements OnInit {
 
   // Volunteer filters
   volunteerFilterCourse: string = '';
-  volunteerFilterStatus: string = '';
+  // volunteerFilterStatus: string = ''; // Removed as we strictly filter by active
   volunteerSearchTerm: string = '';
+
+  // Volunteer Info Modal
+  showVolunteerInfoModal: boolean = false;
+  selectedVolunteerForKeyInfo: any = null;
 
   // For Create Activity
   newActivity: Partial<Activity> = {
@@ -146,7 +150,7 @@ export class ActivityListComponent implements OnInit {
     // Assuming getOrganizationRequests with empty string returns ALL (based on Controller logic).
     // If controller needs orgId, we might need a specific 'getAllRequests' endpoint or use existing with null.
     // Based on my controller code: if ($organizationId) it filters. If not, it returns all.
-    this.apiService.getOrganizationRequests('').subscribe({
+    this.apiService.getOrganizationRequests('', 'PENDIENTE').subscribe({
       next: (data) => {
         this.requests = data;
         this.pendingRequestsCount = data.filter(r => r.status === 'PENDIENTE').length;
@@ -161,7 +165,8 @@ export class ActivityListComponent implements OnInit {
     this.apiService.updateRequestStatus(req.id, status).subscribe({
       next: (res) => {
         req.status = status;
-        this.loadRequests(); // Refresh
+        this.loadRequests(); // Refresh list
+        this.loadData(); // Refresh activities data to show new volunteers
         alert(`Solicitud ${status === 'ACEPTADA' ? 'aceptada' : 'rechazada'} correctamente.`);
       },
       error: (err) => {
@@ -243,11 +248,7 @@ export class ActivityListComponent implements OnInit {
       result = result.filter(v => v.course === this.volunteerFilterCourse);
     }
 
-    if (this.volunteerFilterStatus) {
-      result = result.filter(v => v.status === this.volunteerFilterStatus);
-    }
-
-    return result;
+    return result.filter(v => v.status === 'active');
   }
 
   get uniqueCourses(): string[] {
@@ -308,7 +309,6 @@ export class ActivityListComponent implements OnInit {
   openAddVolunteer(activity: Activity) {
     this.selectedActivity = activity;
     this.volunteerFilterCourse = '';
-    this.volunteerFilterStatus = '';
     this.volunteerSearchTerm = '';
     this.showAddVolunteerModal = true;
   }
@@ -469,5 +469,17 @@ export class ActivityListComponent implements OnInit {
         }
       });
     }
+  }
+
+  // Volunteer Info Modal
+  openVolunteerInfo(volunteer: any) {
+    const fullDetails = this.allVolunteers.find(v => v.id === volunteer.id);
+    this.selectedVolunteerForKeyInfo = fullDetails || volunteer;
+    this.showVolunteerInfoModal = true;
+  }
+
+  closeVolunteerInfoModal() {
+    this.showVolunteerInfoModal = false;
+    this.selectedVolunteerForKeyInfo = null;
   }
 }
