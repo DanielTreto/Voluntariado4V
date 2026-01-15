@@ -53,22 +53,33 @@ class SolicitudController extends AbstractController
 
         $data = [];
         foreach ($requests as $req) {
+            $volunteer = $req->getVolunteer();
+            $activity = $req->getActividad();
+
+            // Skip if critical relations are missing (should not happen with strict schema, but safety first)
+            if (!$volunteer || !$activity) {
+                continue;
+            }
+
+            $fechaSolicitud = $req->getFechaSolicitud();
+            $fechaInicio = $activity->getFECHA_INICIO();
+
             $data[] = [
                 'id' => $req->getId(),
                 'status' => $req->getStatus(),
                 'message' => $req->getMensaje(),
-                'date' => $req->getFechaSolicitud()->format('Y-m-d H:i:s'),
+                'date' => $fechaSolicitud ? $fechaSolicitud->format('Y-m-d H:i:s') : null,
                 'volunteer' => [
-                    'id' => $req->getVolunteer()->getCODVOL(),
-                    'name' => $req->getVolunteer()->getNOMBRE(),
-                    'fullName' => $req->getVolunteer()->getNOMBRE() . ' ' . $req->getVolunteer()->getAPELLIDOS(),
-                    'email' => $req->getVolunteer()->getCORREO(),
-                    'avatar' => $req->getVolunteer()->getFOTO_PERFIL()
+                    'id' => $volunteer->getCODVOL(),
+                    'name' => $volunteer->getNOMBRE(),
+                    'fullName' => $volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDOS(),
+                    'email' => $volunteer->getCORREO(),
+                    'avatar' => $volunteer->getFOTO_PERFIL()
                 ],
                 'activity' => [
-                    'id' => $req->getActividad()->getCODACT(),
-                    'title' => $req->getActividad()->getNOMBRE(),
-                    'date' => $req->getActividad()->getFECHA_INICIO()->format('Y-m-d')
+                    'id' => $activity->getCODACT(),
+                    'title' => $activity->getNOMBRE(),
+                    'date' => $fechaInicio ? $fechaInicio->format('Y-m-d') : null
                 ]
             ];
         }
