@@ -77,9 +77,7 @@ export class ActivityListComponent implements OnInit {
   // volunteerFilterStatus: string = ''; // Removed as we strictly filter by active
   volunteerSearchTerm: string = '';
 
-  // Volunteer Info Modal
-  showVolunteerInfoModal: boolean = false;
-  selectedVolunteerForKeyInfo: any = null;
+
 
   // For Create Activity
   newActivity: Partial<Activity> = {
@@ -259,7 +257,7 @@ export class ActivityListComponent implements OnInit {
 
   setTab(tab: 'pending' | 'requests' | 'active' | 'ended') {
     this.activeTab = tab;
-    this.closeVolunteerInfoModal(); // Ensure modal is closed when switching tabs
+    this.closeRequestInfoModal(); // Ensure isolated modal is closed
     if (tab === 'requests') {
       this.loadRequests();
     }
@@ -474,24 +472,27 @@ export class ActivityListComponent implements OnInit {
     }
   }
 
-  // Volunteer Info Modal
-  openVolunteerInfo(volunteer: any) {
+  // Request Volunteer Info Modal (Isolated)
+  showRequestInfoModal: boolean = false;
+  selectedRequestVolunteer: any = null;
+
+  openRequestInfo(volunteer: any) {
     if (!volunteer) return;
-    console.log('Opening volunteer info for:', volunteer);
+    console.log('Opening request info for:', volunteer);
 
     setTimeout(() => {
       // Use loose equality == to handle string vs number ID mismatches
       const fullDetails = this.allVolunteers.find(v => v.id == volunteer.id);
-      this.selectedVolunteerForKeyInfo = fullDetails || volunteer;
-      console.log('Selected details:', this.selectedVolunteerForKeyInfo);
+      this.selectedRequestVolunteer = fullDetails || volunteer;
+      console.log('Selected details:', this.selectedRequestVolunteer);
 
-      this.showVolunteerInfoModal = true;
-      this.cdr.detectChanges(); // Force UI update immediately
+      this.showRequestInfoModal = true;
+      this.cdr.detectChanges(); // Force UI update
     }, 0);
   }
 
-  closeVolunteerInfoModal() {
-    this.showVolunteerInfoModal = false;
-    this.selectedVolunteerForKeyInfo = null;
+  closeRequestInfoModal() {
+    this.showRequestInfoModal = false;
+    this.selectedRequestVolunteer = null;
   }
 }

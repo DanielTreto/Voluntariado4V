@@ -109,7 +109,7 @@
                                 <small class="text-muted d-block">{{ req.volunteer?.email }}</small>
                             </div>
                             <button class="btn btn-light btn-sm rounded-circle text-primary"
-                                (click)="$event.stopPropagation(); openVolunteerInfo(req.volunteer)"
+                                (click)="$event.stopPropagation(); openRequestInfo(req.volunteer)"
                                 title="Ver información completa">
                                 <i class="bi bi-info-circle-fill fs-5"></i>
                             </button>
@@ -558,53 +558,52 @@
         </div>
     </div>
 
-    <!-- Volunteer Info Modal -->
-    <div class="modal" [class.show]="showVolunteerInfoModal" [style.display]="showVolunteerInfoModal ? 'block' : 'none'"
-        [style.background-color]="showVolunteerInfoModal ? 'rgba(0,0,0,0.5)' : 'transparent'" style="z-index: 2000;"
-        tabindex="-1" (click)="closeVolunteerInfoModal()">
+    <!-- Request Volunteer Info Modal (Isolated) -->
+    <div class="modal" [class.show]="showRequestInfoModal" [style.display]="showRequestInfoModal ? 'block' : 'none'"
+        [style.background-color]="showRequestInfoModal ? 'rgba(0,0,0,0.5)' : 'transparent'" style="z-index: 2000;"
+        tabindex="-1" (click)="closeRequestInfoModal()">
         <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
             <div class="modal-content">
                 <div class="modal-header border-0 pb-0">
                     <h5 class="modal-title fw-bold">Información del Voluntario</h5>
-                    <button type="button" class="btn-close" (click)="closeVolunteerInfoModal()"></button>
+                    <button type="button" class="btn-close" (click)="closeRequestInfoModal()"></button>
                 </div>
-                <div class="modal-body text-center" *ngIf="selectedVolunteerForKeyInfo">
-                    <app-avatar [src]="selectedVolunteerForKeyInfo.avatar || 'assets/images/volunteer-avatar.png'"
-                        [alt]="selectedVolunteerForKeyInfo.name" [size]="100" class="mb-3 d-inline-block"></app-avatar>
+                <!-- Content ONLY renders when selectedRequestVolunteer is present -->
+                <div class="modal-body text-center" *ngIf="selectedRequestVolunteer">
+                    <app-avatar [src]="selectedRequestVolunteer.avatar || 'assets/images/volunteer-avatar.png'"
+                        [alt]="selectedRequestVolunteer.name" [size]="100" class="mb-3 d-inline-block"></app-avatar>
 
-                    <h4 class="fw-bold mb-1">{{ selectedVolunteerForKeyInfo.name }}</h4>
-                    <span class="badge bg-primary mb-3">{{ selectedVolunteerForKeyInfo.course }}</span>
+                    <h4 class="fw-bold mb-1">{{ selectedRequestVolunteer.name }}</h4>
+                    <span class="badge bg-primary mb-3">{{ selectedRequestVolunteer.course }}</span>
 
                     <div class="row g-3 text-start mt-2">
                         <div class="col-12 border-bottom pb-2">
                             <small class="text-muted d-block text-uppercase fw-bold"
                                 style="font-size: 0.7rem;">Contacto</small>
                             <div class="d-flex align-items-center mt-1">
-                                <i class="bi bi-envelope me-2 text-secondary"></i> {{ selectedVolunteerForKeyInfo.email
-                                }}
+                                <i class="bi bi-envelope me-2 text-secondary"></i> {{ selectedRequestVolunteer.email }}
                             </div>
-                            <div class="d-flex align-items-center mt-1" *ngIf="selectedVolunteerForKeyInfo.phone">
-                                <i class="bi bi-telephone me-2 text-secondary"></i> {{ selectedVolunteerForKeyInfo.phone
-                                }}
+                            <div class="d-flex align-items-center mt-1" *ngIf="selectedRequestVolunteer.phone">
+                                <i class="bi bi-telephone me-2 text-secondary"></i> {{ selectedRequestVolunteer.phone }}
                             </div>
                         </div>
 
-                        <div class="col-12" *ngIf="selectedVolunteerForKeyInfo.interests?.length > 0">
+                        <div class="col-12" *ngIf="selectedRequestVolunteer.interests?.length > 0">
                             <small class="text-muted d-block text-uppercase fw-bold mb-2"
                                 style="font-size: 0.7rem;">Intereses</small>
                             <div class="d-flex flex-wrap gap-2">
                                 <span class="badge bg-light text-dark border"
-                                    *ngFor="let interest of selectedVolunteerForKeyInfo.interests">
+                                    *ngFor="let interest of selectedRequestVolunteer.interests">
                                     {{ interest }}
                                 </span>
                             </div>
                         </div>
 
-                        <div class="col-12" *ngIf="selectedVolunteerForKeyInfo.disponibilidades?.length > 0">
+                        <div class="col-12" *ngIf="selectedRequestVolunteer.disponibilidades?.length > 0">
                             <small class="text-muted d-block text-uppercase fw-bold mb-2"
                                 style="font-size: 0.7rem;">Disponibilidad</small>
                             <ul class="list-unstyled small text-muted">
-                                <li *ngFor="let disp of selectedVolunteerForKeyInfo.disponibilidades">
+                                <li *ngFor="let disp of selectedRequestVolunteer.disponibilidades">
                                     <i class="bi bi-clock me-1"></i> {{ disp }}
                                 </li>
                             </ul>
@@ -613,7 +612,7 @@
                 </div>
                 <div class="modal-footer border-0 justify-content-center">
                     <button type="button" class="btn btn-secondary px-4 rounded-pill"
-                        (click)="closeVolunteerInfoModal()">Cerrar</button>
+                        (click)="closeRequestInfoModal()">Cerrar</button>
                 </div>
             </div>
         </div>
