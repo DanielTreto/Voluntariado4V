@@ -36,8 +36,7 @@ class Administrator
     #[Assert\Regex(pattern: '/^[0-9]+$/', message: 'Only numbers allowed')]
     private ?string $telefono = null;
 
-    #[ORM\Column(length: 128, unique: true)]
-    #[Assert\NotBlank]
+    #[ORM\Column(length: 128, unique: true, nullable: true)]
     private ?string $firebaseUid = null;
 
     #[ORM\Column(length: 255, nullable: true)]

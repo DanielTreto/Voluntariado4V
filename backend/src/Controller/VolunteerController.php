@@ -106,7 +106,7 @@ class VolunteerController extends AbstractController
         }
 
 
-        $volunteer->setPASSWORD($data['password'] ?? '');
+
         $volunteer->setESTADO('PENDIENTE');
         
         // Generate Custom ID
@@ -124,6 +124,7 @@ class VolunteerController extends AbstractController
         // Validation
         $errors = $validator->validate($volunteer);
         if (count($errors) > 0) {
+            // ... validation logic ...
             $errorMessages = [];
             foreach ($errors as $error) {
                 $errorMessages[$error->getPropertyPath()] = $error->getMessage();

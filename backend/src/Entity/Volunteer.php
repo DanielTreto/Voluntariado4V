@@ -83,8 +83,7 @@ class Volunteer
         return $this;
     }
 
-    #[ORM\Column(length: 128, unique: true)]
-    #[Assert\NotBlank]
+    #[ORM\Column(length: 128, unique: true, nullable: true)]
     private ?string $firebaseUid = null;
 
     #[ORM\Column(length: 10)]

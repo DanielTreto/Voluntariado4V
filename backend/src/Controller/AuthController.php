@@ -13,44 +13,66 @@ use Symfony\Component\Routing\Annotation\Route;
 class AuthController extends AbstractController
 {
     #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(Request $request, VolunteerRepository $volRepo, OrganizationRepository $orgRepo): JsonResponse
+    public function login(Request $request, VolunteerRepository $volRepo, OrganizationRepository $orgRepo, \App\Repository\CredencialesRepository $credRepo): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $token = $data['token'] ?? '';
+        $email = $data['email'] ?? '';
+        $password = $data['password'] ?? '';
 
-        if (!$token) {
-            return new JsonResponse(['error' => 'Firebase token is required'], 400);
+        // 1. Firebase Token Login
+        if ($token) {
+            // TODO: Verify Firebase token using Admin SDK or similar
+            // For now, we simulate we got a UID from the token
+            $uid = $token; 
+
+            // Check Volunteer
+            $volunteer = $volRepo->findOneBy(['firebaseUid' => $uid]);
+            if ($volunteer) {
+                return new JsonResponse([
+                    'success' => true,
+                    'role' => 'volunteer',
+                    'id' => $volunteer->getCODVOL(),
+                    'name' => $volunteer->getNOMBRE(),
+                    'email' => $volunteer->getCORREO(),
+                    'firebaseUid' => $volunteer->getFirebaseUid()
+                ]);
+            }
+
+            // Check Organization
+            $org = $orgRepo->findOneBy(['firebaseUid' => $uid]);
+            if ($org) {
+                return new JsonResponse([
+                    'success' => true,
+                    'role' => 'organization',
+                    'id' => $org->getCODORG(),
+                    'name' => $org->getNOMBRE(),
+                    'email' => $org->getCORREO(),
+                    'firebaseUid' => $org->getFirebaseUid()
+                ]);
+            }
         }
-
-        // TODO: Verify Firebase token using Admin SDK or similar
-        // For now, we simulate we got a UID from the token
-        // In a real implementation: $verifiedIdToken = $auth->verifyIdToken($token); $uid = $verifiedIdToken->claims()->get('sub');
-        $uid = $token; // SIMULATION: We assume the token IS the uid for testing purposes during preparation phase
-
-        // Check Volunteer
-        $volunteer = $volRepo->findOneBy(['firebaseUid' => $uid]);
-        if ($volunteer) {
-            return new JsonResponse([
-                'success' => true,
-                'role' => 'volunteer',
-                'id' => $volunteer->getCODVOL(),
-                'name' => $volunteer->getNOMBRE(),
-                'email' => $volunteer->getCORREO(),
-                'firebaseUid' => $volunteer->getFirebaseUid()
-            ]);
+        // 2. SQL Email/Password Login
+        elseif ($email && $password) {
+            $cred = $credRepo->findOneBy(['correo' => $email]);
+            
+            if ($cred && $cred->getPassword() === $password) { // Plain text for now as per registration
+                $volunteer = $cred->getVoluntario();
+                if ($volunteer) {
+                    return new JsonResponse([
+                        'success' => true,
+                        'role' => 'volunteer',
+                        'id' => $volunteer->getCODVOL(),
+                        'name' => $volunteer->getNOMBRE(),
+                        'email' => $volunteer->getCORREO(),
+                        'firebaseUid' => $volunteer->getFirebaseUid() // Might be null
+                    ]);
+                }
+                // Handle organization if implemented in Credenciales later
+            }
         }
-
-        // Check Organization
-        $org = $orgRepo->findOneBy(['firebaseUid' => $uid]);
-        if ($org) {
-            return new JsonResponse([
-                'success' => true,
-                'role' => 'organization',
-                'id' => $org->getCODORG(),
-                'name' => $org->getNOMBRE(),
-                'email' => $org->getCORREO(),
-                'firebaseUid' => $org->getFirebaseUid()
-            ]);
+        else {
+             return new JsonResponse(['error' => 'Token or Email/Password required'], 400);
         }
 
         return new JsonResponse(['error' => 'User not found or invalid credentials'], 404);
