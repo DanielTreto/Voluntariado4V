@@ -120,6 +120,7 @@ export class ActivityListComponent implements OnInit {
           type: act.type || 'Social',
           status: this.mapStatus(act.status)
         }));
+        this.cdr.detectChanges();
 
         const openId = params['openId'];
         if (openId) {
@@ -153,6 +154,7 @@ export class ActivityListComponent implements OnInit {
       next: (data) => {
         this.requests = data;
         this.pendingRequestsCount = data.filter(r => r.status === 'PENDIENTE').length;
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading requests', err)
     });
@@ -188,6 +190,7 @@ export class ActivityListComponent implements OnInit {
           status: this.mapVolunteerStatus(v.status),
           interests: v.interests || []
         }));
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading volunteers', err)
     });
@@ -205,6 +208,7 @@ export class ActivityListComponent implements OnInit {
             email: org.email,
             phone: org.phone
           }));
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading organizations', err)
     });
