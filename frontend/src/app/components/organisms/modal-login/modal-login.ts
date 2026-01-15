@@ -40,7 +40,8 @@ export class ModalLogin {
       .then(async (result) => {
         const user = result.user;
         const token = await user.getIdToken();
-        this.sendTokenToBackend(token);
+        const email = user.email || ''; // Capture email
+        this.sendTokenToBackend(token, email);
       })
       .catch((error) => {
         console.error('Google Login Error', error);
@@ -89,8 +90,8 @@ export class ModalLogin {
     this.closeModal();
   }
 
-  private sendTokenToBackend(token: string) {
-    this.apiService.login({ token }).subscribe({
+  private sendTokenToBackend(token: string, email: string = '') {
+    this.apiService.login({ token, email }).subscribe({
       next: (response) => {
         this.handleLoginSuccess(response);
       },
