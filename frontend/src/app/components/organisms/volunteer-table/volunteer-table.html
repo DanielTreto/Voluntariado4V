@@ -1,146 +1,160 @@
-<ul class="nav nav-tabs mb-4">
-    <li class="nav-item">
-        <button class="nav-link" [class.active]="activeTab === 'requests'"
-            (click)="setTab('requests')">Solicitudes</button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" [class.active]="activeTab === 'registered'" (click)="setTab('registered')">Voluntarios
-            Registrados</button>
-    </li>
-</ul>
+<div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+    <!-- Header with Tabs -->
+    <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+        <div class="d-flex gap-3">
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'requests' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('requests')">
+                Solicitudes
+            </button>
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'registered' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('registered')">
+                Voluntarios Registrados
+            </button>
+        </div>
+    </div>
 
-<div class="card shadow-sm border-0 rounded-lg overflow-hidden p-3">
     <!-- Search Bar -->
-    <div class="mb-3">
+    <div class="mb-4">
+        <label class="form-label text-muted small fw-bold text-uppercase">Búsqueda</label>
         <div class="input-group">
-            <span class="input-group-text bg-white border-end-0">
+            <span class="input-group-text bg-light border-0 ps-3">
                 <i class="bi bi-search text-muted"></i>
             </span>
-            <input type="text" class="form-control border-start-0"
+            <input type="text" class="form-control bg-light border-0 py-2"
                 placeholder="Buscar por nombre, email, teléfono o DNI..." [(ngModel)]="searchTerm">
-            <button class="btn btn-outline-secondary" type="button" *ngIf="searchTerm" (click)="searchTerm = ''">
+            <button class="btn btn-light border-0" type="button" *ngIf="searchTerm" (click)="searchTerm = ''">
                 <i class="bi bi-x"></i>
             </button>
         </div>
     </div>
 
-    <div *ngIf="errorMessage" class="alert alert-danger">
-        {{ errorMessage }} <br>
-        <small>Verifica que el backend esté corriendo en http://localhost:8000</small>
+    <div *ngIf="errorMessage" class="alert alert-danger rounded-3 mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i> {{ errorMessage }}
+        <div class="small mt-1">Verifica que el backend esté corriendo en http://localhost:8000</div>
     </div>
+
     <div class="table-responsive">
-        <table class="table table-borderless table-custom">
-            <thead>
+        <table class="table table-hover align-middle">
+            <thead class="bg-light">
                 <tr>
-                    <th scope="col" style="width: 50px;">
+                    <th scope="col" style="width: 50px;" class="border-0 rounded-start-3 py-3 ps-3">
                         <input class="form-check-input" type="checkbox">
                     </th>
-                    <th scope="col" style="width: 25%; cursor: pointer;" (click)="sort('name')">
-                        <div class="d-flex align-items-center justify-content-between">
+                    <th scope="col" class="border-0 py-3" style="width: 25%; cursor: pointer;" (click)="sort('name')">
+                        <div class="d-flex align-items-center gap-2">
                             VOLUNTARIO
-                            <i class="bi"
-                                [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
-                                [class.text-primary]="sortColumn === 'name'"></i>
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 20%; cursor: pointer;" (click)="sort('email')">
-                        <div class="d-flex align-items-center justify-content-between">
+                    <th scope="col" class="border-0 py-3" style="width: 20%; cursor: pointer;" (click)="sort('email')">
+                        <div class="d-flex align-items-center gap-2">
                             EMAIL
-                            <i class="bi"
-                                [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
-                                [class.text-primary]="sortColumn === 'email'"></i>
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 15%; cursor: pointer;" (click)="sort('phone')">
-                        <div class="d-flex align-items-center justify-content-between">
+                    <th scope="col" class="border-0 py-3" style="width: 15%; cursor: pointer;" (click)="sort('phone')">
+                        <div class="d-flex align-items-center gap-2">
                             TELÉFONO
-                            <i class="bi"
-                                [ngClass]="sortColumn === 'phone' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
-                                [class.text-primary]="sortColumn === 'phone'"></i>
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'phone' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 15%;">ÚLTIMA ACTIVIDAD</th>
-                    <th scope="col" style="width: 10%; cursor: pointer;" (click)="sort('status')">
-                        <div class="d-flex align-items-center justify-content-between">
+                    <th scope="col" class="border-0 py-3" style="width: 15%;">ÚLTIMA ACTIVIDAD</th>
+                    <th scope="col" class="border-0 py-3" style="width: 10%; cursor: pointer;" (click)="sort('status')">
+                        <div class="d-flex align-items-center gap-2">
                             ESTADO
-                            <i class="bi"
-                                [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand'"
-                                [class.text-primary]="sortColumn === 'status'"></i>
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
                         </div>
                     </th>
-                    <th scope="col" style="width: 5%;">ACCIONES</th>
+                    <th scope="col" class="border-0 rounded-end-3 py-3 pe-3" style="width: 5%;">ACCIONES</th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let volunteer of filteredVolunteers">
-                    <td><input class="form-check-input" type="checkbox"></td>
+                    <td class="ps-3"><input class="form-check-input" type="checkbox"></td>
                     <td>
-                        <div class="volunteer-info d-flex align-items-center">
+                        <div class="d-flex align-items-center">
                             <app-avatar [src]="volunteer.avatar" [alt]="volunteer.name" class="me-3"></app-avatar>
                             <div>
-                                <div class="fw-semibold">{{ volunteer.name }}</div>
+                                <div class="fw-bold text-dark">{{ volunteer.name }}</div>
                                 <div class="text-muted small">{{ volunteer.project }}</div>
                             </div>
                         </div>
                     </td>
-                    <td>{{ volunteer.email }}</td>
-                    <td>{{ volunteer.phone }}</td>
-                    <td>{{ volunteer.lastActivity }}</td>
+                    <td class="text-muted">{{ volunteer.email }}</td>
+                    <td class="text-muted">{{ volunteer.phone }}</td>
+                    <td class="text-muted">{{ volunteer.lastActivity }}</td>
                     <td><app-badge [label]="volunteer.status | titlecase" [type]="volunteer.status"></app-badge></td>
-                    <td>
+                    <td class="pe-3">
                         <!-- Actions for Registered Tab -->
                         <div class="dropdown" *ngIf="activeTab === 'registered'">
-                            <button class="btn btn-sm text-muted p-0" type="button"
+                            <button class="btn btn-sm text-secondary p-0" type="button"
                                 (click)="toggleDropdown(volunteer.id, $event)">
-                                <i class="bi bi-three-dots"></i>
+                                <i class="bi bi-three-dots-vertical"></i>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end py-1"
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3 py-2"
                                 [class.show]="activeDropdownId === volunteer.id"
-                                [style.display]="activeDropdownId === volunteer.id ? 'block' : 'none'"
-                                style="font-size: 0.85rem; min-width: 140px;">
+                                [style.display]="activeDropdownId === volunteer.id ? 'block' : 'none'">
                                 <li>
-                                    <button class="dropdown-item py-1 px-2" type="button"
+                                    <button class="dropdown-item px-3 py-2 small" type="button"
                                         (click)="openDetails(volunteer)">
-                                        <i class="bi bi-eye me-2"></i>Ver más datos
+                                        <i class="bi bi-eye me-2 text-primary"></i>Ver detalles
                                     </button>
                                 </li>
                                 <li>
-                                    <button class="dropdown-item py-1 px-2" type="button"
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <button class="dropdown-item px-3 py-2 small" type="button"
+                                        [class.text-danger]="volunteer.status === 'active'"
                                         [class.text-success]="volunteer.status === 'suspended'"
-                                        [class.text-warning]="volunteer.status === 'active'"
                                         (click)="toggleVolunteerStatus(volunteer)">
                                         <i class="bi me-2"
                                             [ngClass]="volunteer.status === 'suspended' ? 'bi-play-circle' : 'bi-pause-circle'"></i>
-                                        {{ volunteer.status === 'suspended' ? 'Activar' : 'Suspender' }}
+                                        {{ volunteer.status === 'suspended' ? 'Reactivar cuenta' : 'Suspender cuenta' }}
                                     </button>
                                 </li>
                             </ul>
                         </div>
                         <!-- Actions for Requests Tab -->
-                        <div *ngIf="activeTab === 'requests'" class="d-flex">
-                            <button class="btn btn-success btn-sm me-2" (click)="acceptVolunteer(volunteer)"
-                                title="Aceptar"><i class="bi bi-check-lg"></i></button>
-                            <button class="btn btn-danger btn-sm" (click)="denyVolunteer(volunteer)" title="Denegar"><i
-                                    class="bi bi-x-lg"></i></button>
+                        <div *ngIf="activeTab === 'requests'" class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm rounded-pill px-3"
+                                (click)="acceptVolunteer(volunteer)" title="Aceptar">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm rounded-pill px-3" (click)="denyVolunteer(volunteer)"
+                                title="Denegar">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
                 <tr *ngIf="filteredVolunteers.length === 0">
-                    <td colspan="7" class="text-center text-muted py-4">
-                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                        No se encontraron voluntarios
+                    <td colspan="7" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center text-muted">
+                            <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
+                            <p class="mb-0 fw-medium">No se encontraron voluntarios</p>
+                            <p class="small opacity-75">Intenta con otros filtros de búsqueda</p>
+                        </div>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
-    <div class="d-flex justify-content-between align-items-center mt-3 p-3">
-        <div class="text-muted small">Mostrando {{ filteredVolunteers.length }} voluntarios</div>
+
+    <div class="d-flex justify-content-between align-items-center pt-4 mt-2 border-top">
+        <div class="text-muted small">Mostrando {{ filteredVolunteers.length }} resultados</div>
         <nav aria-label="Pagination">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+            <ul class="pagination pagination-sm mb-0 gap-1">
+                <li class="page-item disabled"><a class="page-link rounded-2 border-0 bg-light" href="#">Anterior</a>
+                </li>
+                <li class="page-item active"><a class="page-link rounded-2 border-0" href="#">1</a></li>
+                <li class="page-item"><a class="page-link rounded-2 border-0 bg-light" href="#">Siguiente</a></li>
             </ul>
         </nav>
     </div>

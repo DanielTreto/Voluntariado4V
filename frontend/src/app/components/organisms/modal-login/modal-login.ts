@@ -13,7 +13,7 @@ import { Auth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword }
   styleUrl: './modal-login.scss',
 })
 export class ModalLogin {
-  onModalClick = output(); 
+  onModalClick = output();
   onRegisterVolClick = output();
   onRegisterOrgClick = output();
   onClose = output();
@@ -22,87 +22,119 @@ export class ModalLogin {
   private router = inject(Router);
   private auth = inject(Auth);
 
-  credentials = {
-    email: '',
-    password: ''
-  };
+  credentials = { email: '', password: '' };
+  
+  // Validation state
+  loginError: string = '';
+  fieldErrors = { email: false, password: false };
+  submitting: boolean = false;
 
-  constructor() {}
+  constructor() { }
 
   closeModal(): void {
+    this.resetState();
     this.onClose.emit();
+  }
+  
+  resetState() {
+      this.loginError = '';
+      this.fieldErrors = { email: false, password: false };
+      this.submitting = false;
+      this.credentials = { email: '', password: '' };
   }
 
   loginWithGoogle(): void {
+    this.resetState();
+    this.submitting = true;
     console.log('Initiating Google Login...');
     const provider = new GoogleAuthProvider();
     signInWithPopup(this.auth, provider)
       .then(async (result) => {
         const user = result.user;
         const token = await user.getIdToken();
-        this.sendTokenToBackend(token);
+        const email = user.email || ''; 
+        this.sendTokenToBackend(token, email);
       })
       .catch((error) => {
+        this.submitting = false;
         console.error('Google Login Error', error);
-        alert('Google Login failed: ' + error.message);
+        this.loginError = 'Error al iniciar sesión con Google: ' + error.message;
       });
   }
 
   loginWithEmail(): void {
-    console.log('Initiating Email Login...');
+    this.loginError = '';
+    this.fieldErrors = { email: false, password: false };
+
+    if (!this.credentials.email) this.fieldErrors.email = true;
+    if (!this.credentials.password) this.fieldErrors.password = true;
+
+    if (this.fieldErrors.email || this.fieldErrors.password) {
+        return;
+    }
+
+    this.submitting = true;
+
+    // 1. Try Firebase Login
     signInWithEmailAndPassword(this.auth, this.credentials.email, this.credentials.password)
       .then(async (userCredential) => {
+        // Firebase Login Success
         const user = userCredential.user;
         const token = await user.getIdToken();
         this.sendTokenToBackend(token);
       })
-      .catch((error) => {
+      .catch((error: any) => {
         console.warn('Firebase Login Error, attempting direct backend login...', error);
         // Fallback or Primary for non-Firebase users: Attempt direct SQL login
-        this.apiService.login({ 
-            email: this.credentials.email, 
-            password: this.credentials.password 
+        this.apiService.login({
+            email: this.credentials.email,
+            password: this.credentials.password
         }).subscribe({
             next: (response) => {
                 this.handleLoginSuccess(response);
             },
             error: (backendError) => {
+                this.submitting = false;
                 console.error('Backend Login failed', backendError);
-                alert('Login failed: ' + (backendError.error?.error || error.message));
+                // Highlight fields red
+                this.fieldErrors.email = true;
+                this.fieldErrors.password = true;
+                this.loginError = 'Usuario o contraseña incorrectos.';
             }
         });
       });
   }
 
   private handleLoginSuccess(response: any) {
-        console.log('Login successful', response);
-        localStorage.setItem('user', JSON.stringify(response));
-        this.onModalClick.emit();
-        // Redirect based on role
-        if (response.role === 'volunteer') {
-          this.router.navigate(['/volunteer-dashboard']);
-        } else if (response.role === 'organization') {
-          this.router.navigate(['/organization-dashboard']);
-        } else {
-          this.router.navigate(['/dashboard']);
-        }
-        this.closeModal();
+    console.log('Login successful', response);
+    localStorage.setItem('user', JSON.stringify(response));
+    this.onModalClick.emit();
+    // Redirect based on role
+    if (response.role === 'volunteer') {
+      this.router.navigate(['/volunteer-dashboard']);
+    } else if (response.role === 'organization') {
+      this.router.navigate(['/organization-dashboard']);
+    } else {
+      this.router.navigate(['/dashboard']);
+    }
+    this.closeModal();
   }
 
-  private sendTokenToBackend(token: string) {
-    this.apiService.login({ token }).subscribe({
+  private sendTokenToBackend(token: string, email: string = '') {
+    this.apiService.login({ token, email }).subscribe({
       next: (response) => {
         this.handleLoginSuccess(response);
       },
       error: (error) => {
+        this.submitting = false;
         console.error('Backend Login failed', error);
-        alert('Backend Login failed: ' + (error.error?.error || 'Unknown error'));
+        this.loginError = 'Error de autenticación: ' + (error.error?.error || 'Inténtalo de nuevo.');
       }
     });
   }
 
   login(): void {
-     this.loginWithEmail();
+    this.loginWithEmail();
   }
 
   openVolunteerRegister(): void {

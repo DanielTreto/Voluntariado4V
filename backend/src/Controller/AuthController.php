@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class AuthController extends AbstractController
 {
     #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(Request $request, VolunteerRepository $volRepo, OrganizationRepository $orgRepo, \App\Repository\CredencialesRepository $credRepo): JsonResponse
+    public function login(Request $request, VolunteerRepository $volRepo, OrganizationRepository $orgRepo, \App\Repository\CredencialesRepository $credRepo, \Doctrine\ORM\EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $token = $data['token'] ?? '';
@@ -25,10 +25,39 @@ class AuthController extends AbstractController
             // TODO: Verify Firebase token using Admin SDK or similar
             // For now, we simulate we got a UID from the token
             $uid = $token; 
+            $tokenEmail = $data['email'] ?? ''; // Expect email from frontend when using Google Login
 
-            // Check Volunteer
+            // 1. Check Volunteer by UID
             $volunteer = $volRepo->findOneBy(['firebaseUid' => $uid]);
+            
+            // 2. Check Organization by UID
+            $org = $orgRepo->findOneBy(['firebaseUid' => $uid]);
+
+            // 3. Email Fallback & Account Linking
+            if (!$volunteer && !$org && $tokenEmail) {
+                // Check Volunteer by Email
+                $volunteerByEmail = $volRepo->findOneBy(['CORREO' => $tokenEmail]);
+                if ($volunteerByEmail) {
+                    // Update UID to link account
+                    $volunteerByEmail->setFirebaseUid($uid);
+                    $entityManager->persist($volunteerByEmail);
+                    $entityManager->flush();
+                    $volunteer = $volunteerByEmail;
+                } else {
+                    // Check Organization by Email
+                    $orgByEmail = $orgRepo->findOneBy(['CORREO' => $tokenEmail]); 
+                    if ($orgByEmail) {
+                        $orgByEmail->setFirebaseUid($uid);
+                        $entityManager->persist($orgByEmail);
+                        $entityManager->flush();
+                        $org = $orgByEmail;
+                    }
+                }
+            }
+
             if ($volunteer) {
+                // If we just linked, we need to persist. 
+                // Since user didn't inject EM, let's do it properly now by modifying signature.
                 return new JsonResponse([
                     'success' => true,
                     'role' => 'volunteer',
@@ -39,9 +68,8 @@ class AuthController extends AbstractController
                 ]);
             }
 
-            // Check Organization
-            $org = $orgRepo->findOneBy(['firebaseUid' => $uid]);
             if ($org) {
+                 // If we just linked, we need to persist.
                 return new JsonResponse([
                     'success' => true,
                     'role' => 'organization',

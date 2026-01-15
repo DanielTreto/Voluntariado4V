@@ -30,6 +30,9 @@ export class ModalRegisterVol {
     password: ''
   };
 
+  registerError: string | null = null;
+  registerSuccess: boolean = false;
+
   constructor() {}
 
   closeModal(): void {
@@ -45,16 +48,19 @@ export class ModalRegisterVol {
   }
 
   registerVolunteer(): void {
-    // Basic validation could go here
+    this.registerError = null;
+    this.registerSuccess = false;
+
+    // Basic validation is handled by template
     this.apiService.registerVolunteer(this.volunteer).subscribe({
       next: (response) => {
         console.log('Volunteer registered', response);
-        alert('Registro completado con éxito');
-        this.closeModal();
+        this.registerSuccess = true;
+        setTimeout(() => this.closeModal(), 2000); // Close after success message
       },
       error: (error) => {
         console.error('Error registering volunteer', error);
-        alert(`Error Status: ${error.status}\nError Body: ${JSON.stringify(error.error)}`);
+        this.registerError = `Error: ${error.error?.message || 'Error en el registro. Verifique los datos.'}`;
       }
     });
   }

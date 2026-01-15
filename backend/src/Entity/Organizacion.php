@@ -40,7 +40,7 @@ class Organizacion
     #[Assert\Email]
     private ?string $CORREO = null;
 
-    #[ORM\Column(length: 9, unique: true)]
+    #[ORM\Column(length: 9, unique: true, columnDefinition: 'CHAR(9)')]
     #[Assert\NotBlank]
     #[Assert\Regex(pattern: '/^[0-9]{9}$/', message: 'Invalid phone number')]
     private ?string $TELEFONO = null;
@@ -55,7 +55,7 @@ class Organizacion
     #[Assert\Choice(choices: ['LOCAL', 'REGIONAL', 'NACIONAL', 'INTERNACIONAL'])]
     private ?string $AMBITO = null;
 
-    #[ORM\Column(length: 128, unique: true)]
+    #[ORM\Column(length: 128, unique: true, nullable: true)]
     #[Assert\NotBlank]
     private ?string $firebaseUid = null;
 

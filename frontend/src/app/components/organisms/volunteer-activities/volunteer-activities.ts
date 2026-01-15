@@ -13,6 +13,10 @@ import { forkJoin } from 'rxjs';
 })
 export class VolunteerActivitiesComponent implements OnInit {
   activities: any[] = [];
+  myActivitiesList: any[] = [];
+  availableActivitiesList: any[] = [];
+  currentTab: string = 'mis-actividades';
+
   myActivityIds: Set<number> = new Set();
   myRequestIds: Set<number> = new Set();
   userId: number | null = null;
@@ -57,21 +61,41 @@ export class VolunteerActivitiesComponent implements OnInit {
           this.myActivityIds = new Set();
         }
 
-        // Process requests
-        if (results.requests) {
-          this.myRequestIds = new Set(results.requests.map((r: any) => r.activityId));
-        }
-
-        // Filter and process all activities
+        // Filter and process all activities first
         if (results.all) {
           this.activities = results.all.filter((a: any) => ['PENDIENTE', 'EN_PROGRESO'].includes(a.status?.toUpperCase()));
         }
+
+        // Process requests
+        this.myRequestIds = new Set();
+        if (results.requests) {
+          results.requests.forEach((req: any) => {
+            this.myRequestIds.add(req.activityId);
+            // Optionally merge request status into the activity object if needed for display
+            const activityInList = this.activities.find(a => a.id === req.activityId);
+            if (activityInList) {
+              activityInList.requestStatus = req.status; // e.g. 'PENDIENTE', 'DENEGADA'
+            }
+          });
+        }
+
+        this.filterActivities();
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading activities', err);
+        console.error('Error loading activities:', err);
+        this.message = 'Error al cargar las actividades.';
       }
     });
+  }
+
+  filterActivities() {
+    this.myActivitiesList = this.activities.filter(a => this.isSignedUp(a.id) || this.isRequested(a.id));
+    this.availableActivitiesList = this.activities.filter(a => !this.isSignedUp(a.id) && !this.isRequested(a.id));
+  }
+
+  setTab(tab: string) {
+    this.currentTab = tab;
   }
 
   signUp(activityId: number) {

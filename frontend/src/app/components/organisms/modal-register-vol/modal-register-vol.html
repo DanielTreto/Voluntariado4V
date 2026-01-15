@@ -7,15 +7,41 @@
     <div class="row g-2">
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
+<<<<<<< HEAD
           <input type="text" [(ngModel)]="volunteer.name" name="name" placeholder="Nombre"
             class="form-control custom-input" required />
+=======
+          <input
+            type="text"
+            [(ngModel)]="volunteer.name"
+            name="name"
+            placeholder="Nombre"
+            class="form-control custom-input"
+            [class.is-invalid]="errors['name']"
+            required
+          />
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
         </div>
+        <div *ngIf="errors['name']" class="text-danger small mb-1 ms-1">{{ errors['name'] }}</div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
+<<<<<<< HEAD
           <input type="text" [(ngModel)]="volunteer.surname1" name="surname1" placeholder="1er Apellido"
             class="form-control custom-input" required />
+=======
+          <input
+            type="text"
+            [(ngModel)]="volunteer.surname1"
+            name="surname1"
+            placeholder="1er Apellido"
+            class="form-control custom-input"
+            [class.is-invalid]="errors['surname1']"
+            required
+          />
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
         </div>
+        <div *ngIf="errors['surname1']" class="text-danger small mb-1 ms-1">{{ errors['surname1'] }}</div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
@@ -26,36 +52,115 @@
     </div>
 
     <div class="input-group mb-3 custom-input-group">
+<<<<<<< HEAD
       <input type="date" [(ngModel)]="volunteer.dateOfBirth" name="dateOfBirth" class="form-control custom-input"
         required />
+=======
+      <input
+        type="date"
+        [(ngModel)]="volunteer.dateOfBirth"
+        name="dateOfBirth"
+        class="form-control custom-input"
+        [class.is-invalid]="errors['dateOfBirth']"
+        required
+      />
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
     </div>
+    <div *ngIf="errors['dateOfBirth']" class="text-danger small mb-1 ms-1">{{ errors['dateOfBirth'] }}</div>
 
     <!-- Address removed as it is not in Entity -->
 
     <div class="input-group mb-3 custom-input-group">
+<<<<<<< HEAD
       <input type="text" [(ngModel)]="volunteer.dni" name="dni" placeholder="DNI" class="form-control custom-input"
         required />
+=======
+      <input
+        type="text"
+        [(ngModel)]="volunteer.dni"
+        name="dni"
+        placeholder="DNI"
+        class="form-control custom-input"
+        [class.is-invalid]="errors['dni']"
+        required
+      />
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
     </div>
+    <div *ngIf="errors['dni']" class="text-danger small mb-1 ms-1">{{ errors['dni'] }}</div>
 
     <div class="input-group mb-3 custom-input-group">
+<<<<<<< HEAD
       <input type="tel" [(ngModel)]="volunteer.phone" name="phone" placeholder="Teléfono"
         class="form-control custom-input" required />
+=======
+      <input
+        type="tel"
+        [(ngModel)]="volunteer.phone"
+        name="phone"
+        placeholder="Teléfono"
+        class="form-control custom-input"
+        [class.is-invalid]="errors['phone']"
+        required
+      />
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
     </div>
+    <div *ngIf="errors['phone']" class="text-danger small mb-1 ms-1">{{ errors['phone'] }}</div>
 
     <div class="input-group mb-3 custom-input-group">
+<<<<<<< HEAD
       <input type="email" [(ngModel)]="volunteer.email" name="email" placeholder="Correo Electrónico"
         class="form-control custom-input" required />
+=======
+      <input
+        type="email"
+        [(ngModel)]="volunteer.email"
+        name="email"
+        placeholder="Correo Electrónico"
+        class="form-control custom-input"
+        [class.is-invalid]="errors['email']"
+        required
+      />
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
+    </div>
+    <div *ngIf="errors['email']" class="text-danger small mb-2 ms-1">
+        {{ errors['email'] }}
     </div>
 
     <div class="input-group mb-3 custom-input-group">
+<<<<<<< HEAD
       <input type="password" [(ngModel)]="volunteer.password" name="password" placeholder="Contraseña"
         class="form-control custom-input" required />
+=======
+      <input
+        type="password"
+        [(ngModel)]="volunteer.password"
+        name="password"
+        placeholder="Contraseña"
+        class="form-control custom-input"
+        [class.is-invalid]="errors['password']"
+        required
+      />
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
     </div>
+    <div *ngIf="errors['password']" class="text-danger small mb-1 ms-1">{{ errors['password'] }}</div>
 
     <div class="mb-3">
       <label for="course" class="form-label small text-secondary">Curso</label>
+<<<<<<< HEAD
       <input type="text" [(ngModel)]="volunteer.course" name="course" placeholder="Código Ciclo (Ej: DAM2)"
         class="form-control custom-input" required />
+=======
+      <input
+        type="text"
+        [(ngModel)]="volunteer.course"
+        name="course"
+        placeholder="Código Ciclo (Ej: DAM2)"
+        class="form-control custom-input"
+        [class.is-invalid]="errors['course']"
+        required
+      />
+      <div *ngIf="errors['course']" class="text-danger small mb-1 ms-1">{{ errors['course'] }}</div>
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
     </div>
 
     <div class="mb-4">
@@ -71,8 +176,22 @@
       </label>
     </div>
 
+<<<<<<< HEAD
     <button type="submit" class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
       style="background-color: var(--color-cuatrovientos-main-blue)">
+=======
+    <div *ngIf="globalError" class="alert alert-danger text-center p-2 mb-3 small" role="alert">
+        {{ globalError }}
+    </div>
+
+    <button
+      type="submit"
+      class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
+      style="background-color: var(--color-cuatrovientos-main-blue)"
+      [disabled]="submitting"
+    >
+      <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+>>>>>>> 8bb78549bd331dbd3f00482a6826c87296ab171e
       Registrarse
     </button>
   </form>
