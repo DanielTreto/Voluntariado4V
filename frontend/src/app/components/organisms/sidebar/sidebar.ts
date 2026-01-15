@@ -12,4 +12,5 @@ import { SidebarLinkComponent } from '../../molecules/sidebar-link/sidebar-link'
 })
 export class SidebarComponent {
   @Input() links: { label: string, icon: string, route: string }[] = [];
+  @Input() sidebarTitle: string = 'organizationsHub';
 }

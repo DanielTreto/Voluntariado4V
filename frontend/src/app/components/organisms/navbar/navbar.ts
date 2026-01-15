@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SearchBarComponent } from '../../molecules/search-bar/search-bar';
 
@@ -9,4 +9,6 @@ import { SearchBarComponent } from '../../molecules/search-bar/search-bar';
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
 })
-export class NavbarComponent { }
+export class NavbarComponent {
+  @Input() title: string = 'Dashboard Admin';
+}

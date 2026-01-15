@@ -195,7 +195,7 @@
                             <small class="text-muted text-uppercase fw-bold d-block mb-1">Organización</small>
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-building me-2 text-primary"></i>
-                                <span>{{ selectedActivity.organization }}</span>
+                                <span>{{ selectedActivity.organization?.name || selectedActivity.organization }}</span>
                             </div>
                         </div>
                     </div>
