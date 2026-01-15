@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -10,6 +10,8 @@ import { Router } from '@angular/router';
   styleUrls: ['./dashboard-header.scss']
 })
 export class DashboardHeaderComponent implements OnInit {
+  @Input() title: string = 'Volunteer Management'; // Default title
+
   userName: string = 'Usuario';
   userRole: string = 'Voluntario';
   avatarSrc: string = 'assets/images/default-avatar.png'; // Default
