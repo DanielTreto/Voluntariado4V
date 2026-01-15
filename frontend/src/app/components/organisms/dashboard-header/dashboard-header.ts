@@ -12,7 +12,8 @@ import { Router } from '@angular/router';
 export class DashboardHeaderComponent implements OnInit {
   userName: string = 'Usuario';
   userRole: string = 'Voluntario';
-  
+  avatarSrc: string = 'assets/images/default-avatar.png'; // Default
+
   private router = inject(Router);
 
   ngOnInit(): void {
@@ -21,15 +22,18 @@ export class DashboardHeaderComponent implements OnInit {
       this.userName = user.name;
       // Translate role for display
       this.userRole = user.role === 'organization' ? 'Organización' : 'Voluntario';
+
+      // Set avatar (mock logic for now, or match Sidebar's previous asset)
+      this.avatarSrc = user.avatar || 'assets/images/admin-avatar.png';
     }
   }
 
   goHome() {
     this.router.navigate(['/']);
   }
-  
+
   logout() {
-      localStorage.removeItem('user');
-      this.router.navigate(['/']);
+    localStorage.removeItem('user');
+    this.router.navigate(['/']);
   }
 }
