@@ -7,6 +7,13 @@
                 <i class="bi bi-clock-history me-2"></i> Historial
             </button>
             <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="currentTab === 'solicitudes' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('solicitudes')">
+                <i class="bi bi-inbox me-2"></i> Solicitudes Recibidas
+                <span class="badge bg-danger ms-2 rounded-pill" *ngIf="pendingRequestsCount > 0">{{ pendingRequestsCount
+                    }}</span>
+            </button>
+            <button class="btn rounded-3 px-4 fw-bold"
                 [ngClass]="currentTab === 'solicitud' ? 'btn-primary' : 'btn-light text-secondary'"
                 (click)="setTab('solicitud')">
                 <i class="bi bi-plus-circle me-2"></i> Nueva Actividad
@@ -152,6 +159,61 @@
                 </button>
             </div>
         </form>
+    </div>
+    <div class="tab-content" *ngIf="currentTab === 'solicitudes'">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-2 text-dark">Solicitudes Recibidas</h3>
+            <p class="text-muted">Gestiona las peticiones de voluntarios para unirse a tus actividades.</p>
+        </div>
+
+        <div class="card border mb-3 rounded-4 overflow-hidden shadow-sm" *ngFor="let req of requests">
+            <div class="card-body p-4 d-flex align-items-center flex-wrap gap-3">
+                <!-- Volunteer Info -->
+                <div class="d-flex align-items-center flex-grow-1">
+                    <app-avatar [src]="req.volunteer?.avatar || 'assets/images/volunteer-avatar.png'"
+                        [alt]="req.volunteer?.fullName" [size]="50" class="me-3"></app-avatar>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">{{ req.volunteer?.fullName }}</h6>
+                        <small class="text-muted">Quiere unirse a: <span class="fw-semibold text-primary">{{
+                                req.activity?.title }}</span></small>
+                    </div>
+                </div>
+
+                <!-- Date & Message -->
+                <div class="text-muted small d-none d-md-block" style="min-width: 150px;">
+                    <i class="bi bi-calendar me-1"></i> {{ req.date | date:'mediumDate' }}
+                    <div *ngIf="req.message" class="text-truncate mt-1" style="max-width: 200px;"
+                        title="{{ req.message }}">
+                        <i class="bi bi-chat-quote me-1"></i> {{ req.message }}
+                    </div>
+                </div>
+
+                <!-- Status Badge (if handled) -->
+                <div *ngIf="req.status !== 'PENDIENTE'">
+                    <span class="badge rounded-pill px-3 py-2" [ngClass]="{
+                        'bg-success': req.status === 'ACEPTADA',
+                        'bg-danger': req.status === 'DENEGADA'
+                    }">{{ req.status }}</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2" *ngIf="req.status === 'PENDIENTE'">
+                    <button class="btn btn-success btn-sm rounded-pill px-3 fw-semibold"
+                        (click)="updateRequestStatus(req, 'ACEPTADA')">
+                        <i class="bi bi-check-lg me-1"></i> Aceptar
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-semibold"
+                        (click)="updateRequestStatus(req, 'DENEGADA')">
+                        <i class="bi bi-x-lg me-1"></i> Rechazar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div *ngIf="requests.length === 0" class="text-center text-muted py-5 bg-light rounded-3">
+            <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+            No tienes solicitudes pendientes.
+        </div>
     </div>
 </div>
 

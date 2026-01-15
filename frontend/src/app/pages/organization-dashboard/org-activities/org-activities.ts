@@ -15,8 +15,10 @@ import { ActivatedRoute } from '@angular/router';
     styleUrls: ['./org-activities.css']
 })
 export class OrgActivitiesComponent implements OnInit {
-    currentTab: 'historial' | 'solicitud' = 'historial';
+    currentTab: 'historial' | 'solicitud' | 'solicitudes' = 'historial';
     activities: any[] = [];
+    requests: any[] = [];
+    pendingRequestsCount: number = 0;
     requestForm: FormGroup;
 
     // Modal state
@@ -59,10 +61,45 @@ export class OrgActivitiesComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadActivities();
+        this.loadRequests(); // Load initial count
     }
 
-    setTab(tab: 'historial' | 'solicitud') {
+    setTab(tab: 'historial' | 'solicitud' | 'solicitudes') {
         this.currentTab = tab;
+        if (tab === 'historial') {
+            this.loadActivities();
+        } else if (tab === 'solicitudes') {
+            this.loadRequests();
+        }
+    }
+
+    loadRequests() {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user || user.role !== 'organization') return;
+
+        this.apiService.getOrganizationRequests(user.id).subscribe({
+            next: (data) => {
+                this.requests = data;
+                this.pendingRequestsCount = data.filter(r => r.status === 'PENDIENTE').length;
+            },
+            error: (err) => console.error('Error loading requests', err)
+        });
+    }
+
+    updateRequestStatus(req: any, status: string) {
+        if (!confirm(`¿Estás seguro de que quieres ${status === 'ACEPTADA' ? 'aceptar' : 'rechazar'} esta solicitud?`)) return;
+
+        this.apiService.updateRequestStatus(req.id, status).subscribe({
+            next: (res) => {
+                req.status = status;
+                this.loadRequests(); // Refresh list/count
+                alert(`Solicitud ${status === 'ACEPTADA' ? 'aceptada' : 'rechazada'} correctamente.`);
+            },
+            error: (err) => {
+                console.error('Error updating status', err);
+                alert(err.error?.error || 'Error al actualizar el estado.');
+            }
+        });
     }
 
     loadActivities() {
