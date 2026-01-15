@@ -51,11 +51,13 @@ export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
   private route = inject(ActivatedRoute);
 
-  activeTab: 'pending' | 'active' | 'ended' = 'active';
+  activeTab: 'pending' | 'requests' | 'active' | 'ended' = 'active';
 
   allVolunteers: Volunteer[] = [];
   allOrganizations: Organization[] = [];
   activities: Activity[] = [];
+  requests: any[] = [];
+  pendingRequestsCount: number = 0;
 
   selectedActivity: Activity | null = null;
   activityToDelete: Activity | null = null;
@@ -92,6 +94,7 @@ export class ActivityListComponent implements OnInit {
     this.loadData();
     this.loadVolunteers();
     this.loadOrganizations();
+    this.loadRequests(); // Preload requests count
   }
 
   loadData() {
@@ -134,6 +137,36 @@ export class ActivityListComponent implements OnInit {
       error: (err) => {
         console.error('Error loading data', err);
         this.errorMessage = 'Error: ' + err.message;
+      }
+    });
+  }
+
+  loadRequests() {
+    // Pass '' as orgId to specific behavior for Admin or just filter from backend if customized
+    // Assuming getOrganizationRequests with empty string returns ALL (based on Controller logic).
+    // If controller needs orgId, we might need a specific 'getAllRequests' endpoint or use existing with null.
+    // Based on my controller code: if ($organizationId) it filters. If not, it returns all.
+    this.apiService.getOrganizationRequests('').subscribe({
+      next: (data) => {
+        this.requests = data;
+        this.pendingRequestsCount = data.filter(r => r.status === 'PENDIENTE').length;
+      },
+      error: (err) => console.error('Error loading requests', err)
+    });
+  }
+
+  updateRequestStatus(req: any, status: string) {
+    if (!confirm(`¿Estás seguro de que quieres ${status === 'ACEPTADA' ? 'aceptar' : 'rechazar'} esta solicitud?`)) return;
+
+    this.apiService.updateRequestStatus(req.id, status).subscribe({
+      next: (res) => {
+        req.status = status;
+        this.loadRequests(); // Refresh
+        alert(`Solicitud ${status === 'ACEPTADA' ? 'aceptada' : 'rechazada'} correctamente.`);
+      },
+      error: (err) => {
+        console.error('Error updating request', err);
+        alert('Error al actualizar la solicitud');
       }
     });
   }
@@ -193,6 +226,8 @@ export class ActivityListComponent implements OnInit {
   }
 
   get filteredActivities() {
+    // Only filter activities if tab is one of the activity states
+    if (this.activeTab === 'requests') return [];
     return this.activities.filter(a => a.status === this.activeTab);
   }
 
@@ -220,8 +255,11 @@ export class ActivityListComponent implements OnInit {
     return courses.filter(c => c);
   }
 
-  setTab(tab: 'pending' | 'active' | 'ended') {
+  setTab(tab: 'pending' | 'requests' | 'active' | 'ended') {
     this.activeTab = tab;
+    if (tab === 'requests') {
+      this.loadRequests();
+    }
   }
 
   // Edit Modal
