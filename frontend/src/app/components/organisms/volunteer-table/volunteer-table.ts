@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
@@ -34,6 +34,7 @@ interface Volunteer {
 })
 export class VolunteerTableComponent implements OnInit {
   private apiService = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
   activeTab: 'requests' | 'registered' = 'requests';
   selectedVolunteer: Volunteer | null = null;
   volunteerToDeactivate: Volunteer | null = null;
@@ -85,6 +86,7 @@ export class VolunteerTableComponent implements OnInit {
             interests: []
           };
         });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading volunteers', err);
