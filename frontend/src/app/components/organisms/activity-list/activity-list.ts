@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
@@ -50,6 +50,7 @@ interface Activity {
 export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
   activeTab: 'pending' | 'requests' | 'active' | 'ended' = 'active';
 
@@ -320,7 +321,7 @@ export class ActivityListComponent implements OnInit {
 
   addVolunteerToActivity(volunteer: Volunteer) {
     if (this.selectedActivity && this.selectedActivity.id) {
-      if (!this.selectedActivity.volunteers.find(v => v.id === volunteer.id)) {
+      if (!this.selectedActivity.volunteers.find(v => v.id == volunteer.id)) {
         this.apiService.signUpForActivity(this.selectedActivity.id, volunteer.id).subscribe({
           next: () => {
             this.selectedActivity!.volunteers.push(volunteer);
@@ -344,7 +345,7 @@ export class ActivityListComponent implements OnInit {
     if (this.selectedActivity && this.selectedActivity.id) {
       this.apiService.unsubscribeFromActivity(this.selectedActivity.id, volunteer.id).subscribe({
         next: () => {
-          this.selectedActivity!.volunteers = this.selectedActivity!.volunteers.filter(v => v.id !== volunteer.id);
+          this.selectedActivity!.volunteers = this.selectedActivity!.volunteers.filter(v => v.id != volunteer.id);
           const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
           if (index !== -1) {
             this.activities[index].volunteers = [...this.selectedActivity!.volunteers];
@@ -359,7 +360,8 @@ export class ActivityListComponent implements OnInit {
   }
 
   isVolunteerInActivity(volunteer: Volunteer): boolean {
-    return this.selectedActivity?.volunteers.some(v => v.id === volunteer.id) || false;
+    // Use loose equality to handle string vs number IDs
+    return this.selectedActivity?.volunteers.some(v => v.id == volunteer.id) || false;
   }
 
   // Delete Modal
@@ -473,9 +475,14 @@ export class ActivityListComponent implements OnInit {
 
   // Volunteer Info Modal
   openVolunteerInfo(volunteer: any) {
-    const fullDetails = this.allVolunteers.find(v => v.id === volunteer.id);
+    console.log('Opening volunteer info for:', volunteer);
+    // Use loose equality == to handle string vs number ID mismatches
+    const fullDetails = this.allVolunteers.find(v => v.id == volunteer.id);
     this.selectedVolunteerForKeyInfo = fullDetails || volunteer;
+    console.log('Selected details:', this.selectedVolunteerForKeyInfo);
+
     this.showVolunteerInfoModal = true;
+    this.cdr.detectChanges(); // Force UI update immediately
   }
 
   closeVolunteerInfoModal() {
