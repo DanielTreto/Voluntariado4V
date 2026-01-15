@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BadgeComponent } from '../../atoms/badge/badge';
@@ -37,6 +37,7 @@ interface Organization {
 })
 export class OrganizationListComponent implements OnInit {
   private apiService = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
   activeTab: 'pending' | 'registered' = 'pending';
   selectedOrg: Organization | null = null;
   orgToSuspend: Organization | null = null;
@@ -83,6 +84,7 @@ export class OrganizationListComponent implements OnInit {
         }));
         // Update activities count after loading
         this.updateActivitiesCounts();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading organizations', err);
@@ -103,6 +105,7 @@ export class OrganizationListComponent implements OnInit {
           organizationId: act.organization?.id
         }));
         this.updateActivitiesCounts();
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading activities', err);
