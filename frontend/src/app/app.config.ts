@@ -13,14 +13,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(),
     provideFirebaseApp(() => initializeApp({
-        apiKey: "AIzaSyCM7P5pA-2fcSDbuQKO3kcxLwe3VFhTbTw",
-        authDomain: "voluntariado4v-29430.firebaseapp.com",
-        projectId: "voluntariado4v-29430",
-        storageBucket: "voluntariado4v-29430.firebasestorage.app",
-        messagingSenderId: "645116961397",
-        appId: "1:645116961397:web:0555b75dc625aea647ce3c",
-        measurementId: "G-Y87KHEGMQY"
+      apiKey: "AIzaSyCM7P5pA-2fcSDbuQKO3kcxLwe3VFhTbTw",
+      authDomain: "voluntariado4v-29430.firebaseapp.com",
+      projectId: "voluntariado4v-29430",
+      storageBucket: "voluntariado4v-29430.firebasestorage.app",
+      messagingSenderId: "645116961397",
+      appId: "1:645116961397:web:0555b75dc625aea647ce3c",
+      measurementId: "G-Y87KHEGMQY"
     })),
-    provideAuth(() => getAuth())
+    provideAuth(() => getAuth()),
   ]
 };
