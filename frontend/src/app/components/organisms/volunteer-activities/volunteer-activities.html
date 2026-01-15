@@ -2,12 +2,12 @@
     <!-- Header with Tabs -->
     <div class="d-flex align-items-center mb-4 border-bottom pb-3">
         <div class="d-flex gap-3">
-            <button class="btn rounded-pill px-4 fw-bold"
+            <button class="btn rounded-3 px-4 fw-bold"
                 [ngClass]="currentTab === 'mis-actividades' ? 'btn-primary' : 'btn-light text-secondary'"
                 (click)="setTab('mis-actividades')">
                 <i class="bi bi-person-check-fill me-2"></i> Mis Actividades
             </button>
-            <button class="btn rounded-pill px-4 fw-bold"
+            <button class="btn rounded-3 px-4 fw-bold"
                 [ngClass]="currentTab === 'explorar' ? 'btn-primary' : 'btn-light text-secondary'"
                 (click)="setTab('explorar')">
                 <i class="bi bi-search me-2"></i> Explorar Actividades
