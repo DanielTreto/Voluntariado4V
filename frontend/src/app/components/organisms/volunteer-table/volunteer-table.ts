@@ -167,6 +167,7 @@ export class VolunteerTableComponent implements OnInit {
     this.apiService.updateVolunteerStatus(volunteer.id, newStatus).subscribe({
       next: () => {
         volunteer.status = newLocalStatus as any;
+        this.cdr.detectChanges();
         this.closeDropdown();
       },
       error: (err) => {
@@ -208,6 +209,7 @@ export class VolunteerTableComponent implements OnInit {
           // For registered users being deactivated, usually they should also disappear or go to a 'suspended' tab.
           // Based on "Registered" tab potentially showing active only, let's update local state so filter catches it.
           // The filtering logic `v.status === 'active'` will hide it automatically.
+          this.cdr.detectChanges();
           this.volunteerToDeactivate = null;
         },
         error: (err) => {
@@ -222,6 +224,7 @@ export class VolunteerTableComponent implements OnInit {
     this.apiService.updateVolunteerStatus(volunteer.id, 'ACTIVO').subscribe({
       next: () => {
         volunteer.status = 'active';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error accepting volunteer', err);
@@ -235,6 +238,7 @@ export class VolunteerTableComponent implements OnInit {
       this.apiService.updateVolunteerStatus(volunteer.id, 'SUSPENDIDO').subscribe({
         next: () => {
           volunteer.status = 'suspended';
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error denying volunteer', err);

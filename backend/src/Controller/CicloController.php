@@ -20,7 +20,7 @@ class CicloController extends AbstractController
             $data[] = [
                 'id' => $ciclo->getCODCICLO(),
                 'name' => $ciclo->getNOMBRE(),
-                'family' => $ciclo->getFAMILIA(), // Assuming this field exists, checking entity next
+                'curso' => $ciclo->getCURSO(),
             ];
         }
 

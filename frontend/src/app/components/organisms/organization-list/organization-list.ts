@@ -210,6 +210,7 @@ export class OrganizationListComponent implements OnInit {
     this.apiService.updateOrganizationStatus(org.id, 'ACTIVO').subscribe({
       next: () => {
         org.status = 'active';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error accepting organization', err);
@@ -223,6 +224,7 @@ export class OrganizationListComponent implements OnInit {
       this.apiService.updateOrganizationStatus(org.id, 'SUSPENDIDO').subscribe({
         next: () => {
           org.status = 'suspended';
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error denying organization', err);
@@ -241,6 +243,7 @@ export class OrganizationListComponent implements OnInit {
     this.apiService.updateOrganizationStatus(org.id, 'SUSPENDIDO').subscribe({
       next: () => {
         org.status = 'suspended';
+        this.cdr.detectChanges();
         this.closeDropdown();
       },
       error: (err) => {
@@ -255,6 +258,7 @@ export class OrganizationListComponent implements OnInit {
       this.apiService.updateOrganizationStatus(this.orgToSuspend.id, 'SUSPENDIDO').subscribe({
         next: () => {
           this.orgToSuspend!.status = 'suspended';
+          this.cdr.detectChanges();
           this.orgToSuspend = null;
         },
         error: (err) => {

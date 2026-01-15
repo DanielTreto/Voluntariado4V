@@ -32,7 +32,9 @@ class Credenciales
     #[ORM\JoinColumn(name: "CODVOL", referencedColumnName: "CODVOL", nullable: true)]
     private ?Volunteer $voluntario = null;
     
-    // Add Organization relationship if needed later, for now just Volunteer as per controller usage
+    #[ORM\OneToOne(targetEntity: Organizacion::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: "CODORG", referencedColumnName: "CODORG", nullable: true)]
+    private ?Organizacion $organizacion = null;
 
     public function getId(): ?int
     {
@@ -83,6 +85,18 @@ class Credenciales
     public function setVoluntario(?Volunteer $voluntario): static
     {
         $this->voluntario = $voluntario;
+
+        return $this;
+    }
+
+    public function getOrganizacion(): ?Organizacion
+    {
+        return $this->organizacion;
+    }
+
+    public function setOrganizacion(?Organizacion $organizacion): static
+    {
+        $this->organizacion = $organizacion;
 
         return $this;
     }

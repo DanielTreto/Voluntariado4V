@@ -294,6 +294,7 @@ export class ActivityListComponent implements OnInit {
           if (index !== -1) {
             this.activities[index] = { ...this.activities[index], ...payload };
           }
+          this.cdr.detectChanges();
           this.closeEditModal();
         },
         error: (err) => {
@@ -333,6 +334,7 @@ export class ActivityListComponent implements OnInit {
             if (index !== -1) {
               this.activities[index].volunteers = [...this.selectedActivity!.volunteers];
             }
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Error adding volunteer', err);
@@ -353,6 +355,7 @@ export class ActivityListComponent implements OnInit {
           if (index !== -1) {
             this.activities[index].volunteers = [...this.selectedActivity!.volunteers];
           }
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error removing volunteer', err);
@@ -383,6 +386,7 @@ export class ActivityListComponent implements OnInit {
       this.apiService.deleteActivity(this.activityToDelete.id).subscribe({
         next: () => {
           this.activities = this.activities.filter(a => a.id !== this.activityToDelete!.id);
+          this.cdr.detectChanges();
           this.closeDeleteModal();
         },
         error: (err) => {
@@ -456,6 +460,7 @@ export class ActivityListComponent implements OnInit {
     this.apiService.updateActivityStatus(activity.id, 'EN_PROGRESO').subscribe({
       next: () => {
         activity.status = 'active';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error accepting activity', err);
@@ -468,6 +473,7 @@ export class ActivityListComponent implements OnInit {
       this.apiService.updateActivityStatus(activity.id, 'DENEGADA').subscribe({
         next: () => {
           this.activities = this.activities.filter(a => a.id !== activity.id);
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error denying activity', err);

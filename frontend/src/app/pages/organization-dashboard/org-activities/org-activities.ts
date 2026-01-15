@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
@@ -44,6 +44,7 @@ export class OrgActivitiesComponent implements OnInit {
     private apiService = inject(ApiService);
     private fb = inject(FormBuilder);
     private route = inject(ActivatedRoute);
+    private cdr = inject(ChangeDetectorRef);
 
     constructor() {
         this.requestForm = this.fb.group({
@@ -81,6 +82,7 @@ export class OrgActivitiesComponent implements OnInit {
             next: (data) => {
                 this.requests = data;
                 this.pendingRequestsCount = data.filter(r => r.status === 'PENDIENTE').length;
+                this.cdr.detectChanges();
             },
             error: (err) => console.error('Error loading requests', err)
         });
@@ -92,6 +94,7 @@ export class OrgActivitiesComponent implements OnInit {
         this.apiService.updateRequestStatus(req.id, status).subscribe({
             next: (res) => {
                 req.status = status;
+                this.cdr.detectChanges();
                 this.loadRequests(); // Refresh list/count
                 alert(`Solicitud ${status === 'ACEPTADA' ? 'aceptada' : 'rechazada'} correctamente.`);
             },
@@ -123,6 +126,8 @@ export class OrgActivitiesComponent implements OnInit {
                         type: act.type || 'General',
                         location: act.UBICACION || act.location
                     }));
+
+                    this.cdr.detectChanges();
 
                     // Check for deep link to open modal
                     this.route.queryParams.subscribe(params => {
