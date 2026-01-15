@@ -475,14 +475,18 @@ export class ActivityListComponent implements OnInit {
 
   // Volunteer Info Modal
   openVolunteerInfo(volunteer: any) {
+    if (!volunteer) return;
     console.log('Opening volunteer info for:', volunteer);
-    // Use loose equality == to handle string vs number ID mismatches
-    const fullDetails = this.allVolunteers.find(v => v.id == volunteer.id);
-    this.selectedVolunteerForKeyInfo = fullDetails || volunteer;
-    console.log('Selected details:', this.selectedVolunteerForKeyInfo);
 
-    this.showVolunteerInfoModal = true;
-    this.cdr.detectChanges(); // Force UI update immediately
+    setTimeout(() => {
+      // Use loose equality == to handle string vs number ID mismatches
+      const fullDetails = this.allVolunteers.find(v => v.id == volunteer.id);
+      this.selectedVolunteerForKeyInfo = fullDetails || volunteer;
+      console.log('Selected details:', this.selectedVolunteerForKeyInfo);
+
+      this.showVolunteerInfoModal = true;
+      this.cdr.detectChanges(); // Force UI update immediately
+    }, 0);
   }
 
   closeVolunteerInfoModal() {
