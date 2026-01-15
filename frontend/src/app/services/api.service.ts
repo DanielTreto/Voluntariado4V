@@ -114,4 +114,8 @@ export class ApiService {
   getVolunteerRequests(id: number | string): Observable<any> {
     return this.http.get(`${this.apiUrl}/volunteers/${id}/requests`);
   }
+
+  getCiclos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/ciclos`);
+  }
 }

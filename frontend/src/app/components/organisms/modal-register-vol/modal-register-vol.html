@@ -1,8 +1,5 @@
-<div
-  class="bg-white rounded-3 shadow-lg p-4 p-md-5 position-relative mx-auto"
-  style="max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto"
-  (click)="$event.stopPropagation()"
->
+<div class="bg-white rounded-3 shadow-lg p-4 p-md-5 position-relative mx-auto"
+  style="max-width: 700px; width: 100%; max-height: 85vh; overflow-y: auto" (click)="$event.stopPropagation()">
   <button (click)="closeModal()" class="btn-close position-absolute top-0 end-0 m-3"></button>
   <h2 class="fs-3 fw-bold text-center text-cuatro-dark-bg mb-4">Registro Voluntario</h2>
 
@@ -10,135 +7,76 @@
     <div class="row g-2">
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
-          <input
-            type="text"
-            [(ngModel)]="volunteer.name"
-            name="name"
-            placeholder="Nombre"
-            class="form-control custom-input"
-            [class.is-invalid]="errors['name']"
-            required
-          />
+          <input type="text" [(ngModel)]="volunteer.name" name="name" placeholder="Nombre"
+            class="form-control custom-input" [class.is-invalid]="errors['name']" required />
         </div>
         <div *ngIf="errors['name']" class="text-danger small mb-1 ms-1">{{ errors['name'] }}</div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
-          <input
-            type="text"
-            [(ngModel)]="volunteer.surname1"
-            name="surname1"
-            placeholder="1er Apellido"
-            class="form-control custom-input"
-            [class.is-invalid]="errors['surname1']"
-            required
-          />
+          <input type="text" [(ngModel)]="volunteer.surname1" name="surname1" placeholder="1er Apellido"
+            class="form-control custom-input" [class.is-invalid]="errors['surname1']" required />
         </div>
         <div *ngIf="errors['surname1']" class="text-danger small mb-1 ms-1">{{ errors['surname1'] }}</div>
       </div>
       <div class="col-md-4">
         <div class="input-group mb-3 custom-input-group">
-          <input
-            type="text"
-            [(ngModel)]="volunteer.surname2"
-            name="surname2"
-            placeholder="2do Apellido"
-            class="form-control custom-input"
-          />
+          <input type="text" [(ngModel)]="volunteer.surname2" name="surname2" placeholder="2do Apellido"
+            class="form-control custom-input" />
         </div>
       </div>
     </div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="date"
-        [(ngModel)]="volunteer.dateOfBirth"
-        name="dateOfBirth"
-        class="form-control custom-input"
-        [class.is-invalid]="errors['dateOfBirth']"
-        required
-      />
+      <input type="date" [(ngModel)]="volunteer.dateOfBirth" name="dateOfBirth" class="form-control custom-input"
+        [class.is-invalid]="errors['dateOfBirth']" required />
     </div>
     <div *ngIf="errors['dateOfBirth']" class="text-danger small mb-1 ms-1">{{ errors['dateOfBirth'] }}</div>
 
     <!-- Address removed as it is not in Entity -->
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="text"
-        [(ngModel)]="volunteer.dni"
-        name="dni"
-        placeholder="DNI"
-        class="form-control custom-input"
-        [class.is-invalid]="errors['dni']"
-        required
-      />
+      <input type="text" [(ngModel)]="volunteer.dni" name="dni" placeholder="DNI" class="form-control custom-input"
+        [class.is-invalid]="errors['dni']" required />
     </div>
     <div *ngIf="errors['dni']" class="text-danger small mb-1 ms-1">{{ errors['dni'] }}</div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="tel"
-        [(ngModel)]="volunteer.phone"
-        name="phone"
-        placeholder="Teléfono"
-        class="form-control custom-input"
-        [class.is-invalid]="errors['phone']"
-        required
-      />
+      <input type="tel" [(ngModel)]="volunteer.phone" name="phone" placeholder="Teléfono"
+        class="form-control custom-input" [class.is-invalid]="errors['phone']" required />
     </div>
     <div *ngIf="errors['phone']" class="text-danger small mb-1 ms-1">{{ errors['phone'] }}</div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="email"
-        [(ngModel)]="volunteer.email"
-        name="email"
-        placeholder="Correo Electrónico"
-        class="form-control custom-input"
-        [class.is-invalid]="errors['email']"
-        required
-      />
+      <input type="email" [(ngModel)]="volunteer.email" name="email" placeholder="Correo Electrónico"
+        class="form-control custom-input" [class.is-invalid]="errors['email']" required />
     </div>
     <div *ngIf="errors['email']" class="text-danger small mb-2 ms-1">
-        {{ errors['email'] }}
+      {{ errors['email'] }}
     </div>
 
     <div class="input-group mb-3 custom-input-group">
-      <input
-        type="password"
-        [(ngModel)]="volunteer.password"
-        name="password"
-        placeholder="Contraseña"
-        class="form-control custom-input"
-        [class.is-invalid]="errors['password']"
-        required
-      />
+      <input type="password" [(ngModel)]="volunteer.password" name="password" placeholder="Contraseña"
+        class="form-control custom-input" [class.is-invalid]="errors['password']" required />
     </div>
     <div *ngIf="errors['password']" class="text-danger small mb-1 ms-1">{{ errors['password'] }}</div>
 
     <div class="mb-3">
       <label for="course" class="form-label small text-secondary">Curso</label>
-      <input
-        type="text"
-        [(ngModel)]="volunteer.course"
-        name="course"
-        placeholder="Código Ciclo (Ej: DAM2)"
-        class="form-control custom-input"
-        [class.is-invalid]="errors['course']"
-        required
-      />
+      <select [(ngModel)]="volunteer.course" name="course" class="form-select custom-input"
+        [class.is-invalid]="errors['course']" required>
+        <option value="" disabled selected>Selecciona tu ciclo formativo</option>
+        <option *ngFor="let cycle of cycles" [value]="cycle.id">
+          {{ cycle.id }} - {{ cycle.name }}
+        </option>
+      </select>
       <div *ngIf="errors['course']" class="text-danger small mb-1 ms-1">{{ errors['course'] }}</div>
     </div>
 
     <div class="mb-4">
       <label class="form-label small text-secondary">Descripción / Intereses</label>
-      <textarea
-        [(ngModel)]="volunteer.description"
-        name="description"
-        class="form-control custom-input"
-        rows="2"
-      ></textarea>
+      <textarea [(ngModel)]="volunteer.description" name="description" class="form-control custom-input"
+        rows="2"></textarea>
     </div>
 
     <div class="form-check mb-4">
@@ -149,15 +87,11 @@
     </div>
 
     <div *ngIf="globalError" class="alert alert-danger text-center p-2 mb-3 small" role="alert">
-        {{ globalError }}
+      {{ globalError }}
     </div>
 
-    <button
-      type="submit"
-      class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
-      style="background-color: var(--color-cuatrovientos-main-blue)"
-      [disabled]="submitting"
-    >
+    <button type="submit" class="w-100 btn btn-lg text-white rounded-lg fw-bold py-2 custom-register-btn"
+      style="background-color: var(--color-cuatrovientos-main-blue)" [disabled]="submitting">
       <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
       Registrarse
     </button>
@@ -166,10 +100,7 @@
   <div class="text-center mt-3">
     <p class="small text-secondary mb-2">
       ¿Ya tienes una cuenta?
-      <button
-        (click)="openLoginModal()"
-        class="btn btn-link text-primary text-decoration-none small"
-      >
+      <button (click)="openLoginModal()" class="btn btn-link text-primary text-decoration-none small">
         Iniciar Sesión
       </button>
     </p>

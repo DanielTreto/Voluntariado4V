@@ -13,7 +13,7 @@ import { ApiService } from '../../../services/api.service';
 export class ModalRegisterVol {
   onClose = output();
   onOpenLogin = output();
-  
+
   private apiService = inject(ApiService);
 
   volunteer = {
@@ -33,10 +33,10 @@ export class ModalRegisterVol {
   globalError: string = '';
   submitting: boolean = false;
 
-  constructor() {}
+  constructor() { }
 
   closeModal(): void {
-    this.onClose.emit(); 
+    this.onClose.emit();
   }
 
   openLoginModal(): void {
@@ -46,9 +46,9 @@ export class ModalRegisterVol {
   validateForm(): boolean {
     this.errors = {};
     let isValid = true;
-    
-    const requiredFields = ['name', 'surname1', 'email', 'phone', 'dni', 'dateOfBirth', 'password'];
-    
+
+    const requiredFields = ['name', 'surname1', 'email', 'phone', 'dni', 'dateOfBirth', 'password', 'course'];
+
     requiredFields.forEach(field => {
       if (!(this.volunteer as any)[field]) {
         this.errors[field] = 'Este campo es obligatorio';
@@ -70,7 +70,7 @@ export class ModalRegisterVol {
 
   registerVolunteer(): void {
     this.globalError = '';
-    
+
     if (!this.validateForm()) {
       return;
     }
@@ -87,23 +87,23 @@ export class ModalRegisterVol {
       error: (error) => {
         this.submitting = false;
         console.error('Error registering volunteer', error);
-        
+
         let msg = 'Error en el registro. Inténtalo de nuevo.';
         if (error.error && error.error.error) {
-             msg = error.error.error;
+          msg = error.error.error;
         }
-        
+
         // Detect duplicates
         if (msg.includes('Duplicate') || msg.includes('SQLSTATE[23000]')) {
-             if (msg.includes('CORREO')) {
-                 this.globalError = 'El correo electrónico ya está registrado.';
-             } else if (msg.includes('DNI')) {
-                 this.globalError = 'El DNI ya está registrado.';
-             } else {
-                 this.globalError = 'Ya existe un usuario con estos datos (DNI o Correo).';
-             }
+          if (msg.includes('CORREO')) {
+            this.globalError = 'El correo electrónico ya está registrado.';
+          } else if (msg.includes('DNI')) {
+            this.globalError = 'El DNI ya está registrado.';
+          } else {
+            this.globalError = 'Ya existe un usuario con estos datos (DNI o Correo).';
+          }
         } else {
-            this.globalError = msg;
+          this.globalError = msg;
         }
       }
     });

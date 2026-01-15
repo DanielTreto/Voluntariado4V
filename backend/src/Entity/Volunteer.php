@@ -52,6 +52,7 @@ class Volunteer
 
     #[ORM\ManyToOne(targetEntity: Ciclo::class)]
     #[ORM\JoinColumn(name: 'CODCICLO', referencedColumnName: 'CODCICLO', nullable: false)]
+    #[Assert\NotNull(message: 'El ciclo formativo es obligatorio.')]
     private ?Ciclo $ciclo = null;
 
     #[ORM\Column(length: 9, unique: true, columnDefinition: 'CHAR(9)')]
