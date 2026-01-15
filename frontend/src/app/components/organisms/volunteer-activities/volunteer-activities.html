@@ -102,9 +102,6 @@
                     <button class="btn btn-success btn-sm rounded-pill fw-semibold" disabled>
                         <i class="bi bi-check-circle-fill me-1"></i> Participando
                     </button>
-                    <button (click)="unsignUp(activity.id)" class="btn btn-outline-danger btn-sm rounded-pill">
-                        Desapuntarse
-                    </button>
                 </div>
 
                 <div *ngIf="isRequested(activity.id) && !isSignedUp(activity.id)" class="d-grid">
@@ -123,10 +120,91 @@
                         No disponible
                     </button>
                 </div>
-                <button class="btn btn-link text-primary text-decoration-none w-100 mt-2 text-center small">
+                <button class="btn btn-link text-primary text-decoration-none w-100 mt-2 text-center small"
+                    (click)="openActivityDetails(activity)">
                     <i class="bi bi-eye me-1"></i> Ver más
                 </button>
             </div>
         </div>
     </div>
 </ng-template>
+
+<!-- Activity Details Modal -->
+<div class="modal" [class.show]="showDetailsModal" [style.display]="showDetailsModal ? 'block' : 'none'"
+    [style.background-color]="showDetailsModal ? 'rgba(0,0,0,0.5)' : 'transparent'" style="z-index: 2000;" tabindex="-1"
+    (click)="closeDetailsModal()">
+    <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-content rounded-4 border-0 shadow" *ngIf="selectedActivity">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">{{ selectedActivity.title }}</h5>
+                <button type="button" class="btn-close" (click)="closeDetailsModal()"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Activity Image -->
+                <img [src]="selectedActivity.image || 'assets/images/activity-default.jpg'" class="w-100 rounded-3 mb-4"
+                    style="max-height: 300px; object-fit: cover;" alt="{{ selectedActivity.title }}">
+
+                <!-- Status Badge -->
+                <div class="mb-3">
+                    <span class="badge rounded-pill px-3 py-2" [ngClass]="{
+                        'bg-success': selectedActivity.status === 'EN_PROGRESO' || selectedActivity.status === 'APROBADA',
+                        'bg-warning text-dark': selectedActivity.status === 'PENDIENTE',
+                        'bg-secondary': selectedActivity.status === 'FINALIZADA'
+                    }">
+                        {{ selectedActivity.status }}
+                    </span>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Descripción</h6>
+                    <p class="mb-0">{{ selectedActivity.description }}</p>
+                </div>
+
+                <!-- Details Grid -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Fecha</small>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-event me-2 text-primary"></i>
+                                <span>{{ selectedActivity.date | date:'fullDate' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Ubicación</small>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-geo-alt me-2 text-primary"></i>
+                                <span>{{ selectedActivity.location || 'Ubicación no especificada' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="selectedActivity.type">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Tipo</small>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-tag me-2 text-primary"></i>
+                                <span>{{ selectedActivity.type }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="selectedActivity.organization">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Organización</small>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-building me-2 text-primary"></i>
+                                <span>{{ selectedActivity.organization }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary px-4 rounded-pill"
+                    (click)="closeDetailsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

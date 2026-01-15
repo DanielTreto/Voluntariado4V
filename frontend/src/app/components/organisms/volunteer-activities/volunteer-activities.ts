@@ -139,4 +139,19 @@ export class VolunteerActivitiesComponent implements OnInit {
   isRequested(activityId: number): boolean {
     return this.myRequestIds.has(activityId);
   }
+
+  // Activity Details Modal
+  showDetailsModal: boolean = false;
+  selectedActivity: any = null;
+
+  openActivityDetails(activity: any) {
+    this.selectedActivity = activity;
+    this.showDetailsModal = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDetailsModal() {
+    this.showDetailsModal = false;
+    this.selectedActivity = null;
+  }
 }
