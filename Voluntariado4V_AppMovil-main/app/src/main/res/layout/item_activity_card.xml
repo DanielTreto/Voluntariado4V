@@ -148,32 +148,11 @@
             android:gravity="end">
 
             <Button
-                android:layout_width="0dp"
+                android:id="@+id/btnViewDetails"
+                android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_weight="1"
-                android:text="Modificar"
-                android:textSize="10sp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginEnd="4dp"/>
-
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:text="+ Alumnos"
-                android:textSize="10sp"
-                android:textColor="#4CAF50"
-                app:strokeColor="#4CAF50"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginEnd="4dp"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Borrar"
-                android:textSize="10sp"
-                android:textColor="#F44336"
-                app:strokeColor="#F44336"
+                android:text="Ver detalles"
+                android:textSize="12sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
         </LinearLayout>
 

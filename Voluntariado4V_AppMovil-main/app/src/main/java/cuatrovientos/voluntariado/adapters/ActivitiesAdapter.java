@@ -64,9 +64,9 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
                 holder.layoutButtonsActive.setVisibility(View.VISIBLE);
                 holder.layoutButtonsPending.setVisibility(View.GONE);
             } else {
-                // Pestaña SOLICITUDES: Mostrar botones Aceptar/Denegar grande
+                // Pestaña SOLICITUDES: Mostrar botones Aceptar/Denegar grande -> AHORA OCULTO
                 holder.layoutButtonsActive.setVisibility(View.GONE);
-                holder.layoutButtonsPending.setVisibility(View.VISIBLE);
+                holder.layoutButtonsPending.setVisibility(View.GONE);
             }
         }
     }

@@ -43,8 +43,8 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
 
         if (org.getStatus().equals("Pending")) {
             // --- MODO SOLICITUD ---
-            // 1. Mostrar botones Aceptar/Denegar
-            holder.actionsLayout.setVisibility(View.VISIBLE);
+            // 1. Mostrar botones Aceptar/Denegar -> AHORA DENEGADO (SOLO VISUALIZAR)
+            holder.actionsLayout.setVisibility(View.GONE);
             // 2. Ocultar los 3 puntos
             holder.btnMoreOptions.setVisibility(View.GONE);
 

@@ -58,7 +58,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
 
         } else {
             // Es una solicitud pendiente ("Pending")
-            holder.actionsLayout.setVisibility(View.VISIBLE); // Mostrar botones Check/Cruz
+            holder.actionsLayout.setVisibility(View.GONE); // Mostrar botones Check/Cruz -> AHORA OCULTO
             holder.btnMoreOptions.setVisibility(View.GONE); // Ocultar 3 puntos
 
             holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1"));
