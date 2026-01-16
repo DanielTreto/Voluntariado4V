@@ -43,7 +43,9 @@ public class VolunteersFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // 2. Crear los DATOS (Lista Maestra)
-        createMockData();
+        // 2. Crear los DATOS (Lista Maestra)
+        masterList = new ArrayList<>();
+        fetchVolunteers();
 
         // 3. Inicializar el adaptador con la lista vacía o filtrada inicialmente
         // Por defecto mostramos la pestaña 0 (Solicitudes -> Pending)
@@ -71,22 +73,78 @@ public class VolunteersFragment extends Fragment {
         });
     }
 
-    // Método para crear datos de prueba
-    private void createMockData() {
-        masterList = new ArrayList<>();
-        // Solicitudes (Pending)
-        masterList.add(new Volunteer("Michael Brown", "Pending Assignment", "michael.b@example.com", "(555) 222-3333", "Pending", "2023-11-20"));
-        masterList.add(new Volunteer("Sarah Davis", "Pending Assignment", "sarah.d@example.com", "(555) 444-5555", "Pending", "2023-11-25"));
+    private void fetchVolunteers() {
+        cuatrovientos.voluntariado.network.ApiService apiService = 
+            cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
 
-        // Registrados (Active / Suspended)
-        masterList.add(new Volunteer("Jane Doe", "Community Garden", "jane.doe@example.com", "(555) 123-4567", "Active", "2023-10-26"));
-        masterList.add(new Volunteer("Emily Johnson", "Literacy Program", "emily.j@example.com", "(555) 456-7890", "Suspended", "2023-10-15"));
-        masterList.add(new Volunteer("John Smith", "Food Bank Initiative", "john.s@example.com", "(555) 987-6543", "Active", "2023-11-01"));
+        apiService.getVolunteers().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiVolunteer>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiVolunteer>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiVolunteer>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    masterList.clear();
+                    for (cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol : response.body()) {
+                        String status = mapStatus(apiVol.getStatus());
+                        String fullName = apiVol.getName() + " " + apiVol.getSurname1() + (apiVol.getSurname2() != null ? " " + apiVol.getSurname2() : "");
+                        String avatarPath = apiVol.getAvatar();
+                        String avatarUrl = null;
+                        if (avatarPath != null) {
+                            if (avatarPath.startsWith("http")) {
+                                avatarUrl = avatarPath;
+                            } else {
+                                avatarUrl = "http://10.0.2.2:8000" + avatarPath;
+                            }
+                        }
+                        
+                        masterList.add(new Volunteer(
+                            fullName,
+                            "Voluntario", 
+                            apiVol.getEmail(),
+                            apiVol.getPhone(),
+                            status,
+                            apiVol.getDateOfBirth(),
+                            avatarUrl
+                        ));
+                    }
+                    // Refresh current view (defaulting to Solicitudes initially)
+                    TabLayout tabLayout = getView().findViewById(R.id.tabLayout);
+                    if (tabLayout.getSelectedTabPosition() == 0) {
+                        filterList("Solicitudes");
+                    } else {
+                        filterList("Registrados");
+                    }
+                } else {
+                    android.util.Log.e("VolunteersFragment", "Error fetching volunteers: " + response.code());
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Error al cargar voluntarios", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiVolunteer>> call, Throwable t) {
+                android.util.Log.e("VolunteersFragment", "Network error: " + t.getMessage());
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Error de conexión", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private String mapStatus(String backendStatus) {
+        if (backendStatus == null) return "Pending";
+        switch (backendStatus.toUpperCase()) {
+            case "ACTIVO": return "Active";
+            case "PENDIENTE": return "Pending";
+            case "SUSPENDIDO": return "Suspended";
+            default: return "Pending";
+        }
     }
 
     // Lógica de filtrado
     private void filterList(String tabName) {
         List<Volunteer> filteredList = new ArrayList<>();
+
+        if (masterList == null) return; // Guard against null
 
         for (Volunteer v : masterList) {
             if (tabName.equals("Solicitudes")) {
@@ -103,6 +161,8 @@ public class VolunteersFragment extends Fragment {
         }
 
         // Actualizamos el adaptador con la nueva lista filtrada
-        adapter.updateList(filteredList);
+        if (adapter != null) {
+            adapter.updateList(filteredList);
+        }
     }
 }

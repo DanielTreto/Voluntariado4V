@@ -34,7 +34,7 @@ public class OrganizationHistoryFragment extends Fragment {
         List<VolunteerActivity> historyList = new ArrayList<>();
         // Mock Data: Finalized / Past activities for Org
         historyList.add(new VolunteerActivity(
-                "Maratón Solidario 2024", "Evento deportivo benéfico.", "Ciudad Deportiva", "2024-03-15", "Deporte", "Finished", 0xFF009688
+                "Maratón Solidario 2024", "Evento deportivo benéfico.", "Ciudad Deportiva", "2024-03-15", "Deporte", "Finished", 0xFF009688, "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
         ));
 
         // Using false (Org Mode) but since they are finished, maybe buttons shouldn't be active?

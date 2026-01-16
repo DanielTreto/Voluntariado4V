@@ -29,7 +29,7 @@ public class EventsFragment extends Fragment {
     private TextView tvMonthTitle;
     private RecyclerView recyclerView;
     private CalendarAdapter adapter;
-    private List<VolunteerActivity> mockActivities;
+    private List<VolunteerActivity> activities;
 
     public EventsFragment() {
         // Required empty public constructor
@@ -56,10 +56,11 @@ public class EventsFragment extends Fragment {
         currentMonth = Calendar.getInstance();
         
         // Cargar datos de prueba
-        loadMockData();
+        activities = new ArrayList<>();
+        fetchActivities();
 
-        // Actualizar vista inicial
-        updateCalendar();
+        // Actualizar vista inicial (Se actualizará al recibir respuesta de API)
+        // updateCalendar();
 
         // Listeners
         btnPrevMonth.setOnClickListener(v -> {
@@ -73,18 +74,80 @@ public class EventsFragment extends Fragment {
         });
     }
 
-    private void loadMockData() {
-        mockActivities = new ArrayList<>();
-        // Ejemplos para Enero 2026 (Mes actual según prompt entorno, aunque la fecha real sea 2026-01-16)
-        mockActivities.add(new VolunteerActivity("Limpieza Río", "", "", "2026-01-05", "Medio Ambiente", "Active", 0xFF2E7D32));
-        mockActivities.add(new VolunteerActivity("Reparto Alimentos", "", "", "2026-01-16", "Social", "Active", 0xFF1976D2));
-        mockActivities.add(new VolunteerActivity("Taller Digital", "", "", "2026-01-20", "Tecnológico", "Active", 0xFFFFC107));
-        
-        // Ejemplos para Febrero 2026
-        mockActivities.add(new VolunteerActivity("Charla Educativa", "", "", "2026-02-10", "Educativo", "Active", 0xFF512DA8));
-        
-        // Ejemplos para Diciembre 2025
-        mockActivities.add(new VolunteerActivity("Cena Navidad", "", "", "2025-12-24", "Social", "Active", 0xFFD32F2F));
+    private void fetchActivities() {
+        cuatrovientos.voluntariado.network.ApiService apiService = 
+            cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
+
+        apiService.getActivities().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    activities.clear();
+                    for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
+                        String rawStatus = apiAct.getStatus() != null ? apiAct.getStatus() : "ACTIVO";
+                        String status = "Active"; 
+                        
+                        // Normalize Backend Status (Spanish) to Frontend (English)
+                        if (rawStatus.equalsIgnoreCase("ACTIVO")) status = "Active";
+                        else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
+                        else if (rawStatus.equalsIgnoreCase("SUSPENDIDO")) status = "Suspended";
+                        else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
+                        else status = rawStatus;
+
+                        // Use Status for Color instead of Type
+                        int color = getColorForStatus(status);
+                        
+                        activities.add(new VolunteerActivity(
+                            apiAct.getTitle(),
+                            apiAct.getDescription(),
+                            apiAct.getLocation(),
+                            apiAct.getDate(),
+                            apiAct.getType(),
+                            status,
+                            color,
+                            apiAct.getImagen()
+                        ));
+                    }
+                    updateCalendar();
+                } else {
+                    android.util.Log.e("EventsFragment", "Error fetching activities: " + response.code());
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Error al cargar actividades", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, Throwable t) {
+                android.util.Log.e("EventsFragment", "Network error: " + t.getMessage());
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Error de conexión", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private int getColorForStatus(String status) {
+        if (status == null) return 0xFF9E9E9E; // Gray default
+        switch (status) {
+            case "Active": return 0xFF4CAF50; // Green
+            case "Pending": return 0xFFFFC107; // Amber
+            case "Finished": return 0xFF9E9E9E; // Grey
+            case "Suspended": return 0xFFF44336; // Red
+            default: return 0xFF2196F3; // Blue default
+        }
+    }
+
+    private int getColorForType(String type) {
+        // Deprecated for Calendar, kept if needed elsewhere
+        if (type == null) return 0xFF9E9E9E; 
+        switch (type) {
+            case "Medio Ambiente": return 0xFF2E7D32; 
+            case "Social": return 0xFF1976D2; 
+            case "Tecnológico": return 0xFFFFC107; 
+            case "Educativo": return 0xFF512DA8; 
+            default: return 0xFFEF5350; 
+        }
     }
 
     private void updateCalendar() {
@@ -125,7 +188,7 @@ public class EventsFragment extends Fragment {
             String eventTitle = null;
             String eventColor = null;
             
-            for (VolunteerActivity activity : mockActivities) {
+            for (VolunteerActivity activity : activities) {
                 if (activity.getDate().equals(dateString)) {
                     eventTitle = activity.getTitle();
                     // Convertir int color a Hex string si es necesario, o pasar int directamente al adaptador

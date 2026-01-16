@@ -12,8 +12,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Volunteer
 {
     #[ORM\Id]
-    #[ORM\Column(name: 'CODVOL', type: 'string', length: 20)]
-    private ?string $CODVOL = null;
+    #[ORM\GeneratedValue]
+    #[ORM\Column(name: 'CODVOL', type: 'integer')]
+    private ?int $CODVOL = null;
 
 
 
@@ -113,12 +114,12 @@ class Volunteer
         $this->preferencias = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    public function getCODVOL(): ?string
+    public function getCODVOL(): ?int
     {
         return $this->CODVOL;
     }
 
-    public function setCODVOL(string $CODVOL): static
+    public function setCODVOL(int $CODVOL): static
     {
         $this->CODVOL = $CODVOL;
         return $this;

@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.model.Organization;
+import com.bumptech.glide.Glide;
+import android.widget.ImageView;
 
 public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdapter.OrgViewHolder> {
 
@@ -40,6 +42,19 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
         holder.tvName.setText(org.getName());
         holder.tvEmail.setText(org.getEmail());
         holder.tvStatus.setText(org.getStatus());
+
+        if (org.getAvatarUrl() != null) {
+             Glide.with(holder.itemView.getContext())
+                 .load(org.getAvatarUrl())
+                 .placeholder(R.drawable.ic_building)
+                 .error(R.drawable.ic_building)
+                 .circleCrop()
+                 .into(holder.imgLogo);
+        } else {
+             // Reset to default if recycled
+             holder.imgLogo.setImageResource(R.drawable.ic_building);
+             holder.imgLogo.setBackground(null); // Clear background
+        }
 
         if (org.getStatus().equals("Pending")) {
             // --- MODO SOLICITUD ---
@@ -80,10 +95,12 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
 
     public static class OrgViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvEmail, tvStatus, tvInfo, btnMoreOptions;
+        ImageView imgLogo;
         LinearLayout actionsLayout;
 
         public OrgViewHolder(@NonNull View itemView) {
             super(itemView);
+            imgLogo = itemView.findViewById(R.id.imgLogo);
             tvName = itemView.findViewById(R.id.tvOrgName);
             tvEmail = itemView.findViewById(R.id.tvOrgEmail);
             tvStatus = itemView.findViewById(R.id.chipOrgStatus);

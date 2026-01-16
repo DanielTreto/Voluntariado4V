@@ -33,7 +33,7 @@ public class StudentHistoryFragment extends Fragment {
         List<VolunteerActivity> historyList = new ArrayList<>();
         // Mock Data: Actividades finalizadas
         historyList.add(new VolunteerActivity(
-                "Gran Recogida 2024", "Campaña anual en supermercados.", "Supermercados Varios", "2024-11-20", "Social", "Finished", 0xFFE91E63
+                "Gran Recogida 2024", "Campaña anual en supermercados.", "Supermercados Varios", "2024-11-20", "Social", "Finished", 0xFFE91E63, "https://images.unsplash.com/photo-1593113598332-cd288d649433?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
         ));
 
         adapter = new ActivitiesAdapter(historyList, true);

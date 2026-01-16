@@ -213,6 +213,21 @@ class Actividad
         return $this;
     }
 
+    #[ORM\Column(name: 'imagen', length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
+    private ?string $IMAGEN = null;
+
+    public function getIMAGEN(): ?string
+    {
+        return $this->IMAGEN;
+    }
+
+    public function setIMAGEN(?string $IMAGEN): static
+    {
+        $this->IMAGEN = $IMAGEN;
+        return $this;
+    }
+
     public function removeVoluntario(Volunteer $volunteer): static
     {
         $this->voluntarios->removeElement($volunteer);

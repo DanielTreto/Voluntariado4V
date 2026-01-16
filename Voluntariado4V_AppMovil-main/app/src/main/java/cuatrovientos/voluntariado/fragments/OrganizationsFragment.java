@@ -38,7 +38,8 @@ public class OrganizationsFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerOrganizations);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        createMockData();
+        masterList = new ArrayList<>();
+        fetchOrganizations();
 
         adapter = new OrganizationsAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
@@ -63,18 +64,75 @@ public class OrganizationsFragment extends Fragment {
         });
     }
 
-    private void createMockData() {
-        masterList = new ArrayList<>();
-        // Solicitudes (Imagen 1)
-        masterList.add(new Organization("Future Horizons NGO", "contact@future.org", "2025-11-20", "0", "Pending"));
+    private void fetchOrganizations() {
+        cuatrovientos.voluntariado.network.ApiService apiService = 
+            cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
 
-        // Registradas (Imagen 2)
-        masterList.add(new Organization("Soluciones Globales A.C.", "info@globales.com", "2023-01-01", "12", "Active"));
-        masterList.add(new Organization("Community Helpers", "hello@helpers.org", "2023-05-15", "5", "Active"));
+        apiService.getOrganizations().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiOrganization>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    masterList.clear();
+                    for (cuatrovientos.voluntariado.network.model.ApiOrganization apiOrg : response.body()) {
+                        String status = mapStatus(apiOrg.getStatus());
+                        String volunteersCount = apiOrg.getDescription() != null && apiOrg.getDescription().isEmpty() ? "0" : "5"; 
+                        String avatarPath = apiOrg.getAvatar();
+                        String avatarUrl = null;
+                        if (avatarPath != null) {
+                            if (avatarPath.startsWith("http")) {
+                                avatarUrl = avatarPath;
+                            } else {
+                                avatarUrl = "http://10.0.2.2:8000" + avatarPath;
+                            }
+                        }
+
+                        masterList.add(new Organization(
+                            apiOrg.getName(),
+                            apiOrg.getEmail(),
+                            "2023-01-01", 
+                            volunteersCount,
+                            status,
+                            avatarUrl
+                        ));
+                    }
+                    TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
+                    if (tabLayout.getSelectedTabPosition() == 0) {
+                        filterList("Solicitudes");
+                    } else {
+                        filterList("Registradas");
+                    }
+                } else {
+                    android.util.Log.e("OrganizationsFragment", "Error fetching organizations: " + response.code());
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Error al cargar organizaciones", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> call, Throwable t) {
+                android.util.Log.e("OrganizationsFragment", "Network error: " + t.getMessage());
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Error de conexión", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private String mapStatus(String backendStatus) {
+        if (backendStatus == null) return "Pending";
+        switch (backendStatus.toUpperCase()) {
+            case "ACTIVO": return "Active";
+            case "PENDIENTE": return "Pending";
+            case "SUSPENDIDO": return "Suspended";
+            default: return "Pending";
+        }
     }
 
     private void filterList(String tabName) {
         List<Organization> filteredList = new ArrayList<>();
+        if (masterList == null) return;
+
         for (Organization org : masterList) {
             if (tabName.equals("Solicitudes")) {
                 if (org.getStatus().equals("Pending")) {
@@ -86,6 +144,8 @@ public class OrganizationsFragment extends Fragment {
                 }
             }
         }
-        adapter.updateList(filteredList);
+        if (adapter != null) {
+            adapter.updateList(filteredList);
+        }
     }
 }

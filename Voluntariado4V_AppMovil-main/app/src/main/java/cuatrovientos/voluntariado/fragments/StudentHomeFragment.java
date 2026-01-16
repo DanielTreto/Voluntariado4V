@@ -37,13 +37,13 @@ public class StudentHomeFragment extends Fragment {
         // Datos simulados para actividades disponibles
         List<VolunteerActivity> availableActivities = new ArrayList<>();
         availableActivities.add(new VolunteerActivity(
-                "Limpieza de Playa", "Jornada de limpieza ambiental.", "Playa La Concha", "2025-05-20", "Medio Ambiente", "Active", 0xFF4CAF50
+                "Limpieza de Playa", "Jornada de limpieza ambiental.", "Playa La Concha", "2025-05-20", "Medio Ambiente", "Active", 0xFF4CAF50, "https://images.unsplash.com/photo-1618477461853-5e8790b933a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
         ));
         availableActivities.add(new VolunteerActivity(
-                "Acompañamiento Mayores", "Visita a residencia de ancianos.", "Residencia San José", "2025-06-10", "Social", "Active", 0xFF2196F3
+                "Acompañamiento Mayores", "Visita a residencia de ancianos.", "Residencia San José", "2025-06-10", "Social", "Active", 0xFF2196F3, "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
         ));
         availableActivities.add(new VolunteerActivity(
-                "Torneo de Fútbol", "Organización de torneo benéfico.", "Polideportivo", "2025-07-01", "Deporte", "Active", 0xFFFF9800
+                "Torneo de Fútbol", "Organización de torneo benéfico.", "Polideportivo", "2025-07-01", "Deporte", "Active", 0xFFFF9800, "https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
         ));
 
         adapter = new ActivitiesAdapter(availableActivities, true);

@@ -16,6 +16,9 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.fragments.BlankFragment;
 
 import android.widget.TextView;
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -43,6 +46,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout = findViewById(R.id.main); // ID definido en activity_dashboard.xml
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Cargar Avatar del Admin (Cabecera del Drawer)
+        View headerView = navigationView.getHeaderView(0);
+        ImageView navImage = headerView.findViewById(R.id.imageView);
+        // Simulamos que el Admin tiene avatar (usando uno de prueba o de prefs)
+        String adminAvatarUrl = "http://10.0.2.2:8000/uploads/avatars/org1.jpg"; 
+        Glide.with(this)
+            .load(adminAvatarUrl)
+            .placeholder(R.drawable.ic_profile_placeholder)
+            .circleCrop()
+            .into(navImage);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar,

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
+import com.bumptech.glide.Glide;
 
 public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.ActivityViewHolder> {
 
@@ -51,8 +52,22 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         holder.tvDate.setText(act.getDate());
         holder.tvCategory.setText(act.getCategory());
 
-        // Simular imagen con color
-        holder.imgHeader.setColorFilter(act.getImageColor(), PorterDuff.Mode.SRC_IN);
+        // Cargar imagen con Glide
+        // Cargar imagen con Glide
+        String imageUrl = act.getImageUrl();
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            // Default generic volunteering image
+            imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
+        }
+
+        holder.imgHeader.setColorFilter(null); 
+        holder.imgHeader.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        Glide.with(holder.itemView.getContext())
+                .load(imageUrl)
+                .centerCrop()
+                .placeholder(R.drawable.ic_launcher_background) // Show while loading
+                .error(R.drawable.ic_launcher_background) // Show on error
+                .into(holder.imgHeader);
 
         if (isStudent) {
             // Estudiante: No mostrar botones de gestión

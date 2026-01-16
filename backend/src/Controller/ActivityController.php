@@ -50,7 +50,7 @@ class ActivityController extends AbstractController
                 'location' => $act->getUBICACION() ?? 'Ubicación no especificada',
                 'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
-                'image' => 'assets/images/activity-1.jpg', // Placeholder
+                'imagen' => $act->getIMAGEN(), // Use database column
                 'organization' => $org ? [
                     'id' => $org->getCODORG(),
                     'name' => $org->getNOMBRE(),

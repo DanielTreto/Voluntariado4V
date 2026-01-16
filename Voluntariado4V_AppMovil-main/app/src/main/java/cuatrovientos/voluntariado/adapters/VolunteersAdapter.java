@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.model.Volunteer;
+import com.bumptech.glide.Glide;
+import android.widget.ImageView;
 
 public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.VolunteerViewHolder> {
 
@@ -41,7 +43,19 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
         holder.tvEmail.setText(volunteer.getEmail());
         holder.tvPhone.setText(volunteer.getPhone());
         holder.tvDate.setText(volunteer.getDate());
+        holder.tvDate.setText(volunteer.getDate());
         holder.tvStatus.setText(volunteer.getStatus());
+
+        if (volunteer.getAvatarUrl() != null) {
+             Glide.with(holder.itemView.getContext())
+                 .load(volunteer.getAvatarUrl())
+                 .placeholder(R.drawable.ic_profile_placeholder)
+                 .error(R.drawable.ic_profile_placeholder)
+                 .circleCrop()
+                 .into(holder.imgAvatar);
+        } else {
+             holder.imgAvatar.setImageResource(R.drawable.ic_profile_placeholder);
+        }
 
         if (volunteer.getStatus().equals("Active") || volunteer.getStatus().equals("Suspended")) {
             holder.actionsLayout.setVisibility(View.GONE);
@@ -76,10 +90,12 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
 
     public static class VolunteerViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvRole, tvEmail, tvPhone, tvStatus, tvDate, btnMoreOptions;
+        ImageView imgAvatar;
         LinearLayout actionsLayout;
 
         public VolunteerViewHolder(@NonNull View itemView) {
             super(itemView);
+            imgAvatar = itemView.findViewById(R.id.imgAvatar);
             tvName = itemView.findViewById(R.id.tvName);
             tvRole = itemView.findViewById(R.id.tvRole);
             tvStatus = itemView.findViewById(R.id.chipStatus);

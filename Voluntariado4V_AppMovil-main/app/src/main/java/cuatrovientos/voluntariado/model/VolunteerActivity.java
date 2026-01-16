@@ -9,9 +9,11 @@ public class VolunteerActivity {
     private String status;   // "Active" (Pestaña 1) o "Pending" (Pestaña 2)
 
     // En una app real usarías URLs, aquí usaremos colores o recursos para simular la imagen
+    // En una app real usarías URLs, aquí usaremos colores o recursos para simular la imagen
     private int imageColor;
+    private String imageUrl;
 
-    public VolunteerActivity(String title, String description, String location, String date, String category, String status, int imageColor) {
+    public VolunteerActivity(String title, String description, String location, String date, String category, String status, int imageColor, String imageUrl) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -19,6 +21,7 @@ public class VolunteerActivity {
         this.category = category;
         this.status = status;
         this.imageColor = imageColor;
+        this.imageUrl = imageUrl;
     }
 
     public String getTitle() { return title; }
@@ -28,4 +31,5 @@ public class VolunteerActivity {
     public String getCategory() { return category; }
     public String getStatus() { return status; }
     public int getImageColor() { return imageColor; }
+    public String getImageUrl() { return imageUrl; }
 }

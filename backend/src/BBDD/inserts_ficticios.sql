@@ -38,7 +38,7 @@ VALUES
 ('ACTIVIDAD5','02:30:00', '2024-02-20', '2024-02-21', 8, 5, 'Festival cultural', 'FINALIZADA'),
 ('ACTIVIDAD6','04:00:00', '2026-05-01', '2026-05-01', 12, 1, 'Maratón Solidario', 'EN_PROGRESO'),
 ('ACTIVIDAD7','02:00:00', '2026-06-15', '2026-06-20', 6, 2, 'Curso de Cocina Saludable', 'PENDIENTE'),
-('ACTIVIDAD8','03:00:00', '2026-07-10', '2026-07-12', 10, 3, 'Campamento Urbano', 'PENDIENTE');
+('ACTIVIDAD8','03:00:00', '2026-07-10', '2026-07-12', 10, 3, 'Campamento Urbano', 'ACTIVO');
 GO
 
 -- 4. INSERTAR DATOS RELACIONADOS

@@ -33,10 +33,10 @@ public class OrganizationHomeFragment extends Fragment {
         // Mock data
         List<VolunteerActivity> myActivities = new ArrayList<>();
         myActivities.add(new VolunteerActivity(
-                "Taller de Reciclaje", "Taller educativo para niños.", "Centro Cívico", "2025-05-25", "Educación", "Active", 0xFF9C27B0
+                "Taller de Reciclaje", "Taller educativo para niños.", "Centro Cívico", "2025-05-25", "Educación", "Active", 0xFF9C27B0, "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
         ));
         myActivities.add(new VolunteerActivity(
-                "Recogida de Ropa", "Campaña de invierno.", "Plaza Mayor", "2025-11-15", "Social", "Active", 0xFFFF5722
+                "Recogida de Ropa", "Campaña de invierno.", "Plaza Mayor", "2025-11-15", "Social", "Active", 0xFFFF5722, "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
         ));
 
         // false = Organization mode (with buttons)

@@ -40,7 +40,8 @@ public class ActivitiesFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // 1. Crear los datos PRIMERO
-        createMockData();
+        masterList = new ArrayList<>();
+        fetchActivities();
 
         // 2. Inicializar el adaptador con una lista vacía temporalmente
         adapter = new ActivitiesAdapter(new ArrayList<>());
@@ -76,19 +77,72 @@ public class ActivitiesFragment extends Fragment {
         });
     }
 
-    private void createMockData() {
-        masterList = new ArrayList<>();
+    private void fetchActivities() {
+        cuatrovientos.voluntariado.network.ApiService apiService = 
+            cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
 
-        // --- SOLICITUDES (Pending) ---
-        // Estas aparecerán en la primera pestaña
-        masterList.add(new VolunteerActivity("Clases de Apoyo", "Refuerzo escolar para niños en riesgo.", "Biblioteca Municipal", "2025-12-20", "Educativo", "Pending", Color.GREEN));
-        masterList.add(new VolunteerActivity("Reparto Nocturno", "Entrega de mantas y comida.", "Centro Ciudad", "2025-12-22", "Social", "Pending", Color.DKGRAY));
+        apiService.getActivities().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    masterList.clear();
+                    for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
+                        int color = getColorForType(apiAct.getType());
+                        String rawStatus = apiAct.getStatus() != null ? apiAct.getStatus() : "ACTIVO";
+                        String status = "Active"; // Default
+                        
+                        // Normalize Backend Status (Spanish) to Frontend (English)
+                        if (rawStatus.equalsIgnoreCase("ACTIVO")) status = "Active";
+                        else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
+                        else if (rawStatus.equalsIgnoreCase("SUSPENDIDO")) status = "Suspended";
+                        else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
+                        else status = rawStatus; // Fallback
+                        
+                        masterList.add(new VolunteerActivity(
+                            apiAct.getTitle(),
+                            apiAct.getDescription(),
+                            apiAct.getLocation(),
+                            apiAct.getDate(),
+                            apiAct.getType(),
+                            status,
+                            color,
+                            apiAct.getImagen()
+                        ));
+                    }
+                    // Refresh current tab
+                    TabLayout tabLayout = getView().findViewById(R.id.tabLayoutAct);
+                    if (tabLayout.getSelectedTabPosition() == 0) {
+                        filterList("Solicitudes");
+                    } else {
+                        filterList("Registradas");
+                    }
+                } else {
+                    android.util.Log.e("ActivitiesFragment", "Error fetching activities: " + response.code());
+                    if (getContext() != null) {
+                        android.widget.Toast.makeText(getContext(), "Error al cargar actividades", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
 
-        // --- REGISTRADAS (Active) ---
-        // Estas aparecerán en la segunda pestaña
-        masterList.add(new VolunteerActivity("Limpieza de Playa", "Jornada de limpieza y concienciación ambiental.", "Playa de la Concha", "2025-12-05", "Medio Ambiente", "Active", Color.CYAN));
-        masterList.add(new VolunteerActivity("Taller de Programación", "Enseñanza de conceptos básicos a jóvenes.", "Centro Cívico", "2025-12-10", "Tecnológico", "Active", Color.BLUE));
-        masterList.add(new VolunteerActivity("Reparto de Alimentos", "Distribución de alimentos a familias del barrio.", "Banco de Alimentos", "2025-12-15", "Social", "Active", Color.MAGENTA));
+            @Override
+            public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, Throwable t) {
+                android.util.Log.e("ActivitiesFragment", "Network error: " + t.getMessage());
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Error de conexión", android.widget.Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private int getColorForType(String type) {
+        if (type == null) return 0xFF9E9E9E; // Gray default
+        switch (type) {
+            case "Medio Ambiente": return 0xFF2E7D32; // Green
+            case "Social": return 0xFF1976D2; // Blue
+            case "Tecnológico": return 0xFFFFC107; // Amber
+            case "Educativo": return 0xFF512DA8; // Deep Purple
+            default: return 0xFFEF5350; // Red default
+        }
     }
 
     private void filterList(String tabName) {
@@ -101,8 +155,8 @@ public class ActivitiesFragment extends Fragment {
                     filteredList.add(act);
                 }
             } else { // Caso "Registradas"
-                // Filtramos por estado "Active"
-                if (act.getStatus().equals("Active")) {
+                // Filtramos por estado "Active", "Finished", "Suspended"
+                if (act.getStatus().equals("Active") || act.getStatus().equals("Finished") || act.getStatus().equals("Suspended")) {
                     filteredList.add(act);
                 }
             }
