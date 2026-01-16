@@ -9,6 +9,8 @@ import { ORGANIZATION_DASHBOARD_ROUTES } from './pages/organization-dashboard/or
 
 import { VOLUNTEER_DASHBOARD_ROUTES } from './pages/volunteer-dashboard/volunteer-dashboard.routes';
 
+import { authGuard } from './guards/auth.guard';
+
 export const routes: Routes = [
     {
         path: '',
@@ -16,11 +18,12 @@ export const routes: Routes = [
         pathMatch: 'full'
     },
     { path: 'pagina-principal', component: PaginaPrincipal },
-    { path: 'dashboard', component: DashboardComponent, children: DASHBOARD_CHILD_ROUTES },
-    { path: 'volunteer-dashboard', component: VolunteerDashboardComponent, children: VOLUNTEER_DASHBOARD_ROUTES },
+    { path: 'dashboard', component: DashboardComponent, children: DASHBOARD_CHILD_ROUTES, canActivate: [authGuard] },
+    { path: 'volunteer-dashboard', component: VolunteerDashboardComponent, children: VOLUNTEER_DASHBOARD_ROUTES, canActivate: [authGuard] },
     {
         path: 'organization-dashboard',
         component: OrganizationDashboardComponent,
-        children: ORGANIZATION_DASHBOARD_ROUTES
+        children: ORGANIZATION_DASHBOARD_ROUTES,
+        canActivate: [authGuard]
     },
 ];
