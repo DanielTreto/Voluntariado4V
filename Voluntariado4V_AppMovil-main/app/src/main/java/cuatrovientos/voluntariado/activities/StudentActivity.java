@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import cuatrovientos.voluntariado.R;
+import cuatrovientos.voluntariado.fragments.EventsFragment;
 import cuatrovientos.voluntariado.fragments.SettingsFragment;
 import cuatrovientos.voluntariado.fragments.StudentHistoryFragment;
 import cuatrovientos.voluntariado.fragments.StudentHomeFragment;
@@ -40,6 +41,8 @@ public class StudentActivity extends AppCompatActivity {
                         selectedFragment = new StudentHomeFragment();
                     } else if (itemId == R.id.nav_history) {
                         selectedFragment = new StudentHistoryFragment();
+                    } else if (itemId == R.id.nav_calendar) {
+                         selectedFragment = new EventsFragment();
                     } else if (itemId == R.id.nav_settings) {
                         selectedFragment = new SettingsFragment();
                     }

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import cuatrovientos.voluntariado.R;
+import cuatrovientos.voluntariado.fragments.EventsFragment;
 import cuatrovientos.voluntariado.fragments.OrganizationHistoryFragment;
 import cuatrovientos.voluntariado.fragments.OrganizationHomeFragment;
 import cuatrovientos.voluntariado.fragments.SettingsFragment;
@@ -40,6 +41,8 @@ public class OrganizationActivity extends AppCompatActivity {
                         selectedFragment = new OrganizationHomeFragment();
                     } else if (itemId == R.id.nav_history_org) {
                         selectedFragment = new OrganizationHistoryFragment();
+                    } else if (itemId == R.id.nav_calendar_org) {
+                        selectedFragment = new EventsFragment();
                     } else if (itemId == R.id.nav_settings_org) {
                         selectedFragment = new SettingsFragment();
                     }
