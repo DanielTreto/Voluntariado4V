@@ -43,35 +43,54 @@
 /* Launch Animation State */
 .scroll-to-top.launching {
     background-color: #ffc107;
-    /* Ignited color */
     pointer-events: none;
-    /* Prevent double clicks */
+    animation: flyUp 1s ease-in-out forwards;
 }
-
 
 .scroll-to-top.launching i {
-    animation: launchRocket 0.5s ease-in-out infinite;
+    /* Vibrate while flying */
+    animation: vibration 0.1s infinite;
 }
 
-@keyframes launchRocket {
+@keyframes flyUp {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    20% {
+        transform: translateY(10px) scale(0.9);
+        opacity: 1;
+    }
+
+    /* Anticipate */
+    100% {
+        transform: translateY(-100vh) scale(0.5);
+        opacity: 0;
+    }
+
+    /* Fly up and vanish */
+}
+
+@keyframes vibration {
     0% {
         transform: translate(0, 0);
     }
 
     25% {
-        transform: translate(-1px, 2px);
+        transform: translate(-1px, 1px);
     }
 
     50% {
-        transform: translate(1px, -2px);
+        transform: translate(1px, -1px);
     }
 
     75% {
-        transform: translate(-1px, -2px);
+        transform: translate(-1px, -1px);
     }
 
     100% {
-        transform: translate(1px, 2px);
+        transform: translate(1px, 1px);
     }
 }
 
@@ -100,7 +119,7 @@
     animation-delay: 0.0s;
     left: 45%;
     --x: -10px;
-    --y: 40px;
+    --y: 60px;
     background: #ffc107;
 }
 
@@ -108,7 +127,7 @@
     animation-delay: 0.1s;
     left: 55%;
     --x: 10px;
-    --y: 40px;
+    --y: 60px;
     background: #ff5722;
 }
 
@@ -116,7 +135,7 @@
     animation-delay: 0.2s;
     left: 40%;
     --x: -20px;
-    --y: 35px;
+    --y: 50px;
     background: #ff9800;
 }
 
@@ -124,7 +143,7 @@
     animation-delay: 0.15s;
     left: 60%;
     --x: 20px;
-    --y: 35px;
+    --y: 50px;
     background: #f44336;
 }
 
