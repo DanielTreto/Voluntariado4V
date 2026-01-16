@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../services/api.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -26,6 +26,7 @@ export class VolunteerActivitiesComponent implements OnInit {
   private apiService = inject(ApiService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     // Check auth
@@ -38,7 +39,22 @@ export class VolunteerActivitiesComponent implements OnInit {
       this.userId = user.id; // temporary fallback
       this.loadActivities();
     }
+
+    // Check for deep link
+    this.route.queryParams.subscribe(params => {
+       const openId = params['openId'];
+       if (openId) {
+           // We need to wait for activities to load. 
+           // If activities are not loaded yet, this might fail unless we check after load.
+           // Moving this logic to loadActivities or using a flag?
+           // Simplest: check in loadActivities after data arrives.
+           this.pendingOpenId = +openId;
+       }
+    });
   }
+
+  // Pending open ID to handle raciness between route and data load
+  pendingOpenId: number | null = null;
 
   loadActivities() {
     if (!this.userId) return;
@@ -81,6 +97,14 @@ export class VolunteerActivitiesComponent implements OnInit {
 
         this.filterActivities();
         this.cdr.detectChanges();
+
+        if (this.pendingOpenId) {
+            const act = this.activities.find(a => a.id === this.pendingOpenId);
+            if (act) {
+                this.openActivityDetails(act);
+                this.pendingOpenId = null; // Clear it
+            }
+        }
       },
       error: (err) => {
         console.error('Error loading activities:', err);

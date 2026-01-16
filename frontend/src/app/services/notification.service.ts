@@ -62,13 +62,15 @@ export class NotificationService {
     });
   }
 
-  notifyVolunteerJoinStatus(volunteerId: number, activityName: string, accepted: boolean) {
+  notifyVolunteerJoinStatus(volunteerId: number, activityName: string, accepted: boolean, activityId?: number) {
       const type = accepted ? 'JOIN_REQUEST_ACCEPTED' : 'JOIN_REQUEST_DENIED';
       const title = accepted ? 'Solicitud Aceptada' : 'Solicitud Denegada';
       const message = accepted 
           ? `Has sido aceptado en la actividad "${activityName}".`
           : `Tu solicitud para "${activityName}" ha sido denegada.`;
       
+      const url = activityId ? `/volunteer-dashboard/activities?openId=${activityId}` : '/volunteer-dashboard/activities';
+
       this.addNotification({
           id: Date.now().toString(),
           type: type,
@@ -76,17 +78,19 @@ export class NotificationService {
           message: message,
           timestamp: new Date(),
           read: false,
-          actionUrl: '/volunteer-dashboard/activities', // Or my activities
+          actionUrl: url,
           recipientRole: 'volunteer'
       });
   }
 
-  notifyActivityRequestStatus(orgId: number, activityTitle: string, accepted: boolean) {
+  notifyActivityRequestStatus(orgId: number, activityTitle: string, accepted: boolean, activityId?: number) {
       const type = accepted ? 'ACTIVITY_REQUEST_ACCEPTED' : 'ACTIVITY_REQUEST_DENIED';
       const title = accepted ? 'Actividad Aceptada' : 'Actividad Denegada';
       const message = accepted 
           ? `La actividad "${activityTitle}" ha sido aprobada.`
           : `La actividad "${activityTitle}" ha sido rechazada.`;
+
+      const url = activityId ? `/organization-dashboard/activities?openId=${activityId}` : '/organization-dashboard/activities';
       
       this.addNotification({
           id: Date.now().toString(),
@@ -95,7 +99,7 @@ export class NotificationService {
           message: message,
           timestamp: new Date(),
           read: false,
-          actionUrl: '/organization-dashboard/activities',
+          actionUrl: url,
           recipientId: orgId,
           recipientRole: 'organization'
       });
