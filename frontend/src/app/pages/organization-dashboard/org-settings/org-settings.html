@@ -8,20 +8,46 @@
         <div class="row">
             <div class="col-md-8">
                 <div class="card p-4 border-0 shadow-sm mb-4">
-                    <h5 class="card-title mb-3">Información General</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre de la Organización</label>
+                            <input type="text" class="form-control" formControlName="NOMBRE">
+                            <div *ngIf="settingsForm.get('NOMBRE')?.invalid && settingsForm.get('NOMBRE')?.touched"
+                                class="text-danger small">
+                                El nombre es obligatorio.
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Persona de Contacto</label>
+                            <input type="text" class="form-control" formControlName="PERSONA_CONTACTO">
+                        </div>
+                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Nombre de la Organización</label>
-                        <input type="text" class="form-control" formControlName="NOMBRE">
-                        <div *ngIf="settingsForm.get('NOMBRE')?.invalid && settingsForm.get('NOMBRE')?.touched"
-                            class="text-danger small">
-                            El nombre es obligatorio.
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Tipo</label>
+                            <input type="text" class="form-control" formControlName="TIPO_ORG"
+                                placeholder="ONG, Empresa, etc.">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Sector</label>
+                            <input type="text" class="form-control" formControlName="SECTOR"
+                                placeholder="Social, Salud, etc.">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Ámbito</label>
+                            <select class="form-select" formControlName="AMBITO">
+                                <option value="Local">Local</option>
+                                <option value="Autonómico">Autonómico</option>
+                                <option value="Estatal">Estatal</option>
+                                <option value="Internacional">Internacional</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Descripción</label>
-                        <textarea class="form-control" formControlName="DESCRIPCION" rows="4"></textarea>
+                        <textarea class="form-control" formControlName="DESCRIPCION" rows="3"></textarea>
                         <div class="form-text">Breve descripción de la misión y valores.</div>
                     </div>
                 </div>
@@ -55,14 +81,25 @@
             </div>
 
             <div class="col-md-4">
-                <!-- Future: Logo Upload -->
+                <!-- Logo Upload -->
                 <div class="card p-4 border-0 shadow-sm text-center">
-                    <h5 class="card-title mb-3">Logo</h5>
-                    <div class="logo-placeholder mb-3">
-                        <i class="bi bi-building fs-1 text-muted"></i>
+                    <h5 class="card-title mb-3">Logo de la Organización</h5>
+                    <div class="logo-container mb-3 position-relative d-inline-block mx-auto">
+                        <img [src]="logoPreview || currentLogo || 'assets/images/org-default.png'"
+                            onerror="this.src='assets/images/org-default.png'" alt="Org Logo"
+                            class="rounded-3 img-thumbnail" style="width: 150px; height: 150px; object-fit: cover;">
+
+                        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="d-none">
+                        <button type="button" (click)="fileInput.click()"
+                            class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle"
+                            style="width: 32px; height: 32px; padding: 0;">
+                            <i class="bi bi-camera-fill"></i>
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" disabled>Cambiar Logo
-                        (Próximamente)</button>
+                    <div class="mt-2 text-muted small" *ngIf="selectedFile">
+                        Nuevo logo seleccionado: {{selectedFile.name}}
+                    </div>
+                    <p class="text-muted small mt-2">Haz clic en la cámara para subir un nuevo logo.</p>
                 </div>
             </div>
         </div>

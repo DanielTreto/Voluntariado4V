@@ -69,6 +69,9 @@ class Organizacion
     #[Assert\Choice(choices: ['ACTIVO', 'SUSPENDIDO', 'PENDIENTE'])]
     private ?string $ESTADO = 'PENDIENTE';
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $AVATAR = null;
+
     public function getCODORG(): ?string
     {
         return $this->CODORG;
@@ -191,4 +194,14 @@ class Organizacion
         return $this;
     }
 
+    public function getAVATAR(): ?string
+    {
+        return $this->AVATAR;
+    }
+
+    public function setAVATAR(?string $AVATAR): static
+    {
+        $this->AVATAR = $AVATAR;
+        return $this;
+    }
 }

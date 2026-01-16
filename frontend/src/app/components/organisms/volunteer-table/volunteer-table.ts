@@ -76,7 +76,7 @@ export class VolunteerTableComponent implements OnInit {
             phone: v.phone,
             lastActivity: 'Reciente',
             status: this.mapStatus(v.status),
-            avatar: 'assets/images/volunteer-avatar.png',
+            avatar: v.avatar ? (v.avatar.startsWith('/uploads') ? 'http://localhost:8000' + v.avatar : v.avatar) : 'assets/images/volunteer-avatar.png',
             dni: v.dni,
             address: 'No disponible',
             course: v.course,

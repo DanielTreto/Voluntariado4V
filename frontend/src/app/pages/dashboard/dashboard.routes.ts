@@ -14,6 +14,6 @@ export const DASHBOARD_CHILD_ROUTES: Routes = [
     { path: 'events', component: EventCalendarComponent },
     { path: 'organizations', component: OrganizationListComponent },
     { path: 'reports', component: ReportsComponent },
-    { path: 'settings', component: SettingsComponent },
+    { path: 'settings', loadComponent: () => import('../../pages/admin-settings/admin-settings').then(m => m.AdminSettingsComponent) },
     { path: '**', redirectTo: 'volunteers' }
 ];

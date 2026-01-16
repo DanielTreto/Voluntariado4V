@@ -31,7 +31,8 @@ class AdministratorController extends AbstractController
             'apellidos' => $admin->getApellidos(),
             'email' => $admin->getCorreo(),
             'phone' => $admin->getTelefono(),
-            'photoUrl' => $admin->getFoto()
+            'phone' => $admin->getTelefono(),
+            'avatar' => $admin->getAVATAR()
         ];
 
         return $this->json($data);
@@ -55,7 +56,9 @@ class AdministratorController extends AbstractController
         if (isset($data['apellidos'])) $admin->setApellidos($data['apellidos']);
         if (isset($data['email'])) $admin->setCorreo($data['email']);
         if (isset($data['phone'])) $admin->setTelefono($data['phone']);
-        if (isset($data['photoUrl'])) $admin->setFoto($data['photoUrl']);
+        if (isset($data['phone'])) $admin->setTelefono($data['phone']);
+        // photoUrl is handled by uploadAvatar endpoint, avoid manual set unless strictly needed
+        // if (isset($data['photoUrl'])) $admin->setAVATAR($data['photoUrl']);
 
         // Basic validation
         $errors = $validator->validate($admin);
@@ -79,6 +82,51 @@ class AdministratorController extends AbstractController
         $response = new JsonResponse(null, 204);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+    #[Route('/admin/{id}/avatar', name: 'api_admin_upload_avatar', methods: ['POST'])]
+    public function uploadAvatar(string $id, Request $request, EntityManagerInterface $entityManager, AdministratorRepository $adminRepository): JsonResponse
+    {
+        $admin = $adminRepository->find($id);
+        if (!$admin) {
+            return new JsonResponse(['error' => 'Administrator not found'], 404);
+        }
+
+        $file = $request->files->get('avatar');
+        if (!$file) {
+            return new JsonResponse(['error' => 'No file uploaded'], 400);
+        }
+
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+            return new JsonResponse(['error' => 'Invalid file type. Only JPG, PNG and GIF are allowed.'], 400);
+        }
+
+        $fileName = 'avatar-admin-' . $id . '-' . uniqid() . '.' . $file->guessExtension();
+        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars';
+
+        try {
+            $file->move($uploadDir, $fileName);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Could not save file'], 500);
+        }
+
+        // Save path in DB
+        $admin->setAVATAR('/uploads/avatars/' . $fileName);
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Avatar uploaded', 'url' => $admin->getAVATAR()], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/admin/{id}/avatar', name: 'api_admin_avatar_options', methods: ['OPTIONS'])]
+    public function avatarOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }

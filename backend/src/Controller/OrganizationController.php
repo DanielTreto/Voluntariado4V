@@ -32,6 +32,7 @@ class OrganizationController extends AbstractController
                 'scope' => $org->getAMBITO(),
                 'description' => $org->getDESCRIPCION(),
                 'status' => $org->getESTADO(),
+                'avatar' => $org->getAVATAR(),
             ];
         }
 
@@ -59,7 +60,8 @@ class OrganizationController extends AbstractController
             'scope' => $org->getAMBITO(),
             'description' => $org->getDESCRIPCION(),
             'status' => $org->getESTADO(),
-            'contactPerson' => $org->getPERSONA_CONTACTO()
+            'contactPerson' => $org->getPERSONA_CONTACTO(),
+            'avatar' => $org->getAVATAR(),
         ];
 
         $response = new JsonResponse($data);
@@ -243,6 +245,51 @@ class OrganizationController extends AbstractController
         $response = new JsonResponse(null, 204);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+    #[Route('/organizations/{id}/avatar', name: 'api_organizations_upload_avatar', methods: ['POST'])]
+    public function uploadAvatar(string $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository): JsonResponse
+    {
+        $org = $orgRepository->find($id);
+        if (!$org) {
+            return new JsonResponse(['error' => 'Organization not found'], 404);
+        }
+
+        $file = $request->files->get('avatar');
+        if (!$file) {
+            return new JsonResponse(['error' => 'No file uploaded'], 400);
+        }
+
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+            return new JsonResponse(['error' => 'Invalid file type. Only JPG, PNG and GIF are allowed.'], 400);
+        }
+
+        $fileName = 'avatar-org-' . $id . '-' . uniqid() . '.' . $file->guessExtension();
+        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars';
+
+        try {
+            $file->move($uploadDir, $fileName);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Could not save file'], 500);
+        }
+
+        // Save path in DB
+        $org->setAVATAR('/uploads/avatars/' . $fileName);
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Avatar uploaded', 'url' => $org->getAVATAR()], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/organizations/{id}/avatar', name: 'api_organizations_avatar_options', methods: ['OPTIONS'])]
+    public function avatarOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }

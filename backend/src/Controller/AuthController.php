@@ -64,7 +64,8 @@ class AuthController extends AbstractController
                     'id' => $volunteer->getCODVOL(),
                     'name' => $volunteer->getNOMBRE(),
                     'email' => $volunteer->getCORREO(),
-                    'firebaseUid' => $volunteer->getFirebaseUid()
+                    'firebaseUid' => $volunteer->getFirebaseUid(),
+                    'avatar' => $volunteer->getAVATAR()
                 ]);
             }
 
@@ -76,7 +77,8 @@ class AuthController extends AbstractController
                     'id' => $org->getCODORG(),
                     'name' => $org->getNOMBRE(),
                     'email' => $org->getCORREO(),
-                    'firebaseUid' => $org->getFirebaseUid()
+                    'firebaseUid' => $org->getFirebaseUid(),
+                    'avatar' => $org->getAVATAR()
                 ]);
             }
         }
@@ -93,7 +95,8 @@ class AuthController extends AbstractController
                         'id' => $volunteer->getCODVOL(),
                         'name' => $volunteer->getNOMBRE(),
                         'email' => $volunteer->getCORREO(),
-                        'firebaseUid' => $volunteer->getFirebaseUid() // Might be null
+                        'firebaseUid' => $volunteer->getFirebaseUid(),
+                        'avatar' => $volunteer->getAVATAR()
                     ]);
                 }
                 
@@ -106,7 +109,8 @@ class AuthController extends AbstractController
                         'id' => $org->getCODORG(),
                         'name' => $org->getNOMBRE(),
                         'email' => $org->getCORREO(),
-                        'firebaseUid' => $org->getFirebaseUid() // Might be null
+                        'firebaseUid' => $org->getFirebaseUid(),
+                        'avatar' => $org->getAVATAR()
                     ]);
                 }
             }

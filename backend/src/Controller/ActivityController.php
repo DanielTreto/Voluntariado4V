@@ -54,7 +54,7 @@ class ActivityController extends AbstractController
                 'organization' => $org ? [
                     'id' => $org->getCODORG(),
                     'name' => $org->getNOMBRE(),
-                    'logo' => 'assets/images/org-default.png'
+                    'avatar' => $org->getAVATAR()
                 ] : null,
                 'volunteers' => array_map(function($vol) {
                     return [
@@ -63,7 +63,7 @@ class ActivityController extends AbstractController
                         // Assuming standard getters based on previous checks.
                         'id' => $vol->getCODVOL(),
                         'name' => trim($vol->getNOMBRE() . ' ' . $vol->getAPELLIDO1() . ' ' . ($vol->getAPELLIDO2() ?? '')),
-                        'avatar' => null, // No photo property
+                        'avatar' => $vol->getAVATAR(),
                         'email' => $vol->getCORREO(),
                         // 'phone' => $vol->getTELEFONO(), // Optional
                         'status' => $vol->getESTADO()
@@ -324,6 +324,7 @@ class ActivityController extends AbstractController
             $data[] = [
                 'id' => $v->getCODVOL(),
                 'name' => $v->getNOMBRE() . ' ' . $v->getAPELLIDO1(),
+                'avatar' => $v->getAVATAR(),
                 'email' => $v->getCORREO(),
                 'phone' => $v->getTELEFONO()
             ];

@@ -7,7 +7,8 @@ import { Observable } from 'rxjs';
 })
 export class ApiService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8000/api'; // Ajusta esto si tu backend corre en otro puerto
+  public baseUrl = 'http://localhost:8000';
+  private apiUrl = `${this.baseUrl}/api`;
 
   constructor() { }
 
@@ -129,5 +130,27 @@ export class ApiService {
 
   getCiclos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/ciclos`);
+  }
+
+  uploadVolunteerAvatar(id: string | number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return this.http.post(`${this.apiUrl}/volunteers/${id}/avatar`, formData);
+  }
+
+  uploadOrganizationAvatar(id: string | number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return this.http.post(`${this.apiUrl}/organizations/${id}/avatar`, formData);
+  }
+
+  uploadAdminAvatar(id: string | number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return this.http.post(`${this.apiUrl}/admin/${id}/avatar`, formData);
+  }
+
+  getActivityTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/activity-types`);
   }
 }

@@ -1,6 +1,7 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-dashboard-header',
@@ -17,6 +18,7 @@ export class DashboardHeaderComponent implements OnInit {
   avatarSrc: string = 'assets/images/default-avatar.png'; // Default
 
   private router = inject(Router);
+  private apiService = inject(ApiService);
 
   ngOnInit(): void {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -25,8 +27,16 @@ export class DashboardHeaderComponent implements OnInit {
       // Translate role for display
       this.userRole = user.role === 'organization' ? 'Organización' : 'Voluntario';
 
-      // Set avatar (mock logic for now, or match Sidebar's previous asset)
-      this.avatarSrc = user.avatar || 'assets/images/admin-avatar.png';
+      // Set avatar
+      if (user.avatar) {
+        if (user.avatar.startsWith('/uploads/')) {
+          this.avatarSrc = this.apiService.baseUrl + user.avatar;
+        } else {
+          this.avatarSrc = user.avatar;
+        }
+      } else {
+        this.avatarSrc = 'assets/images/default-avatar.png';
+      }
     }
   }
 

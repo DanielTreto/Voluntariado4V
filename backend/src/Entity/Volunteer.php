@@ -91,6 +91,9 @@ class Volunteer
     #[Assert\Choice(choices: ['ACTIVO', 'SUSPENDIDO', 'PENDIENTE'])]
     private ?string $ESTADO = 'PENDIENTE';
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $AVATAR = null;
+
     #[ORM\OneToMany(mappedBy: 'voluntario', targetEntity: Disponibilidad::class)]
     private $disponibilidades;
 
@@ -259,4 +262,36 @@ class Volunteer
         return $this;
     }
 
+    public function getAVATAR(): ?string
+    {
+        return $this->AVATAR;
+    }
+
+    public function setAVATAR(?string $AVATAR): static
+    {
+        $this->AVATAR = $AVATAR;
+        return $this;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, TipoActividad>
+     */
+    public function getPreferencias(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->preferencias;
+    }
+
+    public function addPreferencia(TipoActividad $preferencia): static
+    {
+        if (!$this->preferencias->contains($preferencia)) {
+            $this->preferencias->add($preferencia);
+        }
+        return $this;
+    }
+
+    public function removePreferencia(TipoActividad $preferencia): static
+    {
+        $this->preferencias->removeElement($preferencia);
+        return $this;
+    }
 }

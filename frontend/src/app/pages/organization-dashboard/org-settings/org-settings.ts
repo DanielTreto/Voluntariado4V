@@ -14,6 +14,9 @@ export class OrgSettingsComponent implements OnInit {
     settingsForm: FormGroup;
     userId: number | null = null;
     loading = false;
+    selectedFile: File | null = null;
+    logoPreview: string | null = null;
+    currentLogo: string | null = null;
 
     private apiService = inject(ApiService);
     private fb = inject(FormBuilder);
@@ -25,8 +28,11 @@ export class OrgSettingsComponent implements OnInit {
             TELEFONO: ['', [Validators.pattern(/^[6-9][0-9]{8}$/)]],
             DIRECCION: [''],
             WEB: [''],
-            // Email usually read-only or handled separately for auth
-            CORREO: [{ value: '', disabled: true }]
+            CORREO: [{ value: '', disabled: true }],
+            SECTOR: [''],
+            AMBITO: ['Estatal'],
+            PERSONA_CONTACTO: [''],
+            TIPO_ORG: ['']
         });
     }
 
@@ -50,8 +56,17 @@ export class OrgSettingsComponent implements OnInit {
                     TELEFONO: data.TELEFONO,
                     DIRECCION: data.DIRECCION,
                     WEB: data.WEB,
-                    CORREO: data.CORREO
+                    CORREO: data.CORREO,
+                    SECTOR: data.SECTOR,
+                    AMBITO: data.AMBITO,
+                    PERSONA_CONTACTO: data.PERSONA_CONTACTO,
+                    TIPO_ORG: data.TIPO_ORG
                 });
+                if (data.avatar && data.avatar.startsWith('/uploads/')) {
+                    this.currentLogo = this.apiService.baseUrl + data.avatar;
+                } else {
+                    this.currentLogo = data.avatar;
+                }
                 this.loading = false;
             },
             error: (err) => {
@@ -61,19 +76,69 @@ export class OrgSettingsComponent implements OnInit {
         });
     }
 
+    onFileSelected(event: any) {
+        const file = event.target.files[0];
+        if (file) {
+            this.selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = () => {
+                this.logoPreview = reader.result as string;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    uploadLogo() {
+        if (!this.selectedFile || !this.userId) return;
+
+        this.apiService.uploadOrganizationAvatar(this.userId, this.selectedFile).subscribe({
+            next: (res) => {
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.avatar = res.url;
+                localStorage.setItem('user', JSON.stringify(user));
+                this.currentLogo = this.apiService.baseUrl + res.url;
+                this.selectedFile = null;
+                alert('Logo actualizado correctamente');
+            },
+            error: (err) => {
+                console.error('Error uploading logo', err);
+                alert('Error al subir el logo');
+            }
+        });
+    }
+
     saveSettings() {
         if (this.settingsForm.invalid || !this.userId) return;
 
         this.loading = true;
-        // Only send mutable fields
-        const payload = this.settingsForm.getRawValue(); // raw value to check email but backend ignores it usually if secure
-
-        // Clean payload of disabled fields if needed, but getRawValue includes them. 
-        // Usually backend ignores non-updatable fields or we filter them.
+        // Map to lowercase keys expected by backend
+        const formValues = this.settingsForm.getRawValue();
+        const payload = {
+            name: formValues.NOMBRE,
+            type: formValues.TIPO_ORG,
+            email: formValues.CORREO,
+            phone: formValues.TELEFONO,
+            sector: formValues.SECTOR,
+            scope: formValues.AMBITO,
+            contactPerson: formValues.PERSONA_CONTACTO,
+            description: formValues.DESCRIPCION,
+            address: formValues.DIRECCION,
+            web: formValues.WEB
+        };
 
         this.apiService.updateOrganization(this.userId, payload).subscribe({
             next: (res) => {
-                alert('Perfil actualizado correctamente');
+                if (this.selectedFile) {
+                    this.uploadLogo();
+                } else {
+                    alert('Perfil actualizado correctamente');
+                }
+
+                // Update name in localStorage too
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                user.name = formValues.NOMBRE;
+                localStorage.setItem('user', JSON.stringify(user));
+
                 this.loading = false;
             },
             error: (err) => {

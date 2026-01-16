@@ -40,7 +40,7 @@ class Administrator
     private ?string $firebaseUid = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $foto = null;
+    private ?string $AVATAR = null;
 
     public function getId(): ?string
     {
@@ -108,14 +108,14 @@ class Administrator
         return $this;
     }
 
-    public function getFoto(): ?string
+    public function getAVATAR(): ?string
     {
-        return $this->foto;
+        return $this->AVATAR;
     }
 
-    public function setFoto(?string $foto): static
+    public function setAVATAR(?string $AVATAR): static
     {
-        $this->foto = $foto;
+        $this->AVATAR = $AVATAR;
         return $this;
     }
 

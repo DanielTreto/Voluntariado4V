@@ -85,7 +85,12 @@
             </div>
         </div>
         <div class="card-body d-flex flex-column p-4">
-            <h5 class="card-title fw-bold mb-2 text-dark">{{ activity.title }}</h5>
+            <div class="d-flex align-items-center mb-3">
+                <img [src]="activity.organization?.avatar ? (activity.organization.avatar.startsWith('/uploads') ? 'http://localhost:8000' + activity.organization.avatar : activity.organization.avatar) : 'assets/images/org-default.png'"
+                    class="rounded-circle me-2 border" width="32" height="32" alt="Org Logo" style="object-fit: cover;">
+                <h5 class="card-title fw-bold mb-0 text-dark small text-truncate">{{ activity.title }}</h5>
+            </div>
+
             <p class="card-text text-muted small flex-grow-1" style="line-height: 1.6;">{{ activity.description |
                 slice:0:100 }}...</p>
 
@@ -194,7 +199,9 @@
                         <div class="bg-light rounded-3 p-3">
                             <small class="text-muted text-uppercase fw-bold d-block mb-1">Organización</small>
                             <div class="d-flex align-items-center">
-                                <i class="bi bi-building me-2 text-primary"></i>
+                                <img [src]="selectedActivity.organization?.avatar ? (selectedActivity.organization.avatar.startsWith('/uploads') ? 'http://localhost:8000' + selectedActivity.organization.avatar : selectedActivity.organization.avatar) : 'assets/images/org-default.png'"
+                                    class="rounded-circle me-2 border" width="24" height="24"
+                                    style="object-fit: cover;">
                                 <span>{{ selectedActivity.organization?.name || selectedActivity.organization }}</span>
                             </div>
                         </div>

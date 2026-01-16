@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Ciclo;
 use App\Repository\CicloRepository;
+use App\Repository\TipoActividadRepository;
 
 #[Route('/api')]
 class VolunteerController extends AbstractController
@@ -36,6 +37,8 @@ class VolunteerController extends AbstractController
                 'description' => $v->getDESCRIPCION(),
                 'course' => $v->getCODCICLO(),
                 'status' => $v->getESTADO(),
+                'avatar' => $v->getAVATAR(),
+                'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
             ];
         }
 
@@ -65,6 +68,8 @@ class VolunteerController extends AbstractController
             'description' => $v->getDESCRIPCION(),
             'course' => $v->getCODCICLO(),
             'status' => $v->getESTADO(),
+            'avatar' => $v->getAVATAR(),
+            'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
         ];
 
         $response = new JsonResponse($data);
@@ -217,7 +222,7 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers/{id}', name: 'api_volunteers_update', methods: ['PUT'])]
-    public function update(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository, ValidatorInterface $validator, CicloRepository $cicloRepository): JsonResponse
+    public function update(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository, ValidatorInterface $validator, CicloRepository $cicloRepository, TipoActividadRepository $tipoActividadRepository): JsonResponse
     {
         $volunteer = $volunteerRepository->find($id);
 
@@ -249,6 +254,22 @@ class VolunteerController extends AbstractController
                 $volunteer->setFECHA_NACIMIENTO(new \DateTime($data['dateOfBirth']));
             } catch (\Exception $e) {
                 // Ignore invalid date
+            }
+        }
+
+        if (isset($data['preferences']) && is_array($data['preferences'])) {
+            // Clear existing preferences
+            $vPrefs = $volunteer->getPreferencias();
+            foreach ($vPrefs as $pref) {
+                $volunteer->removePreferencia($pref);
+            }
+            
+            // Add new preferences
+            foreach ($data['preferences'] as $typeId) {
+                $tipo = $tipoActividadRepository->find($typeId);
+                if ($tipo) {
+                    $volunteer->addPreferencia($tipo);
+                }
             }
         }
 
@@ -336,6 +357,51 @@ class VolunteerController extends AbstractController
         $response = new JsonResponse(null, 204);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+    #[Route('/volunteers/{id}/avatar', name: 'api_volunteers_upload_avatar', methods: ['POST'])]
+    public function uploadAvatar(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
+    {
+        $volunteer = $volunteerRepository->find($id);
+        if (!$volunteer) {
+            return new JsonResponse(['error' => 'Volunteer not found'], 404);
+        }
+
+        $file = $request->files->get('avatar');
+        if (!$file) {
+            return new JsonResponse(['error' => 'No file uploaded'], 400);
+        }
+
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+            return new JsonResponse(['error' => 'Invalid file type. Only JPG, PNG and GIF are allowed.'], 400);
+        }
+
+        $fileName = 'avatar-' . $id . '-' . uniqid() . '.' . $file->guessExtension();
+        $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/avatars';
+
+        try {
+            $file->move($uploadDir, $fileName);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Could not save file'], 500);
+        }
+
+        // Save path in DB (relative to public)
+        $volunteer->setAVATAR('/uploads/avatars/' . $fileName);
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Avatar uploaded', 'url' => $volunteer->getAVATAR()], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/volunteers/{id}/avatar', name: 'api_volunteers_avatar_options', methods: ['OPTIONS'])]
+    public function avatarOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }
