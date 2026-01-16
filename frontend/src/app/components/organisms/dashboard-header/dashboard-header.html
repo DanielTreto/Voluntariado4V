@@ -1,4 +1,5 @@
-<header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-gray-100 px-4 py-3">
+<header
+    class="navbar navbar-expand-lg navbar-light bg-white shadow-sm border-bottom border-gray-100 px-4 py-3 sticky-top">
     <div class="container-fluid d-flex justify-content-between align-items-center">
 
         <!-- Page Title -->
@@ -6,17 +7,8 @@
             <h4 class="mb-0 fw-bold text-dark" style="color: #2c3e50;">{{ title }}</h4>
         </div>
 
-        <!-- Search Bar & Actions -->
+        <!-- Actions -->
         <div class="d-flex align-items-center gap-4">
-            <!-- Search Bar -->
-            <div class="input-group" style="width: 300px;">
-                <input type="text" class="form-control border-end-0 rounded-start-pill ps-3"
-                    placeholder="Global search..." aria-label="Search">
-                <span class="input-group-text bg-white border-start-0 rounded-end-pill pe-3">
-                    <i class="bi bi-search text-muted"></i>
-                </span>
-            </div>
-
             <!-- Notifications -->
             <div class="position-relative cursor-pointer">
                 <i class="bi bi-bell-fill fs-5 text-secondary"></i>
@@ -32,7 +24,7 @@
                     style="width: 40px; height: 40px; object-fit: cover;">
             </div>
 
-            <!-- Quick Logout (for dev convenience, usually inside dropdown) -->
+            <!-- Quick Logout -->
             <button class="btn btn-link text-danger p-0 ms-2" (click)="logout()" title="Logout">
                 <i class="bi bi-box-arrow-right fs-5"></i>
             </button>
