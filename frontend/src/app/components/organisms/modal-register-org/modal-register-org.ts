@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-modal-register-org',
@@ -16,6 +17,7 @@ export class ModalRegisterOrg {
   onOpenRegisterVol = output();
 
   private apiService = inject(ApiService);
+  private notificationService = inject(NotificationService);
 
   org = {
     name: '',
@@ -52,12 +54,18 @@ export class ModalRegisterOrg {
     this.apiService.registerOrganization(this.org).subscribe({
       next: (response) => {
         console.log('Organization registered', response);
+        this.notificationService.notifyOrgRegistration(this.org.name); // Notify admin
         this.closeModal();
       },
       error: (error) => {
         this.submitting = false;
         console.error('Error registering org', error);
         
+        // FOR DEMO PURPOSES ONLY: Trigger notification even on error if it's a specific "mock" scenario, 
+        // but for now let's assume we want to test the happy path.
+        // Uncomment below to force notification on error for testing:
+        // this.notificationService.notifyOrgRegistration(this.org.name); 
+
         let msg = 'Error en el registro. Inténtalo de nuevo.';
         if (error.error && error.error.error) {
              msg = error.error.error;

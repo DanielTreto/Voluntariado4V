@@ -1,8 +1,51 @@
 .navbar-top {
-    background-color: var(--vh-sidebar-bg);
-    border-bottom: 1px solid #e9ecef;
-    padding: 0.75rem 1.5rem;
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    height: 80px;
+    padding: 0 2rem;
+    background-color: #fff;
+    border-bottom: 1px solid #f1f2f6;
+    z-index: 1020;
+}
+
+.text-vh-dark {
+    color: #2c3e50;
+}
+
+.global-search {
+    gap: 1rem;
+}
+
+/* Notification Dropdown Styles */
+.notification-dropdown {
+    width: 380px;
+    right: 0;
+    top: 100%;
+    margin-top: 10px;
+    z-index: 1050;
+    border-radius: 12px;
+}
+
+.list-group-item {
+    transition: background-color 0.2s;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Scrollbar styling for notification list */
+.list-group::-webkit-scrollbar {
+    width: 6px;
+}
+
+.list-group::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+}
+
+.list-group::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 3px;
+}
+
+.list-group-item.bg-light {
+    background-color: #f0f7ff !important; /* Slight blue tint for unread */
 }
