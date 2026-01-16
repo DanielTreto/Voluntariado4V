@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
@@ -34,6 +34,7 @@ interface Volunteer {
 })
 export class VolunteerTableComponent implements OnInit {
   private apiService = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
   activeTab: 'requests' | 'registered' = 'requests';
   selectedVolunteer: Volunteer | null = null;
   volunteerToDeactivate: Volunteer | null = null;
@@ -85,6 +86,7 @@ export class VolunteerTableComponent implements OnInit {
             interests: []
           };
         });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading volunteers', err);
@@ -165,6 +167,7 @@ export class VolunteerTableComponent implements OnInit {
     this.apiService.updateVolunteerStatus(volunteer.id, newStatus).subscribe({
       next: () => {
         volunteer.status = newLocalStatus as any;
+        this.cdr.detectChanges();
         this.closeDropdown();
       },
       error: (err) => {
@@ -206,6 +209,7 @@ export class VolunteerTableComponent implements OnInit {
           // For registered users being deactivated, usually they should also disappear or go to a 'suspended' tab.
           // Based on "Registered" tab potentially showing active only, let's update local state so filter catches it.
           // The filtering logic `v.status === 'active'` will hide it automatically.
+          this.cdr.detectChanges();
           this.volunteerToDeactivate = null;
         },
         error: (err) => {
@@ -220,6 +224,7 @@ export class VolunteerTableComponent implements OnInit {
     this.apiService.updateVolunteerStatus(volunteer.id, 'ACTIVO').subscribe({
       next: () => {
         volunteer.status = 'active';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error accepting volunteer', err);
@@ -233,6 +238,7 @@ export class VolunteerTableComponent implements OnInit {
       this.apiService.updateVolunteerStatus(volunteer.id, 'SUSPENDIDO').subscribe({
         next: () => {
           volunteer.status = 'suspended';
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error denying volunteer', err);

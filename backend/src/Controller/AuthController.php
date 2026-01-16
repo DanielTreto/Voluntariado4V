@@ -96,7 +96,19 @@ class AuthController extends AbstractController
                         'firebaseUid' => $volunteer->getFirebaseUid() // Might be null
                     ]);
                 }
-                // Handle organization if implemented in Credenciales later
+                
+                // Handle organization login
+                $org = $cred->getOrganizacion();
+                if ($org) {
+                    return new JsonResponse([
+                        'success' => true,
+                        'role' => 'organization',
+                        'id' => $org->getCODORG(),
+                        'name' => $org->getNOMBRE(),
+                        'email' => $org->getCORREO(),
+                        'firebaseUid' => $org->getFirebaseUid() // Might be null
+                    ]);
+                }
             }
         }
         else {
@@ -109,10 +121,10 @@ class AuthController extends AbstractController
     #[Route('/login', name: 'api_login_options', methods: ['OPTIONS'])]
     public function loginOptions(): JsonResponse
     {
-        $response = new JsonResponse(null, 204);
+        $response = new JsonResponse(null, 200); // Return 200 instead of 204 just to be safe
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, WebSocket-Protocol, Authorization'); // Added typical headers
         return $response;
     }
 }

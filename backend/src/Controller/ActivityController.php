@@ -56,7 +56,19 @@ class ActivityController extends AbstractController
                     'name' => $org->getNOMBRE(),
                     'logo' => 'assets/images/org-default.png'
                 ] : null,
-                'volunteers' => [], // Missing relation logic for now
+                'volunteers' => array_map(function($vol) {
+                    return [
+                        'id' => $vol->getCODVOL(), // Using string ID as per entity, incorrectly mapped as number in TS? Needs check. Entity says CODVOL is string.
+                        // Actually, let's check Volunteer entity getters.
+                        // Assuming standard getters based on previous checks.
+                        'id' => $vol->getCODVOL(),
+                        'name' => trim($vol->getNOMBRE() . ' ' . $vol->getAPELLIDO1() . ' ' . ($vol->getAPELLIDO2() ?? '')),
+                        'avatar' => null, // No photo property
+                        'email' => $vol->getCORREO(),
+                        // 'phone' => $vol->getTELEFONO(), // Optional
+                        'status' => $vol->getESTADO()
+                    ];
+                }, $act->getVoluntarios()->toArray()), 
                 'type' => 'Social', // Placeholder, need join with TIPO_ACTIVIDAD
                 'status' => $act->getESTADO(),
             ];

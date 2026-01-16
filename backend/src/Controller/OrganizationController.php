@@ -85,8 +85,6 @@ class OrganizationController extends AbstractController
         $org->setAMBITO($data['scope'] ?? '');
         $org->setPERSONA_CONTACTO($data['contactPerson'] ?? null);
         $org->setDESCRIPCION($data['description'] ?? '');
-        $org->setPASSWORD($data['password'] ?? '');
-        $org->setPASSWORD($data['password'] ?? '');
         $org->setESTADO('PENDIENTE');
 
         // Generate Custom ID

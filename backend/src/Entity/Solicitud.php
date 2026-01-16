@@ -33,6 +33,11 @@ class Solicitud
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $mensaje = null;
 
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
     public function getVolunteer(): ?Volunteer
     {
         return $this->volunteer;

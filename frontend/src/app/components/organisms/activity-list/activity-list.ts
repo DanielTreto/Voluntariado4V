@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
@@ -50,12 +50,15 @@ interface Activity {
 export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
   private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
-  activeTab: 'pending' | 'active' | 'ended' = 'active';
+  activeTab: 'pending' | 'requests' | 'active' | 'ended' = 'active';
 
   allVolunteers: Volunteer[] = [];
   allOrganizations: Organization[] = [];
   activities: Activity[] = [];
+  requests: any[] = [];
+  pendingRequestsCount: number = 0;
 
   selectedActivity: Activity | null = null;
   activityToDelete: Activity | null = null;
@@ -71,8 +74,10 @@ export class ActivityListComponent implements OnInit {
 
   // Volunteer filters
   volunteerFilterCourse: string = '';
-  volunteerFilterStatus: string = '';
+  // volunteerFilterStatus: string = ''; // Removed as we strictly filter by active
   volunteerSearchTerm: string = '';
+
+
 
   // For Create Activity
   newActivity: Partial<Activity> = {
@@ -92,6 +97,7 @@ export class ActivityListComponent implements OnInit {
     this.loadData();
     this.loadVolunteers();
     this.loadOrganizations();
+    this.loadRequests(); // Preload requests count
   }
 
   loadData() {
@@ -114,6 +120,7 @@ export class ActivityListComponent implements OnInit {
           type: act.type || 'Social',
           status: this.mapStatus(act.status)
         }));
+        this.cdr.detectChanges();
 
         const openId = params['openId'];
         if (openId) {
@@ -138,6 +145,38 @@ export class ActivityListComponent implements OnInit {
     });
   }
 
+  loadRequests() {
+    // Pass '' as orgId to specific behavior for Admin or just filter from backend if customized
+    // Assuming getOrganizationRequests with empty string returns ALL (based on Controller logic).
+    // If controller needs orgId, we might need a specific 'getAllRequests' endpoint or use existing with null.
+    // Based on my controller code: if ($organizationId) it filters. If not, it returns all.
+    this.apiService.getOrganizationRequests('', 'PENDIENTE').subscribe({
+      next: (data) => {
+        this.requests = data;
+        this.pendingRequestsCount = data.filter(r => r.status === 'PENDIENTE').length;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading requests', err)
+    });
+  }
+
+  updateRequestStatus(req: any, status: string) {
+    if (!confirm(`¿Estás seguro de que quieres ${status === 'ACEPTADA' ? 'aceptar' : 'rechazar'} esta solicitud?`)) return;
+
+    this.apiService.updateRequestStatus(req.id, status).subscribe({
+      next: (res) => {
+        req.status = status;
+        this.loadRequests(); // Refresh list
+        this.loadData(); // Refresh activities data to show new volunteers
+        alert(`Solicitud ${status === 'ACEPTADA' ? 'aceptada' : 'rechazada'} correctamente.`);
+      },
+      error: (err) => {
+        console.error('Error updating request', err);
+        alert('Error al actualizar la solicitud');
+      }
+    });
+  }
+
   loadVolunteers() {
     this.apiService.getVolunteers().subscribe({
       next: (data) => {
@@ -149,8 +188,13 @@ export class ActivityListComponent implements OnInit {
           phone: v.phone,
           course: v.course || 'Sin curso',
           status: this.mapVolunteerStatus(v.status),
-          interests: v.interests || []
+          interests: v.interests || [],
+          dni: v.dni,
+          birthDate: v.dateOfBirth,
+          description: v.description,
+          disponibilidades: v.disponibilidades || []
         }));
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading volunteers', err)
     });
@@ -168,6 +212,7 @@ export class ActivityListComponent implements OnInit {
             email: org.email,
             phone: org.phone
           }));
+        this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading organizations', err)
     });
@@ -193,6 +238,8 @@ export class ActivityListComponent implements OnInit {
   }
 
   get filteredActivities() {
+    // Only filter activities if tab is one of the activity states
+    if (this.activeTab === 'requests') return [];
     return this.activities.filter(a => a.status === this.activeTab);
   }
 
@@ -208,11 +255,7 @@ export class ActivityListComponent implements OnInit {
       result = result.filter(v => v.course === this.volunteerFilterCourse);
     }
 
-    if (this.volunteerFilterStatus) {
-      result = result.filter(v => v.status === this.volunteerFilterStatus);
-    }
-
-    return result;
+    return result.filter(v => v.status === 'active');
   }
 
   get uniqueCourses(): string[] {
@@ -220,8 +263,12 @@ export class ActivityListComponent implements OnInit {
     return courses.filter(c => c);
   }
 
-  setTab(tab: 'pending' | 'active' | 'ended') {
+  setTab(tab: 'pending' | 'requests' | 'active' | 'ended') {
     this.activeTab = tab;
+    this.closeRequestInfoModal(); // Ensure isolated modal is closed
+    if (tab === 'requests') {
+      this.loadRequests();
+    }
   }
 
   // Edit Modal
@@ -251,6 +298,7 @@ export class ActivityListComponent implements OnInit {
           if (index !== -1) {
             this.activities[index] = { ...this.activities[index], ...payload };
           }
+          this.cdr.detectChanges();
           this.closeEditModal();
         },
         error: (err) => {
@@ -270,7 +318,6 @@ export class ActivityListComponent implements OnInit {
   openAddVolunteer(activity: Activity) {
     this.selectedActivity = activity;
     this.volunteerFilterCourse = '';
-    this.volunteerFilterStatus = '';
     this.volunteerSearchTerm = '';
     this.showAddVolunteerModal = true;
   }
@@ -282,7 +329,7 @@ export class ActivityListComponent implements OnInit {
 
   addVolunteerToActivity(volunteer: Volunteer) {
     if (this.selectedActivity && this.selectedActivity.id) {
-      if (!this.selectedActivity.volunteers.find(v => v.id === volunteer.id)) {
+      if (!this.selectedActivity.volunteers.find(v => v.id == volunteer.id)) {
         this.apiService.signUpForActivity(this.selectedActivity.id, volunteer.id).subscribe({
           next: () => {
             this.selectedActivity!.volunteers.push(volunteer);
@@ -291,6 +338,7 @@ export class ActivityListComponent implements OnInit {
             if (index !== -1) {
               this.activities[index].volunteers = [...this.selectedActivity!.volunteers];
             }
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Error adding volunteer', err);
@@ -306,11 +354,12 @@ export class ActivityListComponent implements OnInit {
     if (this.selectedActivity && this.selectedActivity.id) {
       this.apiService.unsubscribeFromActivity(this.selectedActivity.id, volunteer.id).subscribe({
         next: () => {
-          this.selectedActivity!.volunteers = this.selectedActivity!.volunteers.filter(v => v.id !== volunteer.id);
+          this.selectedActivity!.volunteers = this.selectedActivity!.volunteers.filter(v => v.id != volunteer.id);
           const index = this.activities.findIndex(a => a.id === this.selectedActivity!.id);
           if (index !== -1) {
             this.activities[index].volunteers = [...this.selectedActivity!.volunteers];
           }
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error removing volunteer', err);
@@ -321,7 +370,8 @@ export class ActivityListComponent implements OnInit {
   }
 
   isVolunteerInActivity(volunteer: Volunteer): boolean {
-    return this.selectedActivity?.volunteers.some(v => v.id === volunteer.id) || false;
+    // Use loose equality to handle string vs number IDs
+    return this.selectedActivity?.volunteers.some(v => v.id == volunteer.id) || false;
   }
 
   // Delete Modal
@@ -340,6 +390,7 @@ export class ActivityListComponent implements OnInit {
       this.apiService.deleteActivity(this.activityToDelete.id).subscribe({
         next: () => {
           this.activities = this.activities.filter(a => a.id !== this.activityToDelete!.id);
+          this.cdr.detectChanges();
           this.closeDeleteModal();
         },
         error: (err) => {
@@ -413,6 +464,7 @@ export class ActivityListComponent implements OnInit {
     this.apiService.updateActivityStatus(activity.id, 'EN_PROGRESO').subscribe({
       next: () => {
         activity.status = 'active';
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error accepting activity', err);
@@ -425,11 +477,36 @@ export class ActivityListComponent implements OnInit {
       this.apiService.updateActivityStatus(activity.id, 'DENEGADA').subscribe({
         next: () => {
           this.activities = this.activities.filter(a => a.id !== activity.id);
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error denying activity', err);
         }
       });
     }
+  }
+
+  // Request Volunteer Info Modal (Isolated)
+  showRequestInfoModal: boolean = false;
+  selectedRequestVolunteer: any = null;
+
+  openRequestInfo(volunteer: any) {
+    if (!volunteer) return;
+    console.log('Opening request info for:', volunteer);
+
+    setTimeout(() => {
+      // Use loose equality == to handle string vs number ID mismatches
+      const fullDetails = this.allVolunteers.find(v => v.id == volunteer.id);
+      this.selectedRequestVolunteer = fullDetails || volunteer;
+      console.log('Selected details:', this.selectedRequestVolunteer);
+
+      this.showRequestInfoModal = true;
+      this.cdr.detectChanges(); // Force UI update
+    }, 0);
+  }
+
+  closeRequestInfoModal() {
+    this.showRequestInfoModal = false;
+    this.selectedRequestVolunteer = null;
   }
 }

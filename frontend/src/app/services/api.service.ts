@@ -115,6 +115,18 @@ export class ApiService {
     return this.http.get(`${this.apiUrl}/volunteers/${id}/requests`);
   }
 
+  getOrganizationRequests(orgId: number | string, status?: string): Observable<any[]> {
+    let url = `${this.apiUrl}/requests?organizationId=${orgId}`;
+    if (status) {
+      url += `&status=${status}`;
+    }
+    return this.http.get<any[]>(url);
+  }
+
+  updateRequestStatus(requestId: number, status: string): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/requests/${requestId}/status`, { status });
+  }
+
   getCiclos(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/ciclos`);
   }

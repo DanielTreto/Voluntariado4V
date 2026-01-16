@@ -56,7 +56,6 @@ class Organizacion
     private ?string $AMBITO = null;
 
     #[ORM\Column(length: 128, unique: true, nullable: true)]
-    #[Assert\NotBlank]
     private ?string $firebaseUid = null;
 
     #[ORM\Column(length: 100, nullable: true)]
