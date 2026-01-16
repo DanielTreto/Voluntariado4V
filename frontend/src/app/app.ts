@@ -3,9 +3,12 @@ import { RouterOutlet } from '@angular/router';
 import { ApiService } from './services/api.service';
 
 
+import { ScrollToTopComponent } from './components/atoms/scroll-to-top/scroll-to-top';
+
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [RouterOutlet, ScrollToTopComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
