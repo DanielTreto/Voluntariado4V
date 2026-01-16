@@ -51,18 +51,21 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             if (volunteer.getStatus().equals("Active")) {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9")); // Verde claro
                 holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")); // Verde texto
+                holder.tvStatus.setText("Activo");
             } else {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE")); // Rojo claro
                 holder.tvStatus.setTextColor(Color.parseColor("#F44336")); // Rojo texto
+                holder.tvStatus.setText("Suspendido");
             }
 
         } else {
             // Es una solicitud pendiente ("Pending")
-            holder.actionsLayout.setVisibility(View.VISIBLE); // Mostrar botones Check/Cruz
+            holder.actionsLayout.setVisibility(View.GONE); // Mostrar botones Check/Cruz -> AHORA OCULTO
             holder.btnMoreOptions.setVisibility(View.GONE); // Ocultar 3 puntos
 
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1"));
-            holder.tvStatus.setTextColor(Color.parseColor("#FFA000"));
+            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1")); // Naranja claro
+            holder.tvStatus.setTextColor(Color.parseColor("#FFA000")); // Naranja Texto
+            holder.tvStatus.setText("Pendiente");
         }
     }
 

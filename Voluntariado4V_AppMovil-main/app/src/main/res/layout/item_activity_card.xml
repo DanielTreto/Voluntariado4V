@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,8 +29,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Medio Ambiente"
-                android:background="#FFFFFF"
-                android:textColor="#333333"
+                android:background="@color/white"
+                android:textColor="@color/black"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:paddingHorizontal="8dp"
@@ -53,7 +53,7 @@
                 android:text="Limpieza de Playa"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textColor="@color/text_primary" />
 
             <TextView
                 android:id="@+id/tvActDesc"
@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:text="Jornada de limpieza y concienciación ambiental."
                 android:textSize="14sp"
-                android:textColor="#666666"
+                android:textColor="@color/text_secondary"
                 android:layout_marginTop="4dp"
                 android:maxLines="2"
                 android:ellipsize="end" />
@@ -77,7 +77,7 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@drawable/ic_building"
-                    app:tint="#666666"/>
+                    app:tint="@color/icon_gray"/>
 
                 <TextView
                     android:id="@+id/tvActLocation"
@@ -86,7 +86,7 @@
                     android:text="Playa de la Concha"
                     android:textSize="13sp"
                     android:layout_marginStart="8dp"
-                    android:textColor="#555555"/>
+                    android:textColor="@color/text_secondary"/>
             </LinearLayout>
 
             <LinearLayout
@@ -100,7 +100,7 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@drawable/ic_calendar"
-                    app:tint="#666666"/>
+                    app:tint="@color/icon_gray"/>
 
                 <TextView
                     android:id="@+id/tvActDate"
@@ -109,7 +109,7 @@
                     android:text="2025-12-05"
                     android:textSize="13sp"
                     android:layout_marginStart="8dp"
-                    android:textColor="#555555"/>
+                    android:textColor="@color/text_secondary"/>
             </LinearLayout>
 
             <TextView
@@ -118,6 +118,7 @@
                 android:text="Voluntarios apuntados:"
                 android:textStyle="bold"
                 android:textSize="12sp"
+                android:textColor="@color/text_primary"
                 android:layout_marginTop="12dp"/>
 
             <LinearLayout
@@ -134,7 +135,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_profile_placeholder"
-                    app:tint="#888888"/>
+                    app:tint="@color/icon_gray"/>
             </LinearLayout>
 
         </LinearLayout>
@@ -148,32 +149,13 @@
             android:gravity="end">
 
             <Button
-                android:layout_width="0dp"
+                android:id="@+id/btnViewDetails"
+                android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_weight="1"
-                android:text="Modificar"
-                android:textSize="10sp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginEnd="4dp"/>
-
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:text="+ Alumnos"
-                android:textSize="10sp"
-                android:textColor="#4CAF50"
-                app:strokeColor="#4CAF50"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_marginEnd="4dp"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Borrar"
-                android:textSize="10sp"
-                android:textColor="#F44336"
-                app:strokeColor="#F44336"
+                android:text="Ver detalles"
+                android:textColor="@color/colorPrimary"
+                app:strokeColor="@color/colorPrimary"
+                android:textSize="12sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
         </LinearLayout>
 
@@ -200,6 +182,12 @@
                 android:text="✕ Denegar"
                 android:backgroundTint="#D32F2F"/>
         </LinearLayout>
+        
+        <!-- Bottom Blue Border -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@color/colorPrimary" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

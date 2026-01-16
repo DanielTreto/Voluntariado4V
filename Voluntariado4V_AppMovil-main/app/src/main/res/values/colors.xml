@@ -21,4 +21,8 @@
     <color name="purple_500">@color/colorPrimary</color>
     <color name="teal_200">@color/colorSecondary</color>
     <color name="teal_700">@color/colorPrimaryVariant</color>
+
+    <color name="calendar_header_bg">#EEEEEE</color>
+    <color name="calendar_stroke_color">#E0E0E0</color>
+    <color name="input_default_stroke">#808080</color>
 </resources>

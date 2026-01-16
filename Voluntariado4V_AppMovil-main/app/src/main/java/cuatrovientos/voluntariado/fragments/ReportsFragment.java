@@ -56,6 +56,9 @@ public class ReportsFragment extends Fragment {
 
     // --- CONFIGURACIÓN DEL GRÁFICO DE LÍNEAS ---
     private void setupLineChart() {
+        // Obtenemos el color dinámico del texto (Blanco en Dark Mode, Oscuro en Light Mode)
+        int textColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary);
+
         // 1. Crear los datos (Simulando la imagen: crecimiento constante)
         List<Entry> entries = new ArrayList<>();
         entries.add(new Entry(0, 15f)); // Q1 2024
@@ -84,9 +87,12 @@ public class ReportsFragment extends Fragment {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setDrawGridLines(true);
+        xAxis.setTextColor(textColor); // <-- APLICAR COLOR DINÁMICO
 
+        lineChart.getAxisLeft().setTextColor(textColor); // <-- APLICAR COLOR DINÁMICO
         lineChart.getAxisRight().setEnabled(false); // Ocultar eje derecho
         lineChart.getDescription().setEnabled(false); // Ocultar descripción pequeña
+        lineChart.getLegend().setTextColor(textColor); // <-- APLICAR COLOR DINÁMICO
 
         // 4. Aplicar datos
         LineData lineData = new LineData(dataSet);
@@ -97,6 +103,8 @@ public class ReportsFragment extends Fragment {
 
     // --- CONFIGURACIÓN DEL GRÁFICO DE PASTEL ---
     private void setupPieChart() {
+        int textColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary);
+
         // 1. Crear los datos (Simulando la imagen)
         List<PieEntry> entries = new ArrayList<>();
         entries.add(new PieEntry(35f, "Medio Ambiente"));
@@ -126,8 +134,10 @@ public class ReportsFragment extends Fragment {
         pieChart.getDescription().setEnabled(false);
         pieChart.setCenterText("Eventos\nActivos");
         pieChart.setCenterTextSize(14f);
+        pieChart.setCenterTextColor(textColor); // <-- APLICAR COLOR DINÁMICO
         pieChart.setHoleRadius(40f); // Agujero en el centro (tipo Donut)
         pieChart.setTransparentCircleRadius(45f);
+        pieChart.setHoleColor(Color.TRANSPARENT); // Asegurar que el agujero sea transparente/del color de fondo de la tarjeta
 
         // Configurar Leyenda
         Legend l = pieChart.getLegend();
@@ -135,6 +145,9 @@ public class ReportsFragment extends Fragment {
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
         l.setOrientation(Legend.LegendOrientation.VERTICAL);
         l.setDrawInside(false);
+        l.setTextColor(textColor); // <-- APLICAR COLOR DINÁMICO
+
+        pieChart.setEntryLabelColor(Color.WHITE); // Labels dentro del pastel (siempre visible sobre color)
 
         pieChart.animateY(1000);
         pieChart.invalidate();

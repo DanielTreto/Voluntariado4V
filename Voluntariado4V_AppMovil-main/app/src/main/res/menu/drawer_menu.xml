@@ -7,35 +7,35 @@
         <item
             android:id="@+id/nav_volunteers"
             android:icon="@drawable/ic_people"
-            android:title="Volunteers" />
+            android:title="Voluntarios" />
         <item
             android:id="@+id/nav_organizations"
             android:icon="@drawable/ic_building"
-            android:title="Organizations" />
+            android:title="Organizaciones" />
         <item
             android:id="@+id/nav_activities"
             android:icon="@drawable/ic_list"
-            android:title="Activities" />
+            android:title="Actividades" />
         <item
             android:id="@+id/nav_events"
             android:icon="@drawable/ic_calendar"
-            android:title="Events" />
+            android:title="Eventos" />
         <item
             android:id="@+id/nav_reports"
             android:icon="@drawable/ic_chart"
-            android:title="Reports" />
+            android:title="Informes" />
     </group>
 
-    <item android:title="User Actions">
+    <item android:title="Opciones de Usuario">
         <menu>
             <item
                 android:id="@+id/nav_settings"
                 android:icon="@drawable/ic_settings"
-                android:title="Settings" />
+                android:title="Ajustes" />
             <item
                 android:id="@+id/nav_logout"
                 android:icon="@drawable/ic_logout"
-                android:title="Logout" />
+                android:title="Cerrar Sesión" />
         </menu>
     </item>
 
