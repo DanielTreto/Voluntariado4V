@@ -51,9 +51,9 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
             // 3. Mostrar FECHA
             holder.tvInfo.setText("Fecha solicitud: " + org.getDate());
 
-            // 4. Color Pendiente (Azul claro/Cyan según tu imagen)
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#E0F7FA"));
-            holder.tvStatus.setTextColor(Color.parseColor("#006064"));
+            // 4. Color Pendiente (Naranja para igualar Voluntarios)
+            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1"));
+            holder.tvStatus.setTextColor(Color.parseColor("#FFA000"));
             holder.tvStatus.setText("Pendiente");
 
         } else {
@@ -69,6 +69,7 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
             // 4. Color Activo (Verde)
             holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9"));
             holder.tvStatus.setTextColor(Color.parseColor("#4CAF50"));
+            holder.tvStatus.setText("Activo");
         }
     }
 
