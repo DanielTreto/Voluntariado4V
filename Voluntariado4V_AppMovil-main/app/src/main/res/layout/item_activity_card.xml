@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -152,6 +152,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:text="Ver detalles"
+                android:textColor="@color/colorPrimary"
+                app:strokeColor="@color/colorPrimary"
                 android:textSize="12sp"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
         </LinearLayout>
@@ -179,6 +181,12 @@
                 android:text="✕ Denegar"
                 android:backgroundTint="#D32F2F"/>
         </LinearLayout>
+        
+        <!-- Bottom Blue Border -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@color/colorPrimary" />
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
