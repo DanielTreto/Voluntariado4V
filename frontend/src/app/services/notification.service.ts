@@ -77,8 +77,27 @@ export class NotificationService {
           timestamp: new Date(),
           read: false,
           actionUrl: '/volunteer-dashboard/activities', // Or my activities
-          recipientId: volunteerId,
           recipientRole: 'volunteer'
+      });
+  }
+
+  notifyActivityRequestStatus(orgId: number, activityTitle: string, accepted: boolean) {
+      const type = accepted ? 'ACTIVITY_REQUEST_ACCEPTED' : 'ACTIVITY_REQUEST_DENIED';
+      const title = accepted ? 'Actividad Aceptada' : 'Actividad Denegada';
+      const message = accepted 
+          ? `La actividad "${activityTitle}" ha sido aprobada.`
+          : `La actividad "${activityTitle}" ha sido rechazada.`;
+      
+      this.addNotification({
+          id: Date.now().toString(),
+          type: type,
+          title: title,
+          message: message,
+          timestamp: new Date(),
+          read: false,
+          actionUrl: '/organization-dashboard/activities',
+          recipientId: orgId,
+          recipientRole: 'organization'
       });
   }
 
