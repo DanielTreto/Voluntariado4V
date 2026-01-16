@@ -29,14 +29,27 @@ export class ScrollToTopComponent {
         if (isPlatformBrowser(this.platformId)) {
             this.isLaunching = true;
 
-            // Calculate duration needed? Or just smooth scroll
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // Reset after animation
+            // Keep launching state until likely finished or scrolled up
+            // We can rely on onWindowScroll to hide the button when scrollY < 300
+            // But we prevent toggle during launch to avoid flickering
+
+            const checkScroll = setInterval(() => {
+                if (window.scrollY === 0) {
+                    this.isLaunching = false;
+                    this.showButton = false;
+                    clearInterval(checkScroll);
+                }
+            }, 100);
+
+            // Fallback
             setTimeout(() => {
-                this.isLaunching = false;
-                this.showButton = false; // Hide until scrolled down again
-            }, 1000);
+                if (this.isLaunching) {
+                    this.isLaunching = false;
+                    clearInterval(checkScroll);
+                }
+            }, 2000);
         }
     }
 }
