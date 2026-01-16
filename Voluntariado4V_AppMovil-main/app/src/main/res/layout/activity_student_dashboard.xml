@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="@color/background_light">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
             android:text="Dashboard Alumno"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="24dp"/>
 
         <!-- SECCIÓN 1: Actividad Inscrita -->
@@ -28,7 +28,7 @@
             android:text="Tu Actividad Actual"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#333333"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="8dp"/>
 
         <com.google.android.material.card.MaterialCardView
@@ -37,6 +37,7 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/white"
             android:layout_marginBottom="24dp">
 
             <LinearLayout
@@ -67,7 +68,7 @@
                         android:text="Banco de Alimentos"
                         android:textStyle="bold"
                         android:textSize="16sp"
-                        android:textColor="@color/black"/>
+                        android:textColor="@color/text_primary"/>
 
                     <TextView
                         android:id="@+id/tvMyActivityDate"
@@ -75,7 +76,7 @@
                         android:layout_height="wrap_content"
                         android:text="Próximo evento: 10 Dic"
                         android:textSize="14sp"
-                        android:textColor="#666666"/>
+                        android:textColor="@color/text_secondary"/>
                 </LinearLayout>
 
                 <TextView
@@ -95,7 +96,7 @@
             android:text="Actividades Disponibles"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="#333333"
+            android:textColor="@color/text_primary"
             android:layout_marginBottom="8dp"/>
 
         <androidx.recyclerview.widget.RecyclerView
