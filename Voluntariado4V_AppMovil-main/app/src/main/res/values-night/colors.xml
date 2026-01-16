@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Mode Palette -->
+    <color name="colorPrimary">#4299E1</color> <!-- Bright Blue for better contrast in dark mode -->
+    <color name="colorPrimaryVariant">#000000</color>
+    <color name="colorSecondary">#4299E1</color>
+    <color name="colorOnPrimary">#FFFFFF</color>
+    
+    <color name="background_light">#0F172A</color> <!-- Dark Slate (Main Background) -->
+    <color name="white">#1E293B</color> <!-- Card Background (Lighter Slate) -->
+    
+    <color name="text_primary">#FFFFFF</color> <!-- White text -->
+    <color name="text_secondary">#CBD5E1</color> <!-- Lighter Slate (Slate-300) for better contrast -->
+    
+    <color name="calendar_header_bg">#334155</color> <!-- Slate-700 -->
+    <color name="calendar_stroke_color">#334155</color> <!-- Slate-700 for borders -->
+    <color name="input_default_stroke">#FFFFFF</color> <!-- White for unfocused inputs in dark mode -->
+
+    <color name="background_gray">#0F172A</color>
+    <color name="icon_gray">#CBD5E1</color> <!-- Light Gray for icons -->
+    <color name="black">#FFFFFF</color> <!-- Re-map black to white for dark mode adaptation -->
+
+    <color name="green_active">#4CAF50</color>
+    <color name="red_error">#F44336</color>
+
+    <color name="purple_500">@color/colorPrimary</color>
+    <color name="teal_200">@color/colorSecondary</color>
+    <color name="teal_700">@color/colorPrimaryVariant</color>
+</resources>

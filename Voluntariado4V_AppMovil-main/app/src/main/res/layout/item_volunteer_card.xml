@@ -37,7 +37,7 @@
             android:text="Jane Doe"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/text_primary"
             app:layout_constraintEnd_toStartOf="@+id/btnMoreOptions"
             app:layout_constraintStart_toEndOf="@+id/imgAvatar"
             app:layout_constraintTop_toTopOf="@+id/imgAvatar" />
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:text="Community Garden Project"
             android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/text_secondary"
             app:layout_constraintStart_toStartOf="@+id/tvName"
             app:layout_constraintEnd_toEndOf="@+id/tvName"
             app:layout_constraintTop_toBottomOf="@+id/tvName" />
@@ -61,7 +61,7 @@
             android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/text_secondary"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
@@ -75,7 +75,8 @@
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
             android:layout_marginHorizontal="16dp"
-            android:background="#EEEEEE"
+            android:background="@color/icon_gray"
+            android:alpha="0.2"
             app:layout_constraintTop_toBottomOf="@+id/imgAvatar" />
 
         <LinearLayout
@@ -106,7 +107,7 @@
                 android:layout_height="wrap_content"
                 android:text="jane.doe@example.com"
                 android:textSize="14sp"
-                android:textColor="#555555"
+                android:textColor="@color/text_secondary"
                 android:drawablePadding="8dp" />
 
             <TextView
@@ -115,7 +116,7 @@
                 android:layout_height="wrap_content"
                 android:text="(555) 123-4567"
                 android:textSize="14sp"
-                android:textColor="#555555"
+                android:textColor="@color/text_secondary"
                 android:layout_marginTop="4dp" />
 
             <TextView
@@ -125,7 +126,7 @@
                 android:text="Last Activity: 2023-10-26"
                 android:textSize="12sp"
                 android:layout_marginTop="8dp"
-                android:textColor="@android:color/darker_gray"/>
+                android:textColor="@color/text_secondary"/>
         </LinearLayout>
 
         <LinearLayout

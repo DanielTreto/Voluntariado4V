@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="#F5F5F5">
+    android:background="@color/background_light">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
             android:text="Diciembre 2025"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/black" />
+            android:textColor="@color/text_primary" />
 
         <com.google.android.material.button.MaterialButton
             android:layout_width="40dp"
@@ -41,26 +41,39 @@
             android:insetLeft="0dp"/>
     </LinearLayout>
 
-    <LinearLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:background="#EEEEEE"
-        android:paddingVertical="8dp">
+        app:cardCornerRadius="0dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@color/white">
 
-        <TextView android:text="Lun" style="@style/CalendarHeader" />
-        <TextView android:text="Mar" style="@style/CalendarHeader" />
-        <TextView android:text="Mié" style="@style/CalendarHeader" />
-        <TextView android:text="Jue" style="@style/CalendarHeader" />
-        <TextView android:text="Vie" style="@style/CalendarHeader" />
-        <TextView android:text="Sáb" style="@style/CalendarHeader" />
-        <TextView android:text="Dom" style="@style/CalendarHeader" />
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerCalendar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@color/calendar_header_bg"
+                android:paddingVertical="8dp">
+
+                <TextView android:text="Lun" style="@style/CalendarHeader" />
+                <TextView android:text="Mar" style="@style/CalendarHeader" />
+                <TextView android:text="Mié" style="@style/CalendarHeader" />
+                <TextView android:text="Jue" style="@style/CalendarHeader" />
+                <TextView android:text="Vie" style="@style/CalendarHeader" />
+                <TextView android:text="Sáb" style="@style/CalendarHeader" />
+                <TextView android:text="Dom" style="@style/CalendarHeader" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerCalendar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </LinearLayout>
