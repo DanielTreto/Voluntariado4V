@@ -97,7 +97,7 @@ public class VolunteersFragment extends Fragment {
                         
                         masterList.add(new Volunteer(
                             fullName,
-                            "Voluntario", 
+                            (apiVol.getCourse() != null && !apiVol.getCourse().isEmpty()) ? apiVol.getCourse() : "Voluntario", 
                             apiVol.getEmail(),
                             apiVol.getPhone(),
                             status,
@@ -163,6 +163,17 @@ public class VolunteersFragment extends Fragment {
         // Actualizamos el adaptador con la nueva lista filtrada
         if (adapter != null) {
             adapter.updateList(filteredList);
+        }
+
+        RecyclerView recyclerView = getView().findViewById(R.id.recyclerVolunteers);
+        android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyVolunteers);
+
+        if (filteredList.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            emptyView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyView.setVisibility(View.GONE);
         }
     }
 }

@@ -116,7 +116,7 @@ class VolunteerController extends AbstractController
         
         // Generate Custom ID
         $newId = $volunteerRepository->findNextId();
-        $volunteer->setCODVOL($newId);
+        $volunteer->setCODVOL((int)$newId);
 
         // Create Credentials
         $credenciales = new Credenciales();
@@ -308,6 +308,8 @@ class VolunteerController extends AbstractController
                 'description' => $act->getDESCRIPCION(),
                 'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
                 'status' => $act->getESTADO(),
+                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
+                'imagen' => $act->getIMAGEN(),
             ];
         }
 

@@ -69,7 +69,7 @@ class ActivityController extends AbstractController
                         'status' => $vol->getESTADO()
                     ];
                 }, $act->getVoluntarios()->toArray()), 
-                'type' => 'Social', // Placeholder, need join with TIPO_ACTIVIDAD
+                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
                 'status' => $act->getESTADO(),
             ];
         }

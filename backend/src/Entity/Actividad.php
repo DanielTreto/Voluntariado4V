@@ -198,6 +198,22 @@ class Actividad
     }
 
     /**
+     * @return \Doctrine\Common\Collections\Collection<int, TipoActividad>
+     */
+    public function getTiposActividad(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->tiposActividad;
+    }
+
+    public function addTipoActividad(TipoActividad $tipoActividad): static
+    {
+        if (!$this->tiposActividad->contains($tipoActividad)) {
+            $this->tiposActividad->add($tipoActividad);
+        }
+        return $this;
+    }
+
+    /**
      * @return \Doctrine\Common\Collections\Collection<int, Volunteer>
      */
     public function getVoluntarios(): \Doctrine\Common\Collections\Collection

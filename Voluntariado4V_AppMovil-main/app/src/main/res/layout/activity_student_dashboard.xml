@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -21,73 +20,46 @@
             android:textColor="@color/text_primary"
             android:layout_marginBottom="24dp"/>
 
-        <!-- SECCIÓN 1: Actividad Inscrita -->
+        <!-- SECCIÓN 1: Mis Actividades -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tu Actividad Actual"
+            android:text="Mis Actividades"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
             android:layout_marginBottom="8dp"/>
 
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardMyActivity"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMyActivities"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/white"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp"
+            android:visibility="visible"
+            tools:listitem="@layout/item_activity_card"
+            tools:itemCount="1"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+        <LinearLayout
+            android:id="@+id/emptyMyActivities"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="24dp"
+            android:layout_marginBottom="16dp">
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_event_note"
+                app:tint="@color/text_secondary"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="16dp"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:id="@+id/imgMyActivity"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_launcher_background"
-                    app:tint="#4CAF50"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginStart="16dp">
-
-                    <TextView
-                        android:id="@+id/tvMyActivityTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Banco de Alimentos"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:textColor="@color/text_primary"/>
-
-                    <TextView
-                        android:id="@+id/tvMyActivityDate"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Próximo evento: 10 Dic"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_secondary"/>
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="VER"
-                    android:textStyle="bold"
-                    android:textColor="#2196F3"/>
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+                android:text="No estás inscrito en ninguna actividad"
+                android:textColor="@color/text_secondary"/>
+        </LinearLayout>
 
         <!-- SECCIÓN 2: Actividades Disponibles -->
         <TextView
@@ -103,7 +75,29 @@
             android:id="@+id/rvAvailableActivities"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="visible"
             tools:listitem="@layout/item_activity_card"/>
+
+        <LinearLayout
+            android:id="@+id/emptyAvailableActivities"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            android:padding="24dp">
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_assignment"
+                app:tint="@color/text_secondary"
+                android:layout_marginBottom="8dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No hay actividades disponibles"
+                android:textColor="@color/text_secondary"/>
+        </LinearLayout>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

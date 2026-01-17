@@ -147,5 +147,16 @@ public class OrganizationsFragment extends Fragment {
         if (adapter != null) {
             adapter.updateList(filteredList);
         }
+
+        RecyclerView recyclerView = getView().findViewById(R.id.recyclerOrganizations);
+        android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyOrganizations);
+
+        if (filteredList.isEmpty()) {
+            recyclerView.setVisibility(View.GONE);
+            emptyView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyView.setVisibility(View.GONE);
+        }
     }
 }

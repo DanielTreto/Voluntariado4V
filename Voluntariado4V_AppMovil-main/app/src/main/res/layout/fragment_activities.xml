@@ -36,4 +36,25 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:scrollbars="vertical" />
 
+    <LinearLayout
+        android:id="@+id/emptyActivities"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_event_note" 
+            app:tint="@color/text_secondary"
+            android:layout_marginBottom="16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No hay actividades para mostrar"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"/>
+    </LinearLayout>
+
 </LinearLayout>

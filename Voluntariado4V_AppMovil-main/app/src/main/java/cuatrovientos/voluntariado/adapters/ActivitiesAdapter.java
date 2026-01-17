@@ -51,6 +51,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         holder.tvLocation.setText(act.getLocation());
         holder.tvDate.setText(act.getDate());
         holder.tvCategory.setText(act.getCategory());
+        holder.tvCategory.setBackgroundColor(act.getImageColor());
 
         // Cargar imagen con Glide
         // Cargar imagen con Glide
