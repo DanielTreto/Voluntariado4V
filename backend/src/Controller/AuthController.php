@@ -62,7 +62,7 @@ class AuthController extends AbstractController
                     'success' => true,
                     'role' => 'volunteer',
                     'id' => $volunteer->getCODVOL(),
-                    'name' => $volunteer->getNOMBRE(),
+                    'name' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
                     'email' => $volunteer->getCORREO(),
                     'firebaseUid' => $volunteer->getFirebaseUid(),
                     'avatar' => $volunteer->getAVATAR()
@@ -93,7 +93,7 @@ class AuthController extends AbstractController
                         'success' => true,
                         'role' => 'volunteer',
                         'id' => $volunteer->getCODVOL(),
-                        'name' => $volunteer->getNOMBRE(),
+                        'name' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
                         'email' => $volunteer->getCORREO(),
                         'firebaseUid' => $volunteer->getFirebaseUid(),
                         'avatar' => $volunteer->getAVATAR()
@@ -111,6 +111,19 @@ class AuthController extends AbstractController
                         'email' => $org->getCORREO(),
                         'firebaseUid' => $org->getFirebaseUid(),
                         'avatar' => $org->getAVATAR()
+                    ]);
+                }
+
+                // Handle Admin login
+                if ($cred->getUserType() === 'admin' || $cred->getUserType() === 'administrator') {
+                     return new JsonResponse([
+                        'success' => true,
+                        'role' => 'admin',
+                        'id' => $cred->getId(), // Use Cred ID or 0
+                        'name' => 'Administrador', // Or a stored name if we had one
+                        'email' => $cred->getCorreo(),
+                        'firebaseUid' => 'admin-uid',
+                        'avatar' => null // Use default placeholder
                     ]);
                 }
             }

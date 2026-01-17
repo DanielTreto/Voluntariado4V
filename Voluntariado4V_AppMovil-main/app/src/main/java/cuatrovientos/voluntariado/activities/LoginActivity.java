@@ -63,8 +63,20 @@ public class LoginActivity extends AppCompatActivity {
                     
                     if (loginResponse.isSuccess()) {
                         String role = loginResponse.getRole();
+                        
+                        // Save Session
+                        android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+                        android.content.SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("USER_ID", loginResponse.getId());
+                        editor.putString("USER_NAME", loginResponse.getName());
+                        editor.putString("USER_EMAIL", loginResponse.getEmail());
+                        editor.putString("USER_ROLE", role);
+                        editor.putString("USER_AVATAR", loginResponse.getAvatar());
+                        editor.apply();
+
                         if ("volunteer".equalsIgnoreCase(role)) {
                             Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
+                            // Intent extras kept for backward compatibility if needed, but Prefs is primary now
                             intent.putExtra("USER_ID", loginResponse.getId());
                             intent.putExtra("USER_NAME", loginResponse.getName());
                             intent.putExtra("USER_EMAIL", loginResponse.getEmail());
@@ -72,6 +84,14 @@ public class LoginActivity extends AppCompatActivity {
                             finish();
                         } else if ("organization".equalsIgnoreCase(role)) {
                             Intent intent = new Intent(LoginActivity.this, OrganizationActivity.class);
+                            intent.putExtra("USER_ID", loginResponse.getId());
+                            intent.putExtra("USER_NAME", loginResponse.getName());
+                            intent.putExtra("USER_EMAIL", loginResponse.getEmail());
+                            startActivity(intent);
+                            finish();
+                        } else if ("admin".equalsIgnoreCase(role) || "administrator".equalsIgnoreCase(role)) {
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            // Save session extras if needed, though MainActivity loads from Prefs now
                             intent.putExtra("USER_ID", loginResponse.getId());
                             intent.putExtra("USER_NAME", loginResponse.getName());
                             intent.putExtra("USER_EMAIL", loginResponse.getEmail());

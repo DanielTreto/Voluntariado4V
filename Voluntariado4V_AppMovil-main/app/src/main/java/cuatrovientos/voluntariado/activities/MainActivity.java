@@ -47,16 +47,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Cargar Avatar del Admin (Cabecera del Drawer)
+        // Cargar Avatar y Datos del Admin (Cabecera del Drawer)
         View headerView = navigationView.getHeaderView(0);
         ImageView navImage = headerView.findViewById(R.id.imageView);
-        // Simulamos que el Admin tiene avatar (usando uno de prueba o de prefs)
-        String adminAvatarUrl = "http://10.0.2.2:8000/uploads/avatars/org1.jpg"; 
-        Glide.with(this)
-            .load(adminAvatarUrl)
-            .placeholder(R.drawable.ic_profile_placeholder)
-            .circleCrop()
-            .into(navImage);
+        TextView navName = headerView.findViewById(R.id.tvNavHeaderName);
+        TextView navRole = headerView.findViewById(R.id.tvNavHeaderRole);
+        
+        // Cargar desde SharedPreferences
+        android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+        String savedName = prefs.getString("USER_NAME", "Administrador");
+        String savedAvatar = prefs.getString("USER_AVATAR", null);
+        
+        // Set Data
+        navName.setText(savedName);
+        navRole.setText("Administrador"); // As requested
+
+        // Cargar Avatar si existe, sino placeholder
+        if (savedAvatar != null && !savedAvatar.isEmpty()) {
+            Glide.with(this)
+                .load(savedAvatar)
+                .placeholder(R.drawable.ic_profile_placeholder)
+                .error(R.drawable.ic_profile_placeholder)
+                .circleCrop()
+                .into(navImage);
+        } else {
+             navImage.setImageResource(R.drawable.ic_profile_placeholder);
+        }
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawerLayout, toolbar,
@@ -108,10 +124,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new cuatrovientos.voluntariado.fragments.SettingsFragment();
             title = "Ajustes";
         } else if (id == R.id.nav_logout) {
-            // Logout Logic
-            android.content.Intent intent = new android.content.Intent(this, cuatrovientos.voluntariado.activities.LoginActivity.class);
-            intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+            // Logout Logic with Confirmation
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                .setTitle("Cerrar Sesión")
+                .setMessage("¿Estás seguro de que deseas cerrar sesión?")
+                .setPositiveButton("Sí", (dialog, which) -> {
+                     android.content.Intent intent = new android.content.Intent(this, cuatrovientos.voluntariado.activities.LoginActivity.class);
+                     intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                     startActivity(intent);
+                })
+                .setNegativeButton("No", null)
+                .show();
             return true;
         }
 

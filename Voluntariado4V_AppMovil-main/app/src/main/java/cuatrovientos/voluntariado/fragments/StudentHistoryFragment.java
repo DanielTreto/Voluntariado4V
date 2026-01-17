@@ -114,7 +114,21 @@ public class StudentHistoryFragment extends Fragment {
                          if (avatarUrl != null && !avatarUrl.startsWith("http")) {
                              avatarUrl = "http://10.0.2.2:8000/" + avatarUrl;
                          }
-                         participants.add(new cuatrovientos.voluntariado.model.Volunteer(apiVol.getId(), apiVol.getName(), avatarUrl));
+                         participants.add(new cuatrovientos.voluntariado.model.Volunteer(
+                            apiVol.getId(),
+                            apiVol.getName(),
+                            null, // Surname1
+                            null, // Surname2
+                            null, // Email
+                            null, // Phone
+                            null, // DNI
+                            null, // BirthDate
+                            null, // Description
+                            "Voluntario", // Role
+                            null, // Preferences
+                            "Active", // Status
+                            avatarUrl
+                         ));
                     }
                 }
 

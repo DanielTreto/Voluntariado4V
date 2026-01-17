@@ -12,7 +12,8 @@ public class ApiVolunteer {
     private String description;
     private String course;
     private String status;
-    private String avatar;
+    private String avatar; // Restored
+    private java.util.List<String> preferences; 
 
     // Getters
     public String getId() { return id; }
@@ -27,4 +28,5 @@ public class ApiVolunteer {
     public String getCourse() { return course; }
     public String getStatus() { return status; }
     public String getAvatar() { return avatar; }
+    public java.util.List<String> getPreferences() { return preferences; }
 }

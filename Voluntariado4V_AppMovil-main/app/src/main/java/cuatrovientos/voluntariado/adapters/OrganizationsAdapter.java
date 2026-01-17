@@ -60,8 +60,16 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
             // --- MODO SOLICITUD ---
             // 1. Mostrar botones Aceptar/Denegar -> AHORA DENEGADO (SOLO VISUALIZAR)
             holder.actionsLayout.setVisibility(View.GONE);
-            // 2. Ocultar los 3 puntos
-            holder.btnMoreOptions.setVisibility(View.GONE);
+            // 2. Mostrar +
+            holder.btnMoreOptions.setVisibility(View.VISIBLE);
+            holder.btnMoreOptions.setOnClickListener(v -> {
+                 if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
+                      androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
+                      cuatrovientos.voluntariado.dialogs.OrganizationDetailDialog dialog = 
+                          cuatrovientos.voluntariado.dialogs.OrganizationDetailDialog.newInstance(org);
+                      dialog.show(activity.getSupportFragmentManager(), "OrganizationDetailDialog");
+                 }
+            });
 
             // 3. Mostrar FECHA
             holder.tvInfo.setText("Fecha solicitud: " + org.getDate());
@@ -77,6 +85,14 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
             holder.actionsLayout.setVisibility(View.GONE);
             // 2. Mostrar 3 puntos
             holder.btnMoreOptions.setVisibility(View.VISIBLE);
+            holder.btnMoreOptions.setOnClickListener(v -> {
+                 if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
+                      androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
+                      cuatrovientos.voluntariado.dialogs.OrganizationDetailDialog dialog = 
+                          cuatrovientos.voluntariado.dialogs.OrganizationDetailDialog.newInstance(org);
+                      dialog.show(activity.getSupportFragmentManager(), "OrganizationDetailDialog");
+                 }
+            });
 
             // 3. Mostrar CONTADOR DE VOLUNTARIOS
             holder.tvInfo.setText("Voluntariados creados: " + org.getVolunteersCount());
@@ -94,7 +110,8 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
     }
 
     public static class OrgViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvEmail, tvStatus, tvInfo, btnMoreOptions;
+        TextView tvName, tvEmail, tvStatus, tvInfo;
+        android.widget.ImageView btnMoreOptions;
         ImageView imgLogo;
         LinearLayout actionsLayout;
 

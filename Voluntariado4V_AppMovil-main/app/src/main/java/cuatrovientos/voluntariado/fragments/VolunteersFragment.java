@@ -96,14 +96,19 @@ public class VolunteersFragment extends Fragment {
                         }
                         
                         masterList.add(new Volunteer(
-                            String.valueOf(apiVol.getId()), // ID (String)
-                            fullName, // Name
-                            (apiVol.getCourse() != null && !apiVol.getCourse().isEmpty()) ? apiVol.getCourse() : "Voluntario", // Role
-                            apiVol.getEmail(), // Email
-                            apiVol.getPhone() != null ? apiVol.getPhone() : "", // Phone
-                            apiVol.getDateOfBirth() != null ? apiVol.getDateOfBirth() : "", // Date
-                            status, // Status
-                            avatarUrl // Avatar
+                            String.valueOf(apiVol.getId()),
+                            apiVol.getName(),
+                            apiVol.getSurname1(),
+                            apiVol.getSurname2(),
+                            apiVol.getEmail(),
+                            apiVol.getPhone() != null ? apiVol.getPhone() : "",
+                            apiVol.getDni(),
+                            apiVol.getDateOfBirth() != null ? apiVol.getDateOfBirth() : "",
+                            apiVol.getDescription(),
+                            (apiVol.getCourse() != null && !apiVol.getCourse().isEmpty()) ? apiVol.getCourse() : "Voluntario",
+                            apiVol.getPreferences(),
+                            status,
+                            avatarUrl
                         ));
                     }
                     // Refresh current view (defaulting to Solicitudes initially)

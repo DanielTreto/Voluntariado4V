@@ -42,8 +42,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
         holder.tvRole.setText(volunteer.getRole());
         holder.tvEmail.setText(volunteer.getEmail());
         holder.tvPhone.setText(volunteer.getPhone());
-        holder.tvDate.setText(volunteer.getDate());
-        holder.tvDate.setText(volunteer.getDate());
+        holder.tvDate.setText(volunteer.getBirthDate());
         holder.tvStatus.setText(volunteer.getStatus());
 
         if (volunteer.getAvatarUrl() != null) {
@@ -60,6 +59,14 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
         if (volunteer.getStatus().equals("Active") || volunteer.getStatus().equals("Suspended")) {
             holder.actionsLayout.setVisibility(View.GONE);
             holder.btnMoreOptions.setVisibility(View.VISIBLE);
+            holder.btnMoreOptions.setOnClickListener(v -> {
+                 if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
+                      androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
+                      cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog dialog = 
+                          cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog.newInstance(volunteer);
+                      dialog.show(activity.getSupportFragmentManager(), "VolunteerDetailDialog");
+                 }
+            });
 
             // Colores para Active/Suspended
             if (volunteer.getStatus().equals("Active")) {
@@ -75,7 +82,16 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
         } else {
             // Es una solicitud pendiente ("Pending")
             holder.actionsLayout.setVisibility(View.GONE); // Mostrar botones Check/Cruz -> AHORA OCULTO
-            holder.btnMoreOptions.setVisibility(View.GONE); // Ocultar 3 puntos
+            holder.btnMoreOptions.setVisibility(View.VISIBLE); // Mostrar +
+            
+            holder.btnMoreOptions.setOnClickListener(v -> {
+                 if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
+                      androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
+                      cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog dialog = 
+                          cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog.newInstance(volunteer);
+                      dialog.show(activity.getSupportFragmentManager(), "VolunteerDetailDialog");
+                 }
+            });
 
             holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1")); // Naranja claro
             holder.tvStatus.setTextColor(Color.parseColor("#FFA000")); // Naranja Texto
@@ -89,7 +105,8 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
     }
 
     public static class VolunteerViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvRole, tvEmail, tvPhone, tvStatus, tvDate, btnMoreOptions;
+        TextView tvName, tvRole, tvEmail, tvPhone, tvStatus, tvDate;
+        android.widget.ImageView btnMoreOptions;
         ImageView imgAvatar;
         LinearLayout actionsLayout;
 

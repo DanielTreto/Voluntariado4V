@@ -19,10 +19,16 @@ use App\Entity\Volunteer;
 class ActivityController extends AbstractController
 {
     #[Route('/activities', name: 'api_activities_index', methods: ['GET'])]
-    public function index(ActivityRepository $activityRepository, OrganizationRepository $orgRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function index(Request $request, ActivityRepository $activityRepository, OrganizationRepository $orgRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        // 1. Auto-update status for finished activities
-        $activities = $activityRepository->findAll();
+        // 1. Check for filters
+        $orgId = $request->query->get('organizationId');
+
+        if ($orgId) {
+             $activities = $activityRepository->findBy(['organizacion' => $orgId]); 
+        } else {
+             $activities = $activityRepository->findAll();
+        }
         /*
         $now = new \DateTime();
         $updated = false;

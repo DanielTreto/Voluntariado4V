@@ -16,6 +16,9 @@ public interface ApiService {
     @retrofit2.http.GET("activities")
     Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> getActivities();
 
+    @retrofit2.http.GET("activities")
+    Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> getOrganizationActivities(@retrofit2.http.Query("organizationId") String organizationId);
+
     @retrofit2.http.GET("volunteers/{id}/activities")
     Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> getVolunteerActivities(@retrofit2.http.Path("id") String id);
 }

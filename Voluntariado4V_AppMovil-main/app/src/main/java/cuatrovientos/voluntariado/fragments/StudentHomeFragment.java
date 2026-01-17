@@ -175,7 +175,21 @@ public class StudentHomeFragment extends Fragment {
                  if (avatarUrl != null && !avatarUrl.startsWith("http")) {
                      avatarUrl = "http://10.0.2.2:8000/" + avatarUrl; // Helper method would be better but keeping inline for now
                  }
-                 participants.add(new cuatrovientos.voluntariado.model.Volunteer(apiVol.getId(), apiVol.getName(), avatarUrl));
+                 participants.add(new cuatrovientos.voluntariado.model.Volunteer(
+                    apiVol.getId(),
+                    apiVol.getName(),
+                    null, // Surname1
+                    null, // Surname2
+                    null, // Email
+                    null, // Phone
+                    null, // DNI
+                    null, // BirthDate
+                    null, // Description
+                    "Voluntario", // Role
+                    null, // Preferences
+                    "Active", // Status
+                    avatarUrl
+                 ));
             }
         }
                 String orgName = "Cuatrovientos"; // Default

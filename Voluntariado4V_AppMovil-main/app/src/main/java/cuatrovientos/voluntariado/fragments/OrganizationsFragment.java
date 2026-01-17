@@ -87,11 +87,18 @@ public class OrganizationsFragment extends Fragment {
                         }
 
                         masterList.add(new Organization(
+                            apiOrg.getId(),
                             apiOrg.getName(),
                             apiOrg.getEmail(),
+                            apiOrg.getDescription(),
+                            apiOrg.getType(),
+                            apiOrg.getPhone(),
+                            apiOrg.getSector(),
+                            apiOrg.getScope(),
+                            apiOrg.getContactPerson(),
                             "2023-01-01", 
                             volunteersCount,
-                            status,
+                            status, // FIXED: Use mapped status field
                             avatarUrl
                         ));
                     }

@@ -53,15 +53,14 @@
             app:layout_constraintEnd_toEndOf="@+id/tvOrgName"
             app:layout_constraintTop_toBottomOf="@+id/tvOrgName" />
 
-        <TextView
+        <ImageView
             android:id="@+id/btnOrgMoreOptions"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:text="⋮"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="@color/text_secondary"
+            android:src="@drawable/ic_add"
+            android:padding="4dp"
+            app:tint="@color/text_secondary"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
             android:layout_marginEnd="16dp"

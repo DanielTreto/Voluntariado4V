@@ -7,6 +7,7 @@ public class LoginResponse {
     private String name;
     private String email;
     private String firebaseUid;
+    private String avatar;
     private String error; // For error cases
 
     public boolean isSuccess() {
@@ -35,5 +36,9 @@ public class LoginResponse {
 
     public String getError() {
         return error;
+    }
+
+    public String getAvatar() {
+        return avatar;
     }
 }

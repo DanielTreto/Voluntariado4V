@@ -32,6 +32,7 @@ class OrganizationController extends AbstractController
                 'scope' => $org->getAMBITO(),
                 'description' => $org->getDESCRIPCION(),
                 'status' => $org->getESTADO(),
+                'contactPerson' => $org->getPERSONA_CONTACTO(),
                 'avatar' => $org->getAVATAR(),
             ];
         }
