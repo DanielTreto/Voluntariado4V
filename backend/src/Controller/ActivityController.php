@@ -48,8 +48,9 @@ class ActivityController extends AbstractController
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
                 'location' => $act->getUBICACION() ?? 'Ubicación no especificada',
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
-                'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
+                'date' => $act->getFECHA_INICIO()->format('d/m/y'),
+                'endDate' => $act->getFECHA_FIN()->format('d/m/y'),
+                'duration' => $act->getDURACION_SESION(), // format "HH:mm:ss" usually
                 'imagen' => $act->getIMAGEN(), // Use database column
                 'organization' => $org ? [
                     'id' => $org->getCODORG(),
@@ -71,6 +72,7 @@ class ActivityController extends AbstractController
                 }, $act->getVoluntarios()->toArray()), 
                 'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
                 'status' => $act->getESTADO(),
+                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
             ];
         }
 

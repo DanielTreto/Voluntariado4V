@@ -107,16 +107,44 @@ public class StudentHistoryFragment extends Fragment {
         if (imageUrl != null && !imageUrl.startsWith("http")) {
             imageUrl = "http://10.0.2.2:8000" + imageUrl;
         }
+                List<cuatrovientos.voluntariado.model.Volunteer> participants = new ArrayList<>();
+                if (apiAct.getVolunteers() != null) {
+                    for (cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol : apiAct.getVolunteers()) {
+                         String avatarUrl = apiVol.getAvatar();
+                         if (avatarUrl != null && !avatarUrl.startsWith("http")) {
+                             avatarUrl = "http://10.0.2.2:8000/" + avatarUrl;
+                         }
+                         participants.add(new cuatrovientos.voluntariado.model.Volunteer(apiVol.getId(), apiVol.getName(), avatarUrl));
+                    }
+                }
 
-        return new VolunteerActivity(
-                apiAct.getTitle(),
-                description,
-                "Ubicación por definir", 
-                "2025-01-01", 
-                type,
-                status,
-                color,
-                imageUrl
-        );
+                String orgName = "Cuatrovientos";
+                String orgAvatar = null;
+                if (apiAct.getOrganization() != null) {
+                    orgName = apiAct.getOrganization().getName();
+                    String orgAvPath = apiAct.getOrganization().getAvatar();
+                    if (orgAvPath != null && !orgAvPath.startsWith("http")) {
+                        orgAvatar = "http://10.0.2.2:8000/" + orgAvPath;
+                    } else {
+                        orgAvatar = orgAvPath;
+                    }
+                }
+
+                return new VolunteerActivity(
+                        apiAct.getTitle(),
+                        description,
+                        apiAct.getLocation() != null ? apiAct.getLocation() : "Ubicación por definir", 
+                        apiAct.getDate() != null ? apiAct.getDate() : "Fecha por definir", 
+                        apiAct.getDuration() != null ? apiAct.getDuration() : "N/A",
+                        apiAct.getEndDate(),
+                        apiAct.getMaxVolunteers(),
+                        type,
+                        status,
+                        orgName,
+                        orgAvatar,
+                        color,
+                        imageUrl,
+                        participants
+                );
     }
 }

@@ -96,17 +96,47 @@ public class ActivitiesFragment extends Fragment {
                         else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
                         else if (rawStatus.equalsIgnoreCase("SUSPENDIDO")) status = "Suspended";
                         else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
+                        else if (rawStatus.equalsIgnoreCase("EN_PROGRESO")) status = "InProgress";
                         else status = rawStatus; // Fallback
                         
+                        List<cuatrovientos.voluntariado.model.Volunteer> participants = new ArrayList<>();
+                        if (apiAct.getVolunteers() != null) {
+                            for (cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol : apiAct.getVolunteers()) {
+                                 String avatarUrl = apiVol.getAvatar();
+                                 if (avatarUrl != null && !avatarUrl.startsWith("http")) {
+                                     avatarUrl = "http://10.0.2.2:8000/" + avatarUrl;
+                                 }
+                                 participants.add(new cuatrovientos.voluntariado.model.Volunteer(apiVol.getId(), apiVol.getName(), avatarUrl));
+                            }
+                        }
+
+                        String orgName = "Cuatrovientos";
+                        String orgAvatar = null;
+                        if (apiAct.getOrganization() != null) {
+                            orgName = apiAct.getOrganization().getName();
+                            String orgAvPath = apiAct.getOrganization().getAvatar();
+                            if (orgAvPath != null && !orgAvPath.startsWith("http")) {
+                                orgAvatar = "http://10.0.2.2:8000/" + orgAvPath;
+                            } else {
+                                orgAvatar = orgAvPath;
+                            }
+                        }
+
                         masterList.add(new VolunteerActivity(
                             apiAct.getTitle(),
                             apiAct.getDescription(),
                             apiAct.getLocation(),
                             apiAct.getDate(),
+                            apiAct.getDuration(),
+                            apiAct.getEndDate(),
+                            apiAct.getMaxVolunteers(),
                             apiAct.getType(),
                             status,
+                            orgName,
+                            orgAvatar,
                             color,
-                            apiAct.getImagen()
+                            apiAct.getImagen(),
+                            participants
                         ));
                     }
                     // Refresh current tab
@@ -155,8 +185,8 @@ public class ActivitiesFragment extends Fragment {
                     filteredList.add(act);
                 }
             } else { // Caso "Registradas"
-                // Filtramos por estado "Active", "Finished", "Suspended"
-                if (act.getStatus().equals("Active") || act.getStatus().equals("Finished") || act.getStatus().equals("Suspended")) {
+                // Filtramos por estado "Active", "Finished", "Suspended", "InProgress"
+                if (act.getStatus().equals("Active") || act.getStatus().equals("Finished") || act.getStatus().equals("Suspended") || act.getStatus().equals("InProgress")) {
                     filteredList.add(act);
                 }
             }

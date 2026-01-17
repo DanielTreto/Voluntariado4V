@@ -46,13 +46,13 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
         if (org.getAvatarUrl() != null) {
              Glide.with(holder.itemView.getContext())
                  .load(org.getAvatarUrl())
-                 .placeholder(R.drawable.ic_building)
-                 .error(R.drawable.ic_building)
+                 .placeholder(R.drawable.ic_business)
+                 .error(R.drawable.ic_business)
                  .circleCrop()
                  .into(holder.imgLogo);
         } else {
              // Reset to default if recycled
-             holder.imgLogo.setImageResource(R.drawable.ic_building);
+             holder.imgLogo.setImageResource(R.drawable.ic_business);
              holder.imgLogo.setBackground(null); // Clear background
         }
 

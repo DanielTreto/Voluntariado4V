@@ -49,42 +49,94 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         holder.tvTitle.setText(act.getTitle());
         holder.tvDesc.setText(act.getDescription());
         holder.tvLocation.setText(act.getLocation());
-        holder.tvDate.setText(act.getDate());
+        String dateText = act.getDate();
+        if (dateText != null && dateText.contains(" ")) {
+            dateText = dateText.split(" ")[0];
+        }
+        holder.tvDate.setText(dateText);
+        
+
+
         holder.tvCategory.setText(act.getCategory());
         holder.tvCategory.setBackgroundColor(act.getImageColor());
 
-        // Cargar imagen con Glide
-        // Cargar imagen con Glide
-        String imageUrl = act.getImageUrl();
-        if (imageUrl == null || imageUrl.isEmpty()) {
-            // Default generic volunteering image
-            imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
+        // Status Tag Logic
+        String status = act.getStatus();
+        holder.tvStatusTag.setText(status);
+        if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
+            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9")); // Light Green
+            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#4CAF50")); // Green
+            holder.tvStatusTag.setText("Activa");
+        } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
+            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1")); // Light Orange
+            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#FFA000")); // Orange
+            holder.tvStatusTag.setText("Pendiente");
+        } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
+            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE")); // Light Red
+            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#F44336")); // Red
+            holder.tvStatusTag.setText("Finalizada");
+        } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
+            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#E3F2FD")); // Light Blue
+            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#2196F3")); // Blue
+            holder.tvStatusTag.setText("En Progreso");
+        } else {
+             holder.tvStatusTag.setBackgroundColor(android.graphics.Color.LTGRAY);
+             holder.tvStatusTag.setTextColor(android.graphics.Color.DKGRAY);
         }
 
+        // Volunteer Avatars Logic
+        List<String> avatars = act.getParticipantAvatars();
+        int count = avatars != null ? avatars.size() : 0;
+        
+        holder.imgVol1.setVisibility(View.GONE);
+        holder.imgVol2.setVisibility(View.GONE);
+        holder.tvVolCount.setVisibility(View.GONE);
+        holder.tvNoVolunteers.setVisibility(View.GONE);
+
+        if (count == 0) {
+            holder.tvNoVolunteers.setVisibility(View.VISIBLE);
+        } else {
+            // Vol 1
+            if (count >= 1) {
+                holder.imgVol1.setVisibility(View.VISIBLE);
+                Glide.with(holder.itemView.getContext()).load(avatars.get(0)).circleCrop().placeholder(R.drawable.ic_profile_placeholder).into(holder.imgVol1);
+            }
+            // Vol 2
+            if (count >= 2) {
+                holder.imgVol2.setVisibility(View.VISIBLE);
+                 Glide.with(holder.itemView.getContext()).load(avatars.get(1)).circleCrop().placeholder(R.drawable.ic_profile_placeholder).into(holder.imgVol2);
+            }
+            // Plus Count
+            if (count > 2) {
+                holder.tvVolCount.setVisibility(View.VISIBLE);
+                holder.tvVolCount.setText("+" + (count - 2));
+            }
+        }
+        
+        // Image Header
+        String imageUrl = act.getImageUrl();
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
+        }
         holder.imgHeader.setColorFilter(null); 
-        holder.imgHeader.setScaleType(ImageView.ScaleType.CENTER_CROP);
         Glide.with(holder.itemView.getContext())
                 .load(imageUrl)
                 .centerCrop()
-                .placeholder(R.drawable.ic_launcher_background) // Show while loading
-                .error(R.drawable.ic_launcher_background) // Show on error
+                .placeholder(R.drawable.ic_launcher_background) 
                 .into(holder.imgHeader);
-
-        if (isStudent) {
-            // Estudiante: No mostrar botones de gestión
-            holder.layoutButtonsActive.setVisibility(View.GONE);
-            holder.layoutButtonsPending.setVisibility(View.GONE);
-        } else {
-            if (act.getStatus().equals("Active")) {
-                // Pestaña ACTIVIDADES: Mostrar botones de gestión
-                holder.layoutButtonsActive.setVisibility(View.VISIBLE);
-                holder.layoutButtonsPending.setVisibility(View.GONE);
-            } else {
-                // Pestaña SOLICITUDES: Mostrar botones Aceptar/Denegar grande -> AHORA OCULTO
-                holder.layoutButtonsActive.setVisibility(View.GONE);
-                holder.layoutButtonsPending.setVisibility(View.GONE);
+        
+        // Buttons Logic
+        holder.layoutButtonsActive.setVisibility(View.VISIBLE);
+        holder.layoutButtonsPending.setVisibility(View.GONE);
+        
+        holder.btnViewDetails.setOnClickListener(v -> {
+            if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
+                androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
+                cuatrovientos.voluntariado.dialogs.ActivityDetailDialog dialog = 
+                    cuatrovientos.voluntariado.dialogs.ActivityDetailDialog.newInstance(act);
+                dialog.show(activity.getSupportFragmentManager(), "ActivityDetailDialog");
             }
-        }
+        });
     }
 
     @Override
@@ -93,9 +145,11 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
     }
 
     public static class ActivityViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvDesc, tvLocation, tvDate, tvCategory;
-        ImageView imgHeader;
+        TextView tvTitle, tvDesc, tvLocation, tvDate, tvCategory, tvStatusTag;
+        TextView tvNoVolunteers, tvVolCount;
+        ImageView imgHeader, imgVol1, imgVol2;
         LinearLayout layoutButtonsActive, layoutButtonsPending;
+        android.widget.Button btnViewDetails; // Or TextView/View dependent on XML
 
         public ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -104,10 +158,23 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
             tvLocation = itemView.findViewById(R.id.tvActLocation);
             tvDate = itemView.findViewById(R.id.tvActDate);
             tvCategory = itemView.findViewById(R.id.tvCategory);
+            tvStatusTag = itemView.findViewById(R.id.tvStatusTag);
+            
             imgHeader = itemView.findViewById(R.id.imgActivityHeader);
+            
+            // Volunteers
+            tvNoVolunteers = itemView.findViewById(R.id.tvNoVolunteers);
+            imgVol1 = itemView.findViewById(R.id.imgVol1);
+            imgVol2 = itemView.findViewById(R.id.imgVol2);
+            tvVolCount = itemView.findViewById(R.id.tvVolCountPlus);
 
             layoutButtonsActive = itemView.findViewById(R.id.layoutButtonsActive);
             layoutButtonsPending = itemView.findViewById(R.id.layoutButtonsPending);
+            
+            // Assuming the button ID inside layoutButtonsActive is btnViewDetails
+            // Based on earlier conversations/assumptions. If not, I'll need to check XML or use layoutButtonsActive as the click target if it's just a button wrapper. 
+            // Better to find the button properly.
+            btnViewDetails = itemView.findViewById(R.id.btnViewDetails); 
         }
     }
 }

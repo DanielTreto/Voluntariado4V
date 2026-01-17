@@ -102,8 +102,13 @@ public class EventsFragment extends Fragment {
                             apiAct.getDescription(),
                             apiAct.getLocation(),
                             apiAct.getDate(),
+                            apiAct.getDuration(),
+                            apiAct.getEndDate(),
+                            apiAct.getMaxVolunteers(),
                             apiAct.getType(),
                             status,
+                            (apiAct.getOrganization() != null ? apiAct.getOrganization().getName() : "Cuatrovientos"),
+                            null, // Avatar
                             color,
                             apiAct.getImagen()
                         ));

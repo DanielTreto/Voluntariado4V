@@ -9,8 +9,13 @@ public class ApiActivity {
     private String endDate;
     private String status;
     private String type;
+    private String duration;
+    private int maxVolunteers;
     private String imagen; // Matches backend field 'imagen'
+    private ApiOrganization organization;
     
+    private java.util.List<ApiVolunteer> volunteers;
+
     // Getters
     public int getId() { return id; }
     public String getTitle() { return title; }
@@ -20,5 +25,9 @@ public class ApiActivity {
     public String getEndDate() { return endDate; }
     public String getStatus() { return status; }
     public String getType() { return type; }
+    public String getDuration() { return duration; }
+    public int getMaxVolunteers() { return maxVolunteers; }
     public String getImagen() { return imagen; }
+    public ApiOrganization getOrganization() { return organization; }
+    public java.util.List<ApiVolunteer> getVolunteers() { return volunteers; }
 }

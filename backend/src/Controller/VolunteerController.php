@@ -302,14 +302,23 @@ class VolunteerController extends AbstractController
         $data = [];
 
         foreach ($activities as $act) {
+            $vols = [];
+            foreach ($act->getVoluntarios() as $v) {
+                $vols[] = [
+                    'avatar' => $v->getAVATAR()
+                ];
+            }
+
             $data[] = [
                 'id' => $act->getCODACT(),
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
+                'date' => $act->getFECHA_INICIO()->format('d/m/y H:i'),
+                'duration' => $act->getDURACION_SESION(),
                 'status' => $act->getESTADO(),
                 'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
                 'imagen' => $act->getIMAGEN(),
+                'volunteers' => $vols,
             ];
         }
 
