@@ -304,7 +304,13 @@ class VolunteerController extends AbstractController
         foreach ($activities as $act) {
             $vols = [];
             foreach ($act->getVoluntarios() as $v) {
+                $fullName = $v->getNOMBRE() . ' ' . $v->getAPELLIDO1();
+                if ($v->getAPELLIDO2()) {
+                    $fullName .= ' ' . $v->getAPELLIDO2();
+                }
                 $vols[] = [
+                    'id' => $v->getCODVOL(),
+                    'name' => trim($fullName),
                     'avatar' => $v->getAVATAR()
                 ];
             }
@@ -314,11 +320,18 @@ class VolunteerController extends AbstractController
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
                 'date' => $act->getFECHA_INICIO()->format('d/m/y H:i'),
+                'endDate' => $act->getFECHA_FIN() ? $act->getFECHA_FIN()->format('Y-m-d') : null,
+                'location' => $act->getUBICACION(),
                 'duration' => $act->getDURACION_SESION(),
                 'status' => $act->getESTADO(),
                 'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
+                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
                 'imagen' => $act->getIMAGEN(),
                 'volunteers' => $vols,
+                'organization' => $act->getOrganizacion() ? [
+                    'name' => $act->getOrganizacion()->getNOMBRE(),
+                    'avatar' => $act->getOrganizacion()->getAVATAR()
+                ] : null
             ];
         }
 

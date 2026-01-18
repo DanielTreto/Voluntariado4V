@@ -87,71 +87,7 @@ public class ActivitiesFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     masterList.clear();
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
-                        int color = getColorForType(apiAct.getType());
-                        String rawStatus = apiAct.getStatus() != null ? apiAct.getStatus() : "ACTIVO";
-                        String status = "Active"; // Default
-                        
-                        // Normalize Backend Status (Spanish) to Frontend (English)
-                        if (rawStatus.equalsIgnoreCase("ACTIVO")) status = "Active";
-                        else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
-                        else if (rawStatus.equalsIgnoreCase("SUSPENDIDO")) status = "Suspended";
-                        else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
-                        else if (rawStatus.equalsIgnoreCase("EN_PROGRESO")) status = "InProgress";
-                        else status = rawStatus; // Fallback
-                        
-                        List<cuatrovientos.voluntariado.model.Volunteer> participants = new ArrayList<>();
-                        if (apiAct.getVolunteers() != null) {
-                            for (cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol : apiAct.getVolunteers()) {
-                                 String avatarUrl = apiVol.getAvatar();
-                                 if (avatarUrl != null && !avatarUrl.startsWith("http")) {
-                                     avatarUrl = "http://10.0.2.2:8000/" + avatarUrl;
-                                 }
-                                 participants.add(new cuatrovientos.voluntariado.model.Volunteer(
-                                    apiVol.getId(),
-                                    apiVol.getName(),
-                                    null, // Surname1
-                                    null, // Surname2
-                                    null, // Email
-                                    null, // Phone
-                                    null, // DNI
-                                    null, // BirthDate
-                                    null, // Description
-                                    "Voluntario", // Role
-                                    null, // Preferences
-                                    "Active", // Status (Asumido)
-                                    avatarUrl
-                                 ));
-                            }
-                        }
-
-                        String orgName = "Cuatrovientos";
-                        String orgAvatar = null;
-                        if (apiAct.getOrganization() != null) {
-                            orgName = apiAct.getOrganization().getName();
-                            String orgAvPath = apiAct.getOrganization().getAvatar();
-                            if (orgAvPath != null && !orgAvPath.startsWith("http")) {
-                                orgAvatar = "http://10.0.2.2:8000/" + orgAvPath;
-                            } else {
-                                orgAvatar = orgAvPath;
-                            }
-                        }
-
-                        masterList.add(new VolunteerActivity(
-                            apiAct.getTitle(),
-                            apiAct.getDescription(),
-                            apiAct.getLocation(),
-                            apiAct.getDate(),
-                            apiAct.getDuration(),
-                            apiAct.getEndDate(),
-                            apiAct.getMaxVolunteers(),
-                            apiAct.getType(),
-                            status,
-                            orgName,
-                            orgAvatar,
-                            color,
-                            apiAct.getImagen(),
-                            participants
-                        ));
+                        masterList.add(cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct));
                     }
                     // Refresh current tab
                     TabLayout tabLayout = getView().findViewById(R.id.tabLayoutAct);
@@ -176,17 +112,6 @@ public class ActivitiesFragment extends Fragment {
                 }
             }
         });
-    }
-
-    private int getColorForType(String type) {
-        if (type == null) return 0xFF9E9E9E; // Gray default
-        switch (type) {
-            case "Medio Ambiente": return 0xFF2E7D32; // Green
-            case "Social": return 0xFF1976D2; // Blue
-            case "Tecnológico": return 0xFFFFC107; // Amber
-            case "Educativo": return 0xFF512DA8; // Deep Purple
-            default: return 0xFFEF5350; // Red default
-        }
     }
 
     private void filterList(String tabName) {
