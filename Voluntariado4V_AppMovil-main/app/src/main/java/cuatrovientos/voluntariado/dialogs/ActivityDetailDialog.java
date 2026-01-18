@@ -165,10 +165,59 @@ public class ActivityDetailDialog extends DialogFragment {
                 tvVolunteersTitle.setText("Sin voluntarios apuntados");
                 layoutVolunteers.setVisibility(View.GONE);
             }
+
+            // ODS List
+            TextView tvOdsTitle = view.findViewById(R.id.tvOdsTitle);
+            android.widget.LinearLayout layoutOdsList = view.findViewById(R.id.layoutOdsList);
+            List<cuatrovientos.voluntariado.model.Ods> odsList = activity.getOds();
+
+            tvOdsTitle.setVisibility(View.VISIBLE);
+            layoutOdsList.setVisibility(View.VISIBLE);
+            layoutOdsList.removeAllViews();
+
+            if (odsList != null && !odsList.isEmpty()) {
+                // Configure layout for horizontal scrolling or just horizontal linear layout if few
+                layoutOdsList.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+                
+                for (cuatrovientos.voluntariado.model.Ods ods : odsList) {
+                    ImageView imgOds = new ImageView(getContext());
+                    android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(150, 150); // 50dp roughly
+                    params.setMargins(8, 0, 8, 0);
+                    imgOds.setLayoutParams(params);
+                    imgOds.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    
+                    String formattedId = (ods.getId() < 10) ? "0" + ods.getId() : String.valueOf(ods.getId());
+                    String resourceName = "ods_" + formattedId;
+                    int resId = getResources().getIdentifier(resourceName, "drawable", getContext().getPackageName());
+
+                    if (resId != 0) {
+                        Glide.with(this)
+                             .load(resId)
+                             .placeholder(R.drawable.ic_launcher_background)
+                             .error(R.drawable.ic_launcher_background)
+                             .into(imgOds);
+                    } else {
+                        // Fallback if resource missing for some reason
+                         Glide.with(this)
+                             .load(R.drawable.ic_launcher_background)
+                             .into(imgOds);
+                    }
+                    
+                    layoutOdsList.addView(imgOds);
+                }
+            } else {
+                TextView tvNoOds = new TextView(getContext());
+                tvNoOds.setText("Esta actividad no contribuye a ningún ODS específico.");
+                tvNoOds.setTextColor(0xFF757575);
+                tvNoOds.setTextSize(14f);
+                layoutOdsList.addView(tvNoOds);
+            }
         }
 
         btnClose.setOnClickListener(v -> dismiss());
 
         return view;
     }
+
+    // Removed getOdsImageUrl method as it is no longer needed
 }

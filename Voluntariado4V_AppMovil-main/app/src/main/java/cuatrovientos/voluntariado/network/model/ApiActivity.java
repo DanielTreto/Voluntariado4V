@@ -15,6 +15,7 @@ public class ApiActivity {
     private ApiOrganization organization;
     
     private java.util.List<ApiVolunteer> volunteers;
+    private java.util.List<ApiOds> ods;
 
     // Getters
     public int getId() { return id; }
@@ -30,4 +31,5 @@ public class ApiActivity {
     public String getImagen() { return imagen; }
     public ApiOrganization getOrganization() { return organization; }
     public java.util.List<ApiVolunteer> getVolunteers() { return volunteers; }
+    public java.util.List<ApiOds> getOds() { return ods; }
 }

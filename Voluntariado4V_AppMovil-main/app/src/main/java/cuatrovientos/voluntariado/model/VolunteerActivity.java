@@ -21,12 +21,17 @@ public class VolunteerActivity {
     public void setId(int id) { this.id = id; }
 
     private java.util.List<Volunteer> participants;
+    private java.util.List<Ods> ods;
 
     public VolunteerActivity(String title, String description, String location, String date, String duration, String endDate, int maxVolunteers, String category, String status, String organizationName, String organizationAvatar, int imageColor, String imageUrl) {
-        this(title, description, location, date, duration, endDate, maxVolunteers, category, status, organizationName, organizationAvatar, imageColor, imageUrl, new java.util.ArrayList<>());
+        this(title, description, location, date, duration, endDate, maxVolunteers, category, status, organizationName, organizationAvatar, imageColor, imageUrl, new java.util.ArrayList<>(), new java.util.ArrayList<>());
     }
 
     public VolunteerActivity(String title, String description, String location, String date, String duration, String endDate, int maxVolunteers, String category, String status, String organizationName, String organizationAvatar, int imageColor, String imageUrl, java.util.List<Volunteer> participants) {
+        this(title, description, location, date, duration, endDate, maxVolunteers, category, status, organizationName, organizationAvatar, imageColor, imageUrl, participants, new java.util.ArrayList<>());
+    }
+
+    public VolunteerActivity(String title, String description, String location, String date, String duration, String endDate, int maxVolunteers, String category, String status, String organizationName, String organizationAvatar, int imageColor, String imageUrl, java.util.List<Volunteer> participants, java.util.List<Ods> ods) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -41,6 +46,7 @@ public class VolunteerActivity {
         this.imageColor = imageColor;
         this.imageUrl = imageUrl;
         this.participants = participants;
+        this.ods = ods;
     }
 
     public String getTitle() { return title; }
@@ -57,7 +63,8 @@ public class VolunteerActivity {
     public int getImageColor() { return imageColor; }
     public String getImageUrl() { return imageUrl; }
     public java.util.List<Volunteer> getParticipants() { return participants; }
-    
+    public java.util.List<Ods> getOds() { return ods; }
+
     // Helper to get just avatars for the card view
     public java.util.List<String> getParticipantAvatars() {
         java.util.List<String> avatars = new java.util.ArrayList<>();

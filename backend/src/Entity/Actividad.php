@@ -60,6 +60,14 @@ class Actividad
     #[ORM\InverseJoinColumn(name: 'NUMODS', referencedColumnName: 'NUMODS')]
     private $ods;
 
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Ods>
+     */
+    public function getOds(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->ods;
+    }
+
     #[ORM\Column(name: 'descripcion', length: 500)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 500)]

@@ -78,6 +78,12 @@ class ActivityController extends AbstractController
                 }, $act->getVoluntarios()->toArray()), 
                 'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
                 'status' => $act->getESTADO(),
+                'ods' => array_map(function($ods) {
+                    return [
+                        'id' => $ods->getNUMODS(),
+                        'description' => $ods->getDESCRIPCION()
+                    ];
+                }, $act->getOds()->toArray()),
                 'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
             ];
         }

@@ -327,6 +327,12 @@ class VolunteerController extends AbstractController
                 'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
                 'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
                 'imagen' => $act->getIMAGEN(),
+                'ods' => array_map(function($ods) {
+                    return [
+                        'id' => $ods->getNUMODS(),
+                        'description' => $ods->getDESCRIPCION()
+                    ];
+                }, $act->getOds()->toArray()),
                 'volunteers' => $vols,
                 'organization' => $act->getOrganizacion() ? [
                     'name' => $act->getOrganizacion()->getNOMBRE(),

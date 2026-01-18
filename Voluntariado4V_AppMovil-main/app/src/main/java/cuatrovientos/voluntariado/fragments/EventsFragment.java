@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,8 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.CalendarAdapter;
 import cuatrovientos.voluntariado.model.EventDay;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
+import cuatrovientos.voluntariado.utils.ActivityMapper;
+import cuatrovientos.voluntariado.dialogs.ActivityDetailDialog;
 
 public class EventsFragment extends Fragment {
 
@@ -55,12 +58,8 @@ public class EventsFragment extends Fragment {
         // Inicializar calendario al mes actual
         currentMonth = Calendar.getInstance();
         
-        // Cargar datos de prueba
         activities = new ArrayList<>();
         fetchActivities();
-
-        // Actualizar vista inicial (Se actualizará al recibir respuesta de API)
-        // updateCalendar();
 
         // Listeners
         btnPrevMonth.setOnClickListener(v -> {
@@ -84,34 +83,7 @@ public class EventsFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     activities.clear();
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
-                        String rawStatus = apiAct.getStatus() != null ? apiAct.getStatus() : "ACTIVO";
-                        String status = "Active"; 
-                        
-                        // Normalize Backend Status (Spanish) to Frontend (English)
-                        if (rawStatus.equalsIgnoreCase("ACTIVO")) status = "Active";
-                        else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
-                        else if (rawStatus.equalsIgnoreCase("SUSPENDIDO")) status = "Suspended";
-                        else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
-                        else status = rawStatus;
-
-                        // Use Status for Color instead of Type
-                        int color = getColorForStatus(status);
-                        
-                        activities.add(new VolunteerActivity(
-                            apiAct.getTitle(),
-                            apiAct.getDescription(),
-                            apiAct.getLocation(),
-                            apiAct.getDate(),
-                            apiAct.getDuration(),
-                            apiAct.getEndDate(),
-                            apiAct.getMaxVolunteers(),
-                            apiAct.getType(),
-                            status,
-                            (apiAct.getOrganization() != null ? apiAct.getOrganization().getName() : "Cuatrovientos"),
-                            null, // Avatar
-                            color,
-                            apiAct.getImagen()
-                        ));
+                        activities.add(ActivityMapper.mapApiToModel(apiAct));
                     }
                     updateCalendar();
                 } else {
@@ -139,19 +111,8 @@ public class EventsFragment extends Fragment {
             case "Pending": return 0xFFFFC107; // Amber
             case "Finished": return 0xFF9E9E9E; // Grey
             case "Suspended": return 0xFFF44336; // Red
+            case "InProgress": return 0xFF2196F3; // Blue
             default: return 0xFF2196F3; // Blue default
-        }
-    }
-
-    private int getColorForType(String type) {
-        // Deprecated for Calendar, kept if needed elsewhere
-        if (type == null) return 0xFF9E9E9E; 
-        switch (type) {
-            case "Medio Ambiente": return 0xFF2E7D32; 
-            case "Social": return 0xFF1976D2; 
-            case "Tecnológico": return 0xFFFFC107; 
-            case "Educativo": return 0xFF512DA8; 
-            default: return 0xFFEF5350; 
         }
     }
 
@@ -159,7 +120,6 @@ public class EventsFragment extends Fragment {
         // 1. Actualizar Título
         SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
         String title = sdf.format(currentMonth.getTime());
-        // Capitalizar primera letra
         title = title.substring(0, 1).toUpperCase() + title.substring(1);
         tvMonthTitle.setText(title);
 
@@ -169,50 +129,99 @@ public class EventsFragment extends Fragment {
         Calendar calendar = (Calendar) currentMonth.clone();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         
-        // Obtener día de la semana del primer día (1=Domingo, 2=Lunes...)
-        // Queremos que la semana empiece en Lunes (Index 0 en nuestra vista)
-        // Calendar.MONDAY = 2.
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         int firstDayOffset = dayOfWeek - 2; // Lunes(2) -> 0. Domingo(1) -> -1 (será 6)
         if (firstDayOffset < 0) firstDayOffset = 6; 
 
         // Rellenar espacios vacios antes del día 1
         for (int i = 0; i < firstDayOffset; i++) {
-            days.add(new EventDay("", null, null));
+            days.add(new EventDay("", null, null, null));
         }
 
         // Rellenar días del mes
         int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        
+        // Formatter for parsing the Activity Date (d/m/y H:i) or (dd/mm/yyyy)
+        // Adjust based on observation of backend data. "d/m/y H:i" -> "18/01/26 15:47"
+        // But let's be safe and try multiple or assume ActivityMapper passes strings.
+        // Wait, VolunteerController sends "d/m/y H:i". y is 2 digit year? 
+        // VolunteerController: format('d/m/y H:i'). Php 'y' is 2 digit year.
+        SimpleDateFormat activitySdf = new SimpleDateFormat("dd/MM/yy HH:mm", Locale.getDefault());
+        // Sometimes it might receive full year? Let's try 2 digit year first as per controller.
 
         for (int i = 1; i <= maxDays; i++) {
             calendar.set(Calendar.DAY_OF_MONTH, i);
-            String dateString = dateSdf.format(calendar.getTime());
+            String currentDateString = dateSdf.format(calendar.getTime());
             
             // Buscar evento para esta fecha
             String eventTitle = null;
             String eventColor = null;
+            VolunteerActivity matchedActivity = null;
             
             for (VolunteerActivity activity : activities) {
-                if (activity.getDate().equals(dateString)) {
-                    eventTitle = activity.getTitle();
-                    // Convertir int color a Hex string si es necesario, o pasar int directamente al adaptador
-                    // Aquí asumimos Hex String para adaptar al modelo EventDay existente
-                    eventColor = String.format("#%06X", (0xFFFFFF & activity.getImageColor()));
-                    break; // Mostrar solo el primero
+                String actDateStr = activity.getDate(); // e.g., "18/01/26 15:47" or "2026-01-18" or "Fecha por definir"
+                if (actDateStr == null || actDateStr.contains("difinir")) continue;
+
+                try {
+                    Date actDate = null;
+                    // Try parsing
+                    if (actDateStr.contains("/")) {
+                         // Likely d/m/y or dd/MM/yyyy
+                         try {
+                              // Try full format with time first (VolunteerController)
+                              actDate = activitySdf.parse(actDateStr);
+                         } catch(Exception e) {
+                              try {
+                                  // Try dd/MM/yy (ActivityController uses this, e.g. 18/01/26)
+                                  actDate = new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).parse(actDateStr);
+                              } catch (Exception e2) {
+                                  try {
+                                      // Try dd/MM/yyyy
+                                      actDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(actDateStr);
+                                  } catch (Exception e3) {
+                                      // Fail
+                                  }
+                              }
+                         }
+                    } else if (actDateStr.contains("-")) {
+                         // Likely yyyy-MM-dd
+                         actDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(actDateStr);
+                    }
+                    
+                    if (actDate != null) {
+                         String actDateFormatted = dateSdf.format(actDate);
+                         if (actDateFormatted.equals(currentDateString)) {
+                             eventTitle = activity.getTitle();
+                             // Color per status as requested
+                             int color = getColorForStatus(activity.getStatus());
+                             eventColor = String.format("#%06X", (0xFFFFFF & color));
+                             matchedActivity = activity;
+                             break; // Find match and stop
+                         }
+                    }
+                } catch (Exception e) {
+                    // Ignore parsing errors
                 }
             }
 
-            days.add(new EventDay(String.valueOf(i), eventTitle, eventColor));
+            days.add(new EventDay(String.valueOf(i), eventTitle, eventColor, matchedActivity));
         }
 
-        if (adapter == null) {
-            adapter = new CalendarAdapter(days);
-            recyclerView.setAdapter(adapter);
-        } else {
-            // Recrear adaptador o actualizar lista es más seguro para cambio total de estructura
-            adapter = new CalendarAdapter(days);
-            recyclerView.setAdapter(adapter);
-        }
+        adapter = new CalendarAdapter(days, new CalendarAdapter.OnEventClickListener() {
+            @Override
+            public void onEventClick(List<VolunteerActivity> activities) {
+                // Not used in this simplified implementation
+            }
+
+            @Override
+            public void onEventClick(VolunteerActivity activity) {
+                if (getActivity() != null && activity != null) {
+                     ActivityDetailDialog dialog = ActivityDetailDialog.newInstance(activity);
+                     dialog.show(getParentFragmentManager(), "ActivityDetailDialog");
+                }
+            }
+        });
+        recyclerView.setAdapter(adapter);
     }
 }

@@ -71,7 +71,15 @@ public class ActivityMapper {
             }
         }
 
-        // 6. Build Object
+        // 6. ODS Mapping
+        List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
+        if (apiAct.getOds() != null) {
+            for (cuatrovientos.voluntariado.network.model.ApiOds apiOds : apiAct.getOds()) {
+                odsList.add(new cuatrovientos.voluntariado.model.Ods(apiOds.getId(), apiOds.getDescription()));
+            }
+        }
+
+        // 7. Build Object
         VolunteerActivity volAct = new VolunteerActivity(
                 apiAct.getTitle(),
                 apiAct.getDescription() != null ? apiAct.getDescription() : "",
@@ -86,7 +94,8 @@ public class ActivityMapper {
                 orgAvatar,
                 color,
                 imageUrl,
-                participants
+                participants,
+                odsList
         );
         volAct.setId(apiAct.getId());
         

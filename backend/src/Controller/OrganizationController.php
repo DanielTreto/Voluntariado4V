@@ -231,7 +231,13 @@ class OrganizationController extends AbstractController
                 'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
                 'status' => $act->getESTADO(),
-                'volunteersCount' => $act->getVoluntarios()->count()
+                'volunteersCount' => $act->getVoluntarios()->count(),
+                'ods' => array_map(function($ods) {
+                    return [
+                        'id' => $ods->getNUMODS(),
+                        'description' => $ods->getDESCRIPCION()
+                    ];
+                }, $act->getOds()->toArray())
             ];
         }
 
