@@ -1,0 +1,31 @@
+.org-settings-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+}
+
+.logo-placeholder {
+    width: 120px;
+    height: 120px;
+    background: #f8f9fa;
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #dee2e6;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.form-control:focus {
+    border-color: var(--vh-primary-light, #e0d4fc);
+    box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
+}

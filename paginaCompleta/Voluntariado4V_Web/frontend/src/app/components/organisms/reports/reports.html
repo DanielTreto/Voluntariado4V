@@ -1,0 +1,133 @@
+<div class="container-fluid p-0">
+  <!-- Summary Cards -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 h-100 rounded-4">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase fw-bold mb-2">Total Actividades</h6>
+          <h2 class="display-6 fw-bold text-primary mb-0">{{ totalActivities }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 h-100 rounded-4">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase fw-bold mb-2">Total Voluntarios</h6>
+          <h2 class="display-6 fw-bold text-success mb-0">{{ totalVolunteers }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 h-100 rounded-4">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase fw-bold mb-2">En Progreso</h6>
+          <h2 class="display-6 fw-bold text-warning mb-0">{{ activeActivities }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-4 mb-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm border-0 p-4 h-100 rounded-4">
+        <h5 class="card-title fw-semibold">Crecimiento Acumulado</h5>
+        <p class="card-text text-muted small">Evolución de actividades creadas por mes</p>
+        <div class="chart-container" style="height: 300px;">
+          <canvas #growthChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm border-0 p-4 h-100 rounded-4">
+        <h5 class="card-title fw-semibold">Estado de Actividades</h5>
+        <p class="card-text text-muted small">Distribución actual</p>
+        <div class="chart-container" style="height: 300px;">
+          <canvas #distributionChart></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ranking Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-0 p-4 rounded-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h5 class="card-title fw-semibold mb-1">Ranking de Voluntarios más Activos</h5>
+            <p class="text-muted small mb-0">Voluntarios con más participaciones en el periodo seleccionado</p>
+          </div>
+          <div class="btn-group bg-light rounded-pill p-1" role="group">
+            <button type="button" class="btn btn-sm rounded-pill px-3" [class.btn-white]="rankingPeriod === 'month'"
+              [class.shadow-sm]="rankingPeriod === 'month'" [class.text-muted]="rankingPeriod !== 'month'"
+              (click)="setRankingPeriod('month')">Último Mes</button>
+            <button type="button" class="btn btn-sm rounded-pill px-3" [class.btn-white]="rankingPeriod === 'year'"
+              [class.shadow-sm]="rankingPeriod === 'year'" [class.text-muted]="rankingPeriod !== 'year'"
+              (click)="setRankingPeriod('year')">Último Año</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th class="border-0 text-muted small text-uppercase fw-bold ps-4">Voluntario</th>
+                <th class="border-0 text-muted small text-uppercase fw-bold">Email</th>
+                <th class="border-0 text-muted small text-uppercase fw-bold text-center">Nº Actividades</th>
+                <th class="border-0 text-muted small text-uppercase fw-bold text-end pe-4">Posición</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let vol of topVolunteers; let i = index">
+                <td class="border-0 ps-4">
+                  <div class="d-flex align-items-center">
+                    <img [src]="vol.avatar" alt="Avatar" class="rounded-circle me-3 border"
+                      style="width: 40px; height: 40px; object-fit: cover;">
+                    <div>
+                      <div class="fw-bold text-dark">{{ vol.name }} {{ vol.surname1 }}</div>
+                      <div class="small text-muted">{{ vol.course }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="border-0 text-muted">{{ vol.email }}</td>
+                <td class="border-0 text-center">
+                  <span class="badge bg-primary bg-opacity-10 text-primary fs-6 fw-bold px-3 py-2 rounded-pill">
+                    {{ vol.activityCount }}
+                  </span>
+                </td>
+                <td class="border-0 text-end pe-4">
+                  <div class="d-inline-flex justify-content-center align-items-center rounded-circle fw-bold" [ngClass]="{
+                                     'bg-warning text-dark': i === 0,
+                                     'bg-secondary bg-opacity-25 text-dark': i === 1,
+                                     'bg-brown text-white': i === 2,
+                                     'bg-light text-muted': i > 2
+                                 }" style="width: 32px; height: 32px;">
+                    {{ i + 1 }}
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="topVolunteers.length === 0">
+                <td colspan="4" class="text-center py-5 text-muted border-0">
+                  <i class="bi bi-trophy fs-1 d-block mb-2 opacity-25"></i>
+                  No hay datos de participación para este periodo.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analysis Section -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card shadow-sm border-0 p-4 rounded-4">
+        <h5 class="card-title fw-semibold mb-3"><i class="bi bi-graph-up-arrow me-2"></i>Análisis y Conclusiones</h5>
+        <p class="card-text lead fs-6 text-muted">{{ analysisText }}</p>
+      </div>
+    </div>
+  </div>
+</div>

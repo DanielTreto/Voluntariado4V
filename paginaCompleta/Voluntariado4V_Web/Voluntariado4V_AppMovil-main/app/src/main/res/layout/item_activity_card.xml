@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="140dp">
+
+            <ImageView
+                android:id="@+id/imgActivityHeader"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_launcher_background"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/tvCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Medio Ambiente"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
+                android:elevation="2dp" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tvActTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Limpieza de Playa"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/tvActDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jornada de limpieza y concienciación ambiental."
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="4dp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_building"
+                    app:tint="@color/icon_gray"/>
+
+                <TextView
+                    android:id="@+id/tvActLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Playa de la Concha"
+                    android:textSize="13sp"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/text_secondary"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_calendar"
+                    app:tint="@color/icon_gray"/>
+
+                <TextView
+                    android:id="@+id/tvActDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2025-12-05"
+                    android:textSize="13sp"
+                    android:layout_marginStart="8dp"
+                    android:textColor="@color/text_secondary"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voluntarios apuntados:"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginTop="12dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="4dp">
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_placeholder"
+                    android:layout_marginEnd="4dp"/>
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_profile_placeholder"
+                    app:tint="@color/icon_gray"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutButtonsActive"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/btnViewDetails"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Ver detalles"
+                android:textColor="@color/colorPrimary"
+                app:strokeColor="@color/colorPrimary"
+                android:textSize="12sp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutButtonsPending"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:visibility="gone">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="✓ Aceptar"
+                android:backgroundTint="#2E7D32"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="✕ Denegar"
+                android:backgroundTint="#D32F2F"/>
+        </LinearLayout>
+        
+        <!-- Bottom Blue Border -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@color/colorPrimary" />
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

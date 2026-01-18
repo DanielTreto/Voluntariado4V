@@ -1,0 +1,285 @@
+<div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+    <!-- Header with Tabs -->
+    <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+        <div class="d-flex gap-3">
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'requests' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('requests')">
+                Solicitudes
+            </button>
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'registered' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('registered')">
+                Voluntarios Registrados
+            </button>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <label class="form-label text-muted small fw-bold text-uppercase">Búsqueda</label>
+        <div class="input-group">
+            <span class="input-group-text bg-light border-0 ps-3">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control bg-light border-0 py-2"
+                placeholder="Buscar por nombre, email, teléfono o DNI..." [(ngModel)]="searchTerm">
+            <button class="btn btn-light border-0" type="button" *ngIf="searchTerm" (click)="searchTerm = ''">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger rounded-3 mb-4">
+        <i class="bi bi-exclamation-triangle me-2"></i> {{ errorMessage }}
+        <div class="small mt-1">Verifica que el backend esté corriendo en http://localhost:8000</div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="bg-light">
+                <tr>
+                    <th scope="col" style="width: 50px;" class="border-0 rounded-start-3 py-3 ps-3">
+                        <input class="form-check-input" type="checkbox">
+                    </th>
+                    <th scope="col" class="border-0 py-3" style="width: 25%; cursor: pointer;" (click)="sort('name')">
+                        <div class="d-flex align-items-center gap-2">
+                            VOLUNTARIO
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'name' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
+                        </div>
+                    </th>
+                    <th scope="col" class="border-0 py-3" style="width: 20%; cursor: pointer;" (click)="sort('email')">
+                        <div class="d-flex align-items-center gap-2">
+                            EMAIL
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'email' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
+                        </div>
+                    </th>
+                    <th scope="col" class="border-0 py-3" style="width: 15%; cursor: pointer;" (click)="sort('phone')">
+                        <div class="d-flex align-items-center gap-2">
+                            TELÉFONO
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'phone' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
+                        </div>
+                    </th>
+                    <th scope="col" class="border-0 py-3" style="width: 15%;">ÚLTIMA ACTIVIDAD</th>
+                    <th scope="col" class="border-0 py-3" style="width: 10%; cursor: pointer;" (click)="sort('status')">
+                        <div class="d-flex align-items-center gap-2">
+                            ESTADO
+                            <i class="bi small"
+                                [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
+                        </div>
+                    </th>
+                    <th scope="col" class="border-0 rounded-end-3 py-3 pe-3" style="width: 5%;">ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let volunteer of filteredVolunteers">
+                    <td class="ps-3"><input class="form-check-input" type="checkbox"></td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <app-avatar [src]="volunteer.avatar" [alt]="volunteer.name" class="me-3"></app-avatar>
+                            <div>
+                                <div class="fw-bold text-dark">{{ volunteer.name }}</div>
+                                <div class="text-muted small">{{ volunteer.project }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-muted">{{ volunteer.email }}</td>
+                    <td class="text-muted">{{ volunteer.phone }}</td>
+                    <td class="text-muted">{{ volunteer.lastActivity }}</td>
+                    <td><app-badge [label]="volunteer.status | titlecase" [type]="volunteer.status"></app-badge></td>
+                    <td class="pe-3">
+                        <!-- Actions for Registered Tab -->
+                        <div class="dropdown" *ngIf="activeTab === 'registered'">
+                            <button class="btn btn-sm text-secondary p-0" type="button"
+                                (click)="toggleDropdown(volunteer.id, $event)">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3 py-2"
+                                [class.show]="activeDropdownId === volunteer.id"
+                                [style.display]="activeDropdownId === volunteer.id ? 'block' : 'none'">
+                                <li>
+                                    <button class="dropdown-item px-3 py-2 small" type="button"
+                                        (click)="openDetails(volunteer)">
+                                        <i class="bi bi-eye me-2 text-primary"></i>Ver detalles
+                                    </button>
+                                </li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <button class="dropdown-item px-3 py-2 small" type="button"
+                                        [class.text-danger]="volunteer.status === 'active'"
+                                        [class.text-success]="volunteer.status === 'suspended'"
+                                        (click)="toggleVolunteerStatus(volunteer)">
+                                        <i class="bi me-2"
+                                            [ngClass]="volunteer.status === 'suspended' ? 'bi-play-circle' : 'bi-pause-circle'"></i>
+                                        {{ volunteer.status === 'suspended' ? 'Reactivar cuenta' : 'Suspender cuenta' }}
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- Actions for Requests Tab -->
+                        <div *ngIf="activeTab === 'requests'" class="d-flex gap-2">
+                            <button class="btn btn-success btn-sm rounded-pill px-3"
+                                (click)="acceptVolunteer(volunteer)" title="Aceptar">
+                                <i class="bi bi-check-lg"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm rounded-pill px-3" (click)="denyVolunteer(volunteer)"
+                                title="Denegar">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="filteredVolunteers.length === 0">
+                    <td colspan="7" class="text-center py-5">
+                        <div class="d-flex flex-column align-items-center text-muted">
+                            <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
+                            <p class="mb-0 fw-medium">No se encontraron voluntarios</p>
+                            <p class="small opacity-75">Intenta con otros filtros de búsqueda</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center pt-4 mt-2 border-top">
+        <div class="text-muted small">Mostrando {{ filteredVolunteers.length }} resultados</div>
+        <nav aria-label="Pagination">
+            <ul class="pagination pagination-sm mb-0 gap-1">
+                <li class="page-item disabled"><a class="page-link rounded-2 border-0 bg-light" href="#">Anterior</a>
+                </li>
+                <li class="page-item active"><a class="page-link rounded-2 border-0" href="#">1</a></li>
+                <li class="page-item"><a class="page-link rounded-2 border-0 bg-light" href="#">Siguiente</a></li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal" [class.show]="showDetailsModal" [class.d-block]="showDetailsModal"
+    [style.background-color]="showDetailsModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeDetailsModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Datos del Voluntario</h5>
+                <button type="button" class="btn-close" (click)="closeDetailsModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="selectedVolunteer">
+                <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                    <app-avatar [src]="selectedVolunteer.avatar" [alt]="selectedVolunteer.name" [size]="80"
+                        class="me-4"></app-avatar>
+                    <div>
+                        <h4 class="mb-1">{{ selectedVolunteer.name }}</h4>
+                        <app-badge [label]="selectedVolunteer.status | titlecase"
+                            [type]="selectedVolunteer.status"></app-badge>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-person me-1"></i>Nombre
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.firstName }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-person me-1"></i>Apellidos
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.lastName }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-card-text me-1"></i>DNI
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.dni }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-telephone me-1"></i>Teléfono
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.phone }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-envelope me-1"></i>Email
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.email }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-calendar me-1"></i>Fecha de Nacimiento
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.dateOfBirth }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-book me-1"></i>Curso
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.course }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-geo-alt me-1"></i>Dirección
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.address }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1">
+                                <i class="bi bi-chat-text me-1"></i>Descripción
+                            </label>
+                            <div class="fw-semibold">{{ selectedVolunteer.description }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Deactivate Confirmation Modal -->
+<div class="modal fade" id="deactivateConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-danger">Confirmar Suspensión</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas suspender a <strong>{{ volunteerToDeactivate?.name }}</strong>?</p>
+                <p class="text-muted small mb-0">Esta acción cambiará su estado a "Suspendido".</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="deactivateVolunteer()">Sí,
+                    suspender</button>
+            </div>
+        </div>
+    </div>
+</div>

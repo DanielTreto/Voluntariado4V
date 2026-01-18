@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_home_org"
+        android:icon="@drawable/ic_list"
+        android:title="Mis Actividades" />
+    <item
+        android:id="@+id/nav_history_org"
+        android:icon="@drawable/ic_grid"
+        android:title="Historial" />
+    <item
+        android:id="@+id/nav_calendar_org"
+        android:icon="@drawable/ic_calendar"
+        android:title="Calendario" />
+    <item
+        android:id="@+id/nav_settings_org"
+        android:icon="@drawable/ic_profile_placeholder"
+        android:title="Ajustes" />
+</menu>

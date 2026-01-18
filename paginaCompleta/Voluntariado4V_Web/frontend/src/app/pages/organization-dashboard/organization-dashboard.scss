@@ -1,0 +1,26 @@
+.wrapper {
+    display: flex;
+    width: 100%;
+    align-items: stretch;
+    min-height: 100vh;
+}
+
+.content {
+    width: 100%;
+    /* margin-left: 250px; If sidebar is fixed, otherwise flex handles it */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+#mainContentArea {
+    flex: 1;
+}
+
+/* Ensure sidebar stays left and content takes rest */
+app-sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    /* min-height: 100vh; handled by wrapper stretch */
+}

@@ -1,0 +1,58 @@
+<nav class="navbar-top d-flex justify-content-between align-items-center sticky-top">
+    <h1 class="fs-4 fw-bold mb-0 text-vh-dark">{{ title }}</h1>
+
+    <div class="d-flex align-items-center global-search">
+        <app-search-bar placeholder="Global search..."></app-search-bar>
+        
+        <!-- Notification Bell -->
+        <div class="position-relative ms-3">
+            <button class="btn p-1 text-muted position-relative" (click)="toggleNotifications()">
+                <i class="bi bi-bell-fill fs-5"></i>
+                <span *ngIf="unreadCount > 0" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                    {{ unreadCount }}
+                </span>
+            </button>
+
+            <!-- Notification Dropdown -->
+            <div *ngIf="showNotifications" class="card position-absolute shadow-lg border-0 notification-dropdown">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center py-2">
+                    <h6 class="mb-0 fw-bold">Notificaciones</h6>
+                    <button *ngIf="unreadCount > 0" class="btn btn-link btn-sm text-decoration-none p-0" (click)="markAllRead()">
+                        Marcar todo leído
+                    </button>
+                </div>
+                <div class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+                    <div *ngIf="notifications.length === 0" class="p-3 text-center text-muted">
+                        <small>No hay notificaciones nuevas</small>
+                    </div>
+
+                    <a *ngFor="let notif of notifications" 
+                       (click)="markAsRead(notif)" 
+                       class="list-group-item list-group-item-action border-0 py-3"
+                       [class.bg-light]="!notif.read"
+                       style="cursor: pointer;">
+                        <div class="d-flex w-100 justify-content-between align-items-start mb-1">
+                           <div>
+                                <small class="text-uppercase fw-bold" 
+                                    [ngClass]="{
+                                        'text-primary': notif.type === 'ORG_REGISTER' || notif.type === 'VOL_REGISTER',
+                                        'text-success': notif.type === 'ORG_ACTIVITY' || notif.type === 'VOL_JOIN_ACTIVITY'
+                                    }" style="font-size: 0.7rem;">
+                                    {{ notif.type === 'ORG_REGISTER' || notif.type === 'VOL_REGISTER' ? 'Registro' : 'Actividad' }}
+                                </small>
+                                <p class="mb-1 text-dark" style="font-size: 0.9rem;">{{ notif.message }}</p>
+                           </div>
+                           <small class="text-muted ms-2" style="font-size: 0.75em; white-space: nowrap;">
+                                {{ notif.timestamp | date:'shortTime' }}
+                           </small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn p-1 ms-3 text-muted">
+            <i class="bi bi-person-circle fs-4"></i>
+        </button>
+    </div>
+</nav>

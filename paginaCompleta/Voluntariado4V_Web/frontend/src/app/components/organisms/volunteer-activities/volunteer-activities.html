@@ -1,0 +1,217 @@
+<div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+    <!-- Header with Tabs -->
+    <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+        <div class="d-flex gap-3">
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="currentTab === 'mis-actividades' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('mis-actividades')">
+                <i class="bi bi-person-check-fill me-2"></i> Mis Actividades
+            </button>
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="currentTab === 'explorar' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('explorar')">
+                <i class="bi bi-search me-2"></i> Explorar Actividades
+            </button>
+        </div>
+    </div>
+
+    <!-- Feedback Message -->
+    <div *ngIf="message" class="alert mb-4 rounded-3" [ngClass]="{
+      'alert-success': !message.includes('Error'),
+      'alert-danger': message.includes('Error')
+    }">
+        <i class="bi" [ngClass]="!message.includes('Error') ? 'bi-check-circle' : 'bi-exclamation-triangle'"></i>
+        {{ message }}
+    </div>
+
+    <!-- MY ACTIVITIES TAB -->
+    <div *ngIf="currentTab === 'mis-actividades'">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-2 text-dark">Mis Actividades</h3>
+            <p class="text-muted">Gestiona tus actividades aceptadas y en curso.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" *ngFor="let activity of myActivitiesList">
+                <ng-container *ngTemplateOutlet="activityCard; context: { activity: activity }"></ng-container>
+            </div>
+            <div *ngIf="myActivitiesList.length === 0" class="col-12 text-center text-muted py-5 bg-light rounded-3">
+                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                No tienes actividades en curso ni solicitudes pendientes.
+            </div>
+        </div>
+    </div>
+
+    <!-- EXPLORE TAB -->
+    <div *ngIf="currentTab === 'explorar'">
+        <div class="mb-4">
+            <h3 class="fw-bold mb-2 text-dark">Actividades Disponibles</h3>
+            <p class="text-muted">Encuentra nuevas oportunidades de voluntariado.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" *ngFor="let activity of availableActivitiesList">
+                <ng-container *ngTemplateOutlet="activityCard; context: { activity: activity }"></ng-container>
+            </div>
+            <div *ngIf="availableActivitiesList.length === 0"
+                class="col-12 text-center text-muted py-5 bg-light rounded-3">
+                <i class="bi bi-emoji-frown fs-1 d-block mb-2 text-secondary"></i>
+                No hay nuevas actividades disponibles por ahora.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reusable Card Template -->
+<ng-template #activityCard let-activity="activity">
+    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden activity-card-hover">
+        <div class="position-relative">
+            <img [src]="activity.image || 'assets/images/activity-default.jpg'" class="card-img-top"
+                alt="{{ activity.title }}" style="height: 200px; object-fit: cover;">
+
+            <div class="position-absolute top-0 end-0 p-3">
+                <!-- Status Logic -->
+                <span class="badge rounded-pill px-3 py-2 shadow-sm" [ngClass]="{
+                    'bg-success': activity.status === 'APROBADA' || activity.status === 'EN_PROGRESO',
+                    'bg-warning text-dark': activity.status === 'PENDIENTE' || (activity.requestStatus === 'PENDIENTE'), 
+                    'bg-danger': activity.status === 'DENEGADA' || (activity.requestStatus === 'DENEGADA'),
+                    'bg-secondary': activity.status === 'FINALIZADA'
+                  }">
+                    {{ activity.requestStatus || activity.status }}
+                </span>
+            </div>
+            <div class="position-absolute bottom-0 start-0 w-100 p-3 bg-gradient-dark text-white d-none">
+                <!-- Optional overlay content -->
+            </div>
+        </div>
+        <div class="card-body d-flex flex-column p-4">
+            <div class="d-flex align-items-center mb-3">
+                <img [src]="activity.organization?.avatar ? (activity.organization.avatar.startsWith('/uploads') ? 'http://localhost:8000' + activity.organization.avatar : activity.organization.avatar) : 'assets/images/org-default.png'"
+                    class="rounded-circle me-2 border" width="32" height="32" alt="Org Logo" style="object-fit: cover;">
+                <h5 class="card-title fw-bold mb-0 text-dark small text-truncate">{{ activity.title }}</h5>
+            </div>
+
+            <p class="card-text text-muted small flex-grow-1" style="line-height: 1.6;">{{ activity.description |
+                slice:0:100 }}...</p>
+
+            <div class="d-flex align-items-center text-muted small mb-2">
+                <i class="bi bi-calendar-event me-2 text-primary"></i> {{ activity.date | date:'mediumDate' }}
+            </div>
+            <div class="d-flex align-items-center text-muted small mb-4">
+                <i class="bi bi-geo-alt me-2 text-primary"></i> {{ activity.location || 'Online' }}
+            </div>
+
+            <div class="mt-auto pt-3 border-top custom-card-actions">
+                <!-- Buttons Logic -->
+                <div *ngIf="isSignedUp(activity.id)" class="d-grid gap-2">
+                    <button class="btn btn-success btn-sm rounded-pill fw-semibold" disabled>
+                        <i class="bi bi-check-circle-fill me-1"></i> Participando
+                    </button>
+                </div>
+
+                <div *ngIf="isRequested(activity.id) && !isSignedUp(activity.id)" class="d-grid">
+                    <button class="btn btn-warning btn-sm text-dark rounded-pill fw-semibold" disabled>
+                        <i class="bi bi-hourglass-split me-1"></i> Solicitud Enviada
+                    </button>
+                </div>
+
+                <div *ngIf="!isSignedUp(activity.id) && !isRequested(activity.id)" class="d-grid">
+                    <button *ngIf="activity.status === 'PENDIENTE' || activity.status === 'EN_PROGRESO'"
+                        (click)="signUp(activity.id)" class="btn btn-primary btn-sm rounded-pill fw-semibold">
+                        <i class="bi bi-person-plus-fill me-1"></i> Solicitar Participación
+                    </button>
+                    <button *ngIf="activity.status !== 'PENDIENTE' && activity.status !== 'EN_PROGRESO'" disabled
+                        class="btn btn-light text-secondary btn-sm rounded-pill border">
+                        No disponible
+                    </button>
+                </div>
+                <button class="btn btn-link text-primary text-decoration-none w-100 mt-2 text-center small"
+                    (click)="openActivityDetails(activity)">
+                    <i class="bi bi-eye me-1"></i> Ver más
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Activity Details Modal -->
+<div class="modal" [class.show]="showDetailsModal" [style.display]="showDetailsModal ? 'block' : 'none'"
+    [style.background-color]="showDetailsModal ? 'rgba(0,0,0,0.5)' : 'transparent'" style="z-index: 2000;" tabindex="-1"
+    (click)="closeDetailsModal()">
+    <div class="modal-dialog modal-dialog-centered modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-content rounded-4 border-0 shadow" *ngIf="selectedActivity">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">{{ selectedActivity.title }}</h5>
+                <button type="button" class="btn-close" (click)="closeDetailsModal()"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Activity Image -->
+                <img [src]="selectedActivity.image || 'assets/images/activity-default.jpg'" class="w-100 rounded-3 mb-4"
+                    style="max-height: 300px; object-fit: cover;" alt="{{ selectedActivity.title }}">
+
+                <!-- Status Badge -->
+                <div class="mb-3">
+                    <span class="badge rounded-pill px-3 py-2" [ngClass]="{
+                        'bg-success': selectedActivity.status === 'EN_PROGRESO' || selectedActivity.status === 'APROBADA',
+                        'bg-warning text-dark': selectedActivity.status === 'PENDIENTE',
+                        'bg-secondary': selectedActivity.status === 'FINALIZADA'
+                    }">
+                        {{ selectedActivity.status }}
+                    </span>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Descripción</h6>
+                    <p class="mb-0">{{ selectedActivity.description }}</p>
+                </div>
+
+                <!-- Details Grid -->
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Fecha</small>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-event me-2 text-primary"></i>
+                                <span>{{ selectedActivity.date | date:'fullDate' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Ubicación</small>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-geo-alt me-2 text-primary"></i>
+                                <span>{{ selectedActivity.location || 'Ubicación no especificada' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="selectedActivity.type">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Tipo</small>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-tag me-2 text-primary"></i>
+                                <span>{{ selectedActivity.type }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" *ngIf="selectedActivity.organization">
+                        <div class="bg-light rounded-3 p-3">
+                            <small class="text-muted text-uppercase fw-bold d-block mb-1">Organización</small>
+                            <div class="d-flex align-items-center">
+                                <img [src]="selectedActivity.organization?.avatar ? (selectedActivity.organization.avatar.startsWith('/uploads') ? 'http://localhost:8000' + selectedActivity.organization.avatar : selectedActivity.organization.avatar) : 'assets/images/org-default.png'"
+                                    class="rounded-circle me-2 border" width="24" height="24"
+                                    style="object-fit: cover;">
+                                <span>{{ selectedActivity.organization?.name || selectedActivity.organization }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-secondary px-4 rounded-pill"
+                    (click)="closeDetailsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

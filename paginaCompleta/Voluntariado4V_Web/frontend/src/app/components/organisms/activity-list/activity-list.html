@@ -1,0 +1,677 @@
+<!-- Tabs with "Nueva Actividad" button inside active tab -->
+<div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+    <!-- Header with Tabs -->
+    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+        <div class="d-flex gap-3">
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'pending' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('pending')">
+                Validar Actividades
+            </button>
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'requests' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('requests')">
+                Solicitudes
+                <span class="badge bg-danger ms-2 rounded-pill" *ngIf="pendingRequestsCount > 0">{{ pendingRequestsCount
+                    }}</span>
+            </button>
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'active' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('active')">
+                Actividades
+            </button>
+            <button class="btn rounded-3 px-4 fw-bold"
+                [ngClass]="activeTab === 'ended' ? 'btn-primary' : 'btn-light text-secondary'"
+                (click)="setTab('ended')">
+                Finalizadas
+            </button>
+        </div>
+
+        <!-- Action Button for Active Tab -->
+        <button *ngIf="activeTab === 'active'" class="btn btn-primary rounded-pill px-4 fw-bold"
+            (click)="openCreateModal()">
+            <i class="bi bi-plus-lg me-2"></i> Nueva Actividad
+        </button>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger mb-4 rounded-3">{{ errorMessage }}</div>
+
+    <!-- Solicitudes Tab Content -->
+    <div *ngIf="activeTab === 'pending'">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="border-0 rounded-start-3 py-3 ps-3">IMAGEN</th>
+                        <th class="border-0 py-3 ps-3">ACTIVIDAD</th>
+                        <th class="border-0 py-3">ORGANIZACIÓN</th>
+                        <th class="border-0 py-3">FECHA</th>
+                        <th class="border-0 py-3">CONTACTO</th>
+                        <th class="border-0 rounded-end-3 py-3 pe-3">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let activity of filteredActivities">
+                        <td class="ps-3">
+                            <img [src]="activity.image" alt="Activity Image" class="rounded"
+                                style="width: 60px; height: 60px; object-fit: cover;">
+                        </td>
+                        <td class="ps-3">
+                            <div class="fw-bold text-dark">{{ activity.title }}</div>
+                            <small class="text-muted d-block text-truncate" style="max-width: 250px;">{{
+                                activity.description }}</small>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img [src]="activity.organization.logo" alt="Logo" class="rounded-circle me-2"
+                                    width="32" height="32">
+                                <span class="fw-semibold">{{ activity.organization.name }}</span>
+                            </div>
+                        </td>
+                        <td class="text-muted">{{ activity.date }}</td>
+                        <td>
+                            <div *ngIf="activity.organization.email" class="small">{{ activity.organization.email }}
+                            </div>
+                            <small class="text-muted" *ngIf="activity.organization.phone">{{ activity.organization.phone
+                                }}</small>
+                        </td>
+                        <td class="pe-3">
+                            <button class="btn btn-success btn-sm me-2 rounded-pill px-3"
+                                (click)="acceptActivity(activity)">
+                                <i class="bi bi-check-lg"></i> Aceptar
+                            </button>
+                            <button class="btn btn-danger btn-sm rounded-pill px-3" (click)="denyActivity(activity)">
+                                <i class="bi bi-x-lg"></i> Denegar
+                            </button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="filteredActivities.length === 0">
+                        <td colspan="5" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center text-muted">
+                                <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
+                                <p class="mb-0 fw-medium">No hay solicitudes pendientes</p>
+                            </div>
+
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Requests Tab Content (Volunteers) -->
+    <div *ngIf="activeTab === 'requests'">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" *ngFor="let req of requests">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="d-flex align-items-center mb-3">
+                            <app-avatar [src]="req.volunteer?.avatar || 'assets/images/volunteer-avatar.png'"
+                                [alt]="req.volunteer?.fullName" [size]="48" class="me-3"></app-avatar>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-0 text-dark">{{ req.volunteer?.fullName }}</h6>
+                                <small class="text-muted d-block">{{ req.volunteer?.email }}</small>
+                            </div>
+                            <button class="btn btn-light btn-sm rounded-circle text-primary"
+                                (click)="$event.stopPropagation(); openRequestInfo(req.volunteer)"
+                                title="Ver información completa">
+                                <i class="bi bi-info-circle-fill fs-5"></i>
+                            </button>
+                        </div>
+
+                        <div class="mb-3 p-3 bg-light rounded-3">
+                            <small class="text-uppercase text-muted fw-bold" style="font-size: 0.7rem;">SOLICITA UNIRSE
+                                A</small>
+                            <div class="fw-semibold text-primary mt-1">{{ req.activity?.title }}</div>
+                            <div class="d-flex align-items-center mt-2 small text-muted">
+                                <i class="bi bi-calendar me-2"></i> {{ req.activity?.date | date:'mediumDate' }}
+                            </div>
+                        </div>
+
+                        <div *ngIf="req.message" class="mb-3 text-muted small fst-italic">
+                            "{{ req.message }}"
+                        </div>
+
+                        <div class="mt-auto d-flex gap-2">
+                            <button class="btn btn-success flex-fill rounded-pill fw-bold btn-sm"
+                                (click)="updateRequestStatus(req, 'ACEPTADA')">
+                                <i class="bi bi-check-lg me-1"></i> Aceptar
+                            </button>
+                            <button class="btn btn-outline-danger flex-fill rounded-pill fw-bold btn-sm"
+                                (click)="updateRequestStatus(req, 'DENEGADA')">
+                                <i class="bi bi-x-lg me-1"></i> Rechazar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="requests.length === 0" class="col-12 text-center text-muted py-5">
+                <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                No hay solicitudes de voluntarios pendientes.
+            </div>
+        </div>
+    </div>
+
+    <!-- Actividades Tab Content -->
+    <div *ngIf="activeTab === 'active'">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" *ngFor="let activity of filteredActivities">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden activity-card-hover bg-light">
+                    <div class="position-relative">
+                        <img [src]="activity.image" class="card-img-top" alt="{{ activity.title }}"
+                            style="height: 180px; object-fit: cover;">
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <span class="badge bg-white text-dark shadow-sm">{{ activity.type }}</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            <img [src]="activity.organization.logo" alt="Org Logo" class="rounded-circle me-2 border"
+                                width="24" height="24">
+                            <small class="text-muted fw-semibold">{{ activity.organization.name }}</small>
+                        </div>
+                        <h6 class="card-title fw-bold mb-2 text-dark">{{ activity.title }}</h6>
+                        <p class="card-text text-muted small flex-grow-1">{{ activity.description | slice:0:80 }}...</p>
+
+                        <div class="d-flex align-items-center text-muted small mb-2">
+                            <i class="bi bi-geo-alt-fill me-1 text-primary"></i> {{ activity.location }}
+                        </div>
+                        <div class="d-flex align-items-center text-muted small mb-3">
+                            <i class="bi bi-calendar-event me-1 text-primary"></i> {{ activity.date }}
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="fw-semibold d-block mb-1 text-muted">Voluntarios apuntados:</small>
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex me-2">
+                                    <app-avatar *ngFor="let vol of activity.volunteers.slice(0, 3)" [src]="vol.avatar"
+                                        [alt]="vol.name" [size]="28"
+                                        class="me-1 border border-white rounded-circle"></app-avatar>
+                                </div>
+                                <span *ngIf="activity.volunteers.length > 3" class="small text-muted">+{{
+                                    activity.volunteers.length - 3 }}</span>
+                                <span *ngIf="activity.volunteers.length === 0" class="small text-muted fst-italic">Sin
+                                    voluntarios</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-auto pt-3 border-top gap-2">
+                            <button class="btn btn-outline-primary btn-sm flex-fill rounded-pill"
+                                (click)="openEdit(activity)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-success btn-sm flex-fill rounded-pill"
+                                (click)="openAddVolunteer(activity)">
+                                <i class="bi bi-person-plus"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm flex-fill rounded-pill"
+                                (click)="openDeleteConfirm(activity)">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="filteredActivities.length === 0" class="col-12 text-center text-muted py-5">
+                <i class="bi bi-calendar-x fs-1 d-block mb-2 opacity-50"></i>
+                No hay actividades activas.
+            </div>
+        </div>
+    </div>
+
+    <!-- Finalizadas Tab Content -->
+    <div *ngIf="activeTab === 'ended'">
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" *ngFor="let activity of filteredActivities">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden opacity-75 bg-light">
+                    <div class="position-relative">
+                        <img [src]="activity.image" class="card-img-top" alt="{{ activity.title }}"
+                            style="height: 180px; object-fit: cover; filter: grayscale(50%);">
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <span class="badge bg-secondary">Finalizada</span>
+                        </div>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex align-items-center mb-2">
+                            <img [src]="activity.organization.logo" alt="Org Logo" class="rounded-circle me-2 border"
+                                width="24" height="24">
+                            <small class="text-muted fw-semibold">{{ activity.organization.name }}</small>
+                        </div>
+                        <h6 class="card-title fw-bold mb-2 text-dark">{{ activity.title }}</h6>
+                        <p class="card-text text-muted small">{{ activity.description | slice:0:60 }}...</p>
+
+                        <div class="d-flex align-items-center text-muted small mb-2">
+                            <i class="bi bi-calendar-event me-1"></i> {{ activity.date }}
+                        </div>
+
+                        <div class="mt-auto pt-3 border-top">
+                            <button class="btn btn-outline-secondary btn-sm w-100 rounded-pill"
+                                (click)="openViewDetails(activity)">
+                                <i class="bi bi-eye me-1"></i> Ver más
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngIf="filteredActivities.length === 0" class="col-12 text-center text-muted py-5">
+                <i class="bi bi-check-circle fs-1 d-block mb-2 opacity-50"></i>
+                No hay actividades finalizadas.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Edit Activity Modal -->
+<div class="modal" [class.show]="showEditModal" [class.d-block]="showEditModal"
+    [style.background-color]="showEditModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeEditModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Modificar Actividad</h5>
+                <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="selectedActivity">
+                <form>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" [(ngModel)]="selectedActivity.title" name="title">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" rows="3" [(ngModel)]="selectedActivity.description"
+                                name="description"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" [(ngModel)]="selectedActivity.location"
+                                name="location">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" [(ngModel)]="selectedActivity.date" name="date">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" [(ngModel)]="selectedActivity.type" name="type">
+                                <option value="Medio Ambiente">Medio Ambiente</option>
+                                <option value="Social">Social</option>
+                                <option value="Tecnológico">Tecnológico</option>
+                                <option value="Educativo">Educativo</option>
+                                <option value="Salud">Salud</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Imagen</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <img *ngIf="imagePreview" [src]="imagePreview" class="img-thumbnail"
+                                    style="width: 60px; height: 60px; object-fit: cover;">
+                                <input type="file" class="form-control" (change)="onFileSelected($event)"
+                                    accept="image/*">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Voluntarios apuntados ({{ selectedActivity.volunteers.length
+                                }})</label>
+                            <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+                                <div class="d-flex flex-wrap gap-2" *ngIf="selectedActivity.volunteers.length > 0">
+                                    <span class="badge bg-light text-dark border d-flex align-items-center"
+                                        *ngFor="let vol of selectedActivity.volunteers">
+                                        <app-avatar [src]="vol.avatar" [alt]="vol.name" [size]="20"
+                                            class="me-1"></app-avatar>
+                                        {{ vol.name }}
+                                        <button type="button" class="btn-close btn-close-sm ms-2"
+                                            style="font-size: 0.6rem;"
+                                            (click)="removeVolunteerFromActivity(vol)"></button>
+                                    </span>
+                                </div>
+                                <div class="text-muted small text-center py-2"
+                                    *ngIf="selectedActivity.volunteers.length === 0">
+                                    Sin voluntarios asignados
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="saveActivity()">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Volunteer Modal -->
+<div class="modal" [class.show]="showAddVolunteerModal" [class.d-block]="showAddVolunteerModal"
+    [style.background-color]="showAddVolunteerModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeAddVolunteerModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Añadir Voluntarios</h5>
+                <button type="button" class="btn-close" (click)="closeAddVolunteerModal()"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Filters -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small">Buscar</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="Nombre del voluntario..."
+                            [(ngModel)]="volunteerSearchTerm">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">Curso</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="volunteerFilterCourse">
+                            <option value="">Todos los cursos</option>
+                            <option *ngFor="let course of uniqueCourses" [value]="course">{{ course }}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Volunteers List -->
+                <div class="border rounded" style="max-height: 350px; overflow-y: auto;">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center"
+                            *ngFor="let volunteer of filteredVolunteers">
+                            <div class="d-flex align-items-center">
+                                <app-avatar [src]="volunteer.avatar" [alt]="volunteer.name" [size]="40"
+                                    class="me-3"></app-avatar>
+                                <div>
+                                    <div class="fw-semibold">{{ volunteer.name }}</div>
+                                    <div class="small text-muted">{{ volunteer.course }} • {{ volunteer.email }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <app-badge [label]="volunteer.status | titlecase" [type]="volunteer.status"
+                                    class="me-2"></app-badge>
+                                <button class="btn btn-sm" [class.btn-success]="!isVolunteerInActivity(volunteer)"
+                                    [class.btn-outline-danger]="isVolunteerInActivity(volunteer)"
+                                    (click)="isVolunteerInActivity(volunteer) ? removeVolunteerFromActivity(volunteer) : addVolunteerToActivity(volunteer)">
+                                    <i class="bi" [ngClass]="isVolunteerInActivity(volunteer) ? 'bi-x' : 'bi-plus'"></i>
+                                    {{ isVolunteerInActivity(volunteer) ? 'Quitar' : 'Añadir' }}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="list-group-item text-center text-muted py-4"
+                            *ngIf="filteredVolunteers.length === 0">
+                            No se encontraron voluntarios con esos filtros.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" (click)="closeAddVolunteerModal()">Listo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" [class.show]="showDeleteModal" [class.d-block]="showDeleteModal"
+    [style.background-color]="showDeleteModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeDeleteModal()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-danger">Confirmar Borrado</h5>
+                <button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas borrar la actividad <strong>{{ activityToDelete?.title }}</strong>?
+                </p>
+                <p class="text-muted small mb-0">Esta acción eliminará la actividad de la base de datos
+                    permanentemente.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">Cancelar</button>
+                <button type="button" class="btn btn-danger" (click)="deleteActivity()">Sí, borrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Activity Details Modal (Finalizadas) -->
+<div class="modal" [class.show]="showViewModal" [class.d-block]="showViewModal"
+    [style.background-color]="showViewModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeViewModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Detalles de la Actividad</h5>
+                <button type="button" class="btn-close" (click)="closeViewModal()"></button>
+            </div>
+            <div class="modal-body" *ngIf="viewActivity">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <img [src]="viewActivity.image" alt="{{ viewActivity.title }}" class="img-fluid rounded"
+                            style="width: 100%; height: 200px; object-fit: cover;">
+                    </div>
+                    <div class="col-md-7">
+                        <h4 class="fw-bold mb-2">{{ viewActivity.title }}</h4>
+                        <span class="badge bg-secondary mb-3">{{ viewActivity.type }}</span>
+                        <p class="text-muted">{{ viewActivity.description }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-building me-1"></i>Organización</label>
+                            <div class="d-flex align-items-center">
+                                <img [src]="viewActivity.organization.logo" class="rounded-circle me-2" width="24"
+                                    height="24">
+                                <span class="fw-semibold">{{ viewActivity.organization.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-geo-alt me-1"></i>Ubicación</label>
+                            <div class="fw-semibold">{{ viewActivity.location }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-calendar me-1"></i>Fecha</label>
+                            <div class="fw-semibold">{{ viewActivity.date }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="border rounded p-3">
+                            <label class="form-label text-muted small mb-1"><i
+                                    class="bi bi-people me-1"></i>Voluntarios</label>
+                            <div class="fw-semibold">{{ viewActivity.volunteers.length }} participantes</div>
+                        </div>
+                    </div>
+                    <div class="col-12" *ngIf="viewActivity.volunteers.length > 0">
+                        <label class="form-label text-muted small">Voluntarios que participaron:</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-light text-dark border" *ngFor="let vol of viewActivity.volunteers">
+                                <app-avatar [src]="vol.avatar" [alt]="vol.name" [size]="18" class="me-1"></app-avatar>
+                                {{ vol.name }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" (click)="closeViewModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Activity Modal -->
+<div class="modal" [class.show]="showCreateModal" [class.d-block]="showCreateModal"
+    [style.background-color]="showCreateModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeCreateModal()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Nueva Actividad</h5>
+                <button type="button" class="btn-close" (click)="closeCreateModal()"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Título</label>
+                        <input type="text" class="form-control" [(ngModel)]="newActivity.title" name="newTitle">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" rows="3" [(ngModel)]="newActivity.description"
+                            name="newDescription"></textarea>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Ubicación</label>
+                            <input type="text" class="form-control" [(ngModel)]="newActivity.location"
+                                name="newLocation">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" class="form-control" [(ngModel)]="newActivity.date" name="newDate">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Imagen</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <img *ngIf="imagePreview" [src]="imagePreview" class="img-thumbnail"
+                                style="width: 60px; height: 60px; object-fit: cover;">
+                            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Organización</label>
+                        <select class="form-select" [(ngModel)]="selectedOrgId" name="newOrg">
+                            <option [ngValue]="null" disabled selected>Elige una organización...</option>
+                            <option *ngFor="let org of allOrganizations" [ngValue]="org.id">{{ org.name }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" [(ngModel)]="newActivity.type" name="newType">
+                            <option value="Medio Ambiente">Medio Ambiente</option>
+                            <option value="Social">Social</option>
+                            <option value="Tecnológico">Tecnológico</option>
+                            <option value="Educativo">Educativo</option>
+                            <option value="Salud">Salud</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary" (click)="createActivity()">Crear Actividad</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Request Volunteer Info Modal (Isolated) -->
+<div class="modal" [class.show]="showRequestInfoModal" [style.display]="showRequestInfoModal ? 'block' : 'none'"
+    [style.background-color]="showRequestInfoModal ? 'rgba(0,0,0,0.5)' : 'transparent'" style="z-index: 2000;"
+    tabindex="-1" (click)="closeRequestInfoModal()">
+    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Información del Voluntario</h5>
+                <button type="button" class="btn-close" (click)="closeRequestInfoModal()"></button>
+            </div>
+            <!-- Content ONLY renders when selectedRequestVolunteer is present -->
+            <div class="modal-body text-center" *ngIf="selectedRequestVolunteer">
+                <app-avatar [src]="selectedRequestVolunteer.avatar || 'assets/images/volunteer-avatar.png'"
+                    [alt]="selectedRequestVolunteer.name" [size]="100" class="mb-3 d-inline-block"></app-avatar>
+
+                <h4 class="fw-bold mb-1">{{ selectedRequestVolunteer.name }}</h4>
+                <span class="badge bg-primary mb-3">{{ selectedRequestVolunteer.course }}</span>
+
+                <div class="row g-3 text-start mt-2">
+                    <!-- Datos Personales -->
+                    <div class="col-12 border-bottom pb-2">
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Datos
+                            Personales</small>
+                        <div class="d-flex align-items-center mt-1" *ngIf="selectedRequestVolunteer.dni">
+                            <i class="bi bi-person-vcard me-2 text-secondary"></i>
+                            <span class="fw-medium">DNI:</span>&nbsp;{{ selectedRequestVolunteer.dni }}
+                        </div>
+                        <div class="d-flex align-items-center mt-1" *ngIf="selectedRequestVolunteer.birthDate">
+                            <i class="bi bi-calendar-event me-2 text-secondary"></i>
+                            <span class="fw-medium">Fecha Nac.:</span>&nbsp;{{ selectedRequestVolunteer.birthDate |
+                            date:'dd/MM/yyyy' }}
+                        </div>
+                        <div class="d-flex align-items-center mt-1" *ngIf="selectedRequestVolunteer.status">
+                            <i class="bi bi-circle-fill me-2" [ngClass]="{
+                                'text-success': selectedRequestVolunteer.status === 'active',
+                                'text-warning': selectedRequestVolunteer.status === 'pending',
+                                'text-danger': selectedRequestVolunteer.status === 'suspended'
+                            }" style="font-size: 0.5rem;"></i>
+                            <span class="fw-medium">Estado:</span>&nbsp;
+                            <span [ngClass]="{
+                                'text-success': selectedRequestVolunteer.status === 'active',
+                                'text-warning': selectedRequestVolunteer.status === 'pending',
+                                'text-danger': selectedRequestVolunteer.status === 'suspended'
+                            }">
+                                {{ selectedRequestVolunteer.status === 'active' ? 'Activo' :
+                                selectedRequestVolunteer.status === 'pending' ? 'Pendiente' : 'Suspendido' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Contacto -->
+                    <div class="col-12 border-bottom pb-2">
+                        <small class="text-muted d-block text-uppercase fw-bold"
+                            style="font-size: 0.7rem;">Contacto</small>
+                        <div class="d-flex align-items-center mt-1">
+                            <i class="bi bi-envelope me-2 text-secondary"></i> {{ selectedRequestVolunteer.email }}
+                        </div>
+                        <div class="d-flex align-items-center mt-1" *ngIf="selectedRequestVolunteer.phone">
+                            <i class="bi bi-telephone me-2 text-secondary"></i> {{ selectedRequestVolunteer.phone }}
+                        </div>
+                    </div>
+
+                    <!-- Descripción -->
+                    <div class="col-12 border-bottom pb-2" *ngIf="selectedRequestVolunteer.description">
+                        <small class="text-muted d-block text-uppercase fw-bold mb-1" style="font-size: 0.7rem;">Sobre
+                            mí</small>
+                        <p class="mb-0 small text-muted">{{ selectedRequestVolunteer.description }}</p>
+                    </div>
+
+                    <!-- Intereses -->
+                    <div class="col-12 border-bottom pb-2" *ngIf="selectedRequestVolunteer.interests?.length > 0">
+                        <small class="text-muted d-block text-uppercase fw-bold mb-2"
+                            style="font-size: 0.7rem;">Intereses</small>
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-light text-dark border"
+                                *ngFor="let interest of selectedRequestVolunteer.interests">
+                                {{ interest }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Disponibilidad -->
+                    <div class="col-12" *ngIf="selectedRequestVolunteer.disponibilidades?.length > 0">
+                        <small class="text-muted d-block text-uppercase fw-bold mb-2"
+                            style="font-size: 0.7rem;">Disponibilidad</small>
+                        <ul class="list-unstyled small text-muted mb-0">
+                            <li *ngFor="let disp of selectedRequestVolunteer.disponibilidades">
+                                <i class="bi bi-clock me-1"></i> {{ disp }}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-secondary px-4 rounded-pill"
+                    (click)="closeRequestInfoModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

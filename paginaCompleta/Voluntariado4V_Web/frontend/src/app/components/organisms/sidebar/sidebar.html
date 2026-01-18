@@ -1,0 +1,15 @@
+<nav class="sidebar shadow-sm">
+    <div>
+        <div class="sidebar-header d-flex align-items-center mb-4">
+            <i class="bi bi-person-heart me-2 fs-4" style="color: var(--vh-primary);"></i>
+            <span class="fs-5 fw-bold text-secondary">{{ sidebarTitle }}</span>
+        </div>
+
+        <div class="sidebar-nav">
+            <app-sidebar-link *ngFor="let link of links" [label]="link.label" [icon]="link.icon"
+                [route]="link.route"></app-sidebar-link>
+        </div>
+    </div>
+
+
+</nav>

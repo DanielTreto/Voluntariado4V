@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Web App Palette -->
+    <color name="colorPrimary">#1A467B</color> <!-- Navy Blue -->
+    <color name="colorPrimaryVariant">#0F172A</color> <!-- Dark Slate -->
+    <color name="colorSecondary">#4299E1</color> <!-- Bright Blue -->
+    <color name="colorOnPrimary">#FFFFFF</color>
+    
+    <color name="background_light">#F8FAFC</color> <!-- Light Grayish Blue -->
+    <color name="text_primary">#212529</color> <!-- Dark Gray -->
+    <color name="text_secondary">#6C757D</color> <!-- Muted Gray -->
+    
+    <color name="background_gray">#F5F7FA</color> <!-- Maintaining for legacy if needed -->
+    <color name="icon_gray">#606060</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <color name="green_active">#4CAF50</color>
+    <color name="red_error">#F44336</color>
+
+    <color name="purple_500">@color/colorPrimary</color>
+    <color name="teal_200">@color/colorSecondary</color>
+    <color name="teal_700">@color/colorPrimaryVariant</color>
+
+    <color name="calendar_header_bg">#EEEEEE</color>
+    <color name="calendar_stroke_color">#E0E0E0</color>
+    <color name="input_default_stroke">#808080</color>
+</resources>

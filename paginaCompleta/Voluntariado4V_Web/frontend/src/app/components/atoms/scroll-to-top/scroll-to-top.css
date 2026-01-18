@@ -1,0 +1,160 @@
+.scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000;
+    transform: translateY(20px);
+    overflow: visible;
+    /* Allow particles to go outside */
+}
+
+.scroll-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.scroll-to-top:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.scroll-to-top i {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+    z-index: 2;
+    /* Keep icon above particles */
+}
+
+/* Launch Animation State */
+.scroll-to-top.launching {
+    background-color: #ffc107;
+    pointer-events: none;
+    animation: flyUp 1s ease-in-out forwards;
+}
+
+.scroll-to-top.launching i {
+    /* Vibrate while flying */
+    animation: vibration 0.1s infinite;
+}
+
+@keyframes flyUp {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    20% {
+        transform: translateY(10px) scale(0.9);
+        opacity: 1;
+    }
+
+    /* Anticipate */
+    100% {
+        transform: translateY(-100vh) scale(0.5);
+        opacity: 0;
+    }
+
+    /* Fly up and vanish */
+}
+
+@keyframes vibration {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(-1px, 1px);
+    }
+
+    50% {
+        transform: translate(1px, -1px);
+    }
+
+    75% {
+        transform: translate(-1px, -1px);
+    }
+
+    100% {
+        transform: translate(1px, 1px);
+    }
+}
+
+/* Particles */
+.particle {
+    position: absolute;
+    bottom: -5px;
+    /* Start lower */
+    left: 50%;
+    width: 8px;
+    /* Bigger fire */
+    height: 8px;
+    background-color: #ff5722;
+    border-radius: 50%;
+    opacity: 0;
+    transform: translateX(-50%);
+    z-index: 1;
+}
+
+.scroll-to-top.launching .particle {
+    animation: particles 0.5s ease-out infinite;
+    /* Infinite loop while launching */
+}
+
+.scroll-to-top.launching .p1 {
+    animation-delay: 0.0s;
+    left: 45%;
+    --x: -10px;
+    --y: 60px;
+    background: #ffc107;
+}
+
+.scroll-to-top.launching .p2 {
+    animation-delay: 0.1s;
+    left: 55%;
+    --x: 10px;
+    --y: 60px;
+    background: #ff5722;
+}
+
+.scroll-to-top.launching .p3 {
+    animation-delay: 0.2s;
+    left: 40%;
+    --x: -20px;
+    --y: 50px;
+    background: #ff9800;
+}
+
+.scroll-to-top.launching .p4 {
+    animation-delay: 0.15s;
+    left: 60%;
+    --x: 20px;
+    --y: 50px;
+    background: #f44336;
+}
+
+@keyframes particles {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--x)), var(--y)) scale(0);
+    }
+}

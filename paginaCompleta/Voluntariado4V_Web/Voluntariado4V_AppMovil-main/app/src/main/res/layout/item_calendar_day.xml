@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:orientation="vertical"
+    android:background="@drawable/calendar_cell_border"
+    android:padding="4dp">
+
+    <TextView
+        android:id="@+id/tvDayNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:textColor="@color/text_primary" />
+
+    <TextView
+        android:id="@+id/tvEventTag"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="#1B5E20"
+        android:padding="4dp"
+        android:text="Evento"
+        android:textColor="#FFFFFF"
+        android:textSize="10sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:visibility="gone" />
+</LinearLayout>

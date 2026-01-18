@@ -1,0 +1,15 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.navbar {
+    background-color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.user-info {
+    line-height: 1.2;
+}
