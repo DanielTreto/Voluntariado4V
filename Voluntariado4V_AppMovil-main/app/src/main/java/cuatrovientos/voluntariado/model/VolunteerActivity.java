@@ -13,8 +13,12 @@ public class VolunteerActivity {
     private String organizationName;
     private String organizationAvatar;
 
+    private int id; // Added ID field
     private int imageColor; // Background color for category chip
     private String imageUrl; // Header image
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     private java.util.List<Volunteer> participants;
 
