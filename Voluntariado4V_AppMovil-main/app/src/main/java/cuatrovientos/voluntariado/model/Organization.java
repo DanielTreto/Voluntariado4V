@@ -15,6 +15,8 @@ public class Organization {
     private String status;         
     private String avatarUrl;      
 
+    public Organization() {}
+
     public Organization(String id, String name, String email, String description, String type, String phone, String sector, String scope, String contactPerson, String date, String volunteersCount, String status, String avatarUrl) {
         this.id = id;
         this.name = name;
@@ -32,18 +34,42 @@ public class Organization {
     }
 
     public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
+
     public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
     // Getters for new fields
     public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+
     public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+
     public String getSector() { return sector; }
+    public void setSector(String sector) { this.sector = sector; }
+
     public String getScope() { return scope; }
+    public void setScope(String scope) { this.scope = scope; }
+
     public String getContactPerson() { return contactPerson; }
+    public void setContactPerson(String contactPerson) { this.contactPerson = contactPerson; }
 
     public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
     public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
     public String getDate() { return date; }
+    public void setDate(String date) { this.date = date; }
+
     public String getVolunteersCount() { return volunteersCount; }
+    public void setVolunteersCount(String volunteersCount) { this.volunteersCount = volunteersCount; }
+
     public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
     public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 }

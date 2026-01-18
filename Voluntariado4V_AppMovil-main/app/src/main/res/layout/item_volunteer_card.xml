@@ -106,7 +106,9 @@
                 android:text="jane.doe@example.com"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
-                android:drawablePadding="8dp" />
+                android:drawableStart="@drawable/ic_email"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"/>
 
             <TextView
                 android:id="@+id/tvPhone"
@@ -115,16 +117,22 @@
                 android:text="(555) 123-4567"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="4dp"
+                android:drawableStart="@drawable/ic_phone"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"/>
 
             <TextView
-                android:id="@+id/tvDate"
+                android:id="@+id/tvDni"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Last Activity: 2023-10-26"
-                android:textSize="12sp"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/text_secondary"/>
+                android:text="12345678A"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_secondary"
+                android:drawableStart="@drawable/ic_badge"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"/>
         </LinearLayout>
 
         <LinearLayout

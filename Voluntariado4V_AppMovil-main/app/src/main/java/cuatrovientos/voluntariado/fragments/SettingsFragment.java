@@ -67,6 +67,15 @@ public class SettingsFragment extends Fragment {
                  imgProfile.setImageResource(R.drawable.ic_profile_placeholder);
             }
 
+            // Populate Read-Only Details
+            com.google.android.material.textfield.TextInputEditText etName = view.findViewById(R.id.etEditName);
+            com.google.android.material.textfield.TextInputEditText etEmail = view.findViewById(R.id.etEditEmail);
+            com.google.android.material.textfield.TextInputEditText etAvatar = view.findViewById(R.id.etEditPhotoUrl);
+            
+            if (etName != null) etName.setText(name);
+            if (etEmail != null) etEmail.setText(email);
+            if (etAvatar != null) etAvatar.setText(avatar);
+
             // Dark Mode Logic
             SwitchMaterial switchDarkMode = view.findViewById(R.id.switchDarkMode);
             // Check current night mode in prefs (or system default if not set)
@@ -105,7 +114,7 @@ public class SettingsFragment extends Fragment {
                     btnToggleDetails.setText("Ocultar detalles de la cuenta");
                 } else {
                     containerAccountDetails.setVisibility(View.GONE);
-                    btnToggleDetails.setText("Cambiar detalles de la cuenta");
+                    btnToggleDetails.setText("Ver detalles de la cuenta");
                 }
             }
         });

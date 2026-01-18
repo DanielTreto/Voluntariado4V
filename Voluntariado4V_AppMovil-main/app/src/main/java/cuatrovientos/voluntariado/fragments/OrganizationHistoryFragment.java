@@ -39,7 +39,7 @@ public class OrganizationHistoryFragment extends Fragment {
         String userId = prefs.getString("USER_ID", null);
 
         // Initialize empty adapter
-        adapter = new ActivitiesAdapter(new ArrayList<>(), true); // true = hide buttons (history mode)
+        adapter = new ActivitiesAdapter(new ArrayList<>(), false); // false = org view (no buttons, no arrow)
         rvHistory.setAdapter(adapter);
 
         if (userId != null) {
@@ -113,6 +113,14 @@ public class OrganizationHistoryFragment extends Fragment {
                             }
                         }
 
+                        // Map ODS
+                        List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
+                        if (apiAct.getOds() != null) {
+                            for (cuatrovientos.voluntariado.network.model.ApiOds apiOds : apiAct.getOds()) {
+                                odsList.add(new cuatrovientos.voluntariado.model.Ods(apiOds.getId(), apiOds.getDescription()));
+                            }
+                        }
+
                          VolunteerActivity volAct = new VolunteerActivity(
                             apiAct.getTitle(),
                             apiAct.getDescription(),
@@ -127,7 +135,8 @@ public class OrganizationHistoryFragment extends Fragment {
                             null, 
                             android.graphics.Color.GRAY, // Gray for history
                             imageUrl,
-                            volunteerList // Pass the list here
+                            volunteerList, // Pass the list here
+                            odsList // Pass ODS list
                         );
                         volAct.setId(apiAct.getId());
                         

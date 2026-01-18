@@ -217,7 +217,7 @@ public class EventsFragment extends Fragment {
             @Override
             public void onEventClick(VolunteerActivity activity) {
                 if (getActivity() != null && activity != null) {
-                     ActivityDetailDialog dialog = ActivityDetailDialog.newInstance(activity);
+                     ActivityDetailDialog dialog = ActivityDetailDialog.newInstance(activity, true);
                      dialog.show(getParentFragmentManager(), "ActivityDetailDialog");
                 }
             }

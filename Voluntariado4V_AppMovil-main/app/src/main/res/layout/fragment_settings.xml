@@ -199,13 +199,13 @@
             android:id="@+id/btnToggleDetails"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="Cambiar detalles de la cuenta"
+            android:text="Ver detalles de la cuenta"
             android:backgroundTint="@color/colorPrimary"
             app:cornerRadius="12dp"
             android:textSize="16sp"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Editable Form -->
+        <!-- Read-only Details View -->
         <LinearLayout
             android:id="@+id/containerAccountDetails"
             android:layout_width="match_parent"
@@ -225,7 +225,10 @@
                     android:id="@+id/etEditName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPersonName"/>
+                    android:inputType="textPersonName"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:cursorVisible="false"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -240,7 +243,10 @@
                     android:id="@+id/etEditPhotoUrl"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textUri"/>
+                    android:inputType="textUri"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:cursorVisible="false"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -248,53 +254,18 @@
                 android:layout_height="wrap_content"
                 android:hint="Correo Electrónico"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="24dp"
                 app:boxStrokeColor="@color/input_border_selector"
                 app:hintTextColor="@color/colorPrimary">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etEditEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"/>
+                    android:inputType="textEmailAddress"
+                    android:focusable="false"
+                    android:clickable="false"
+                    android:cursorVisible="false"/>
             </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Contraseña Actual"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
-                app:endIconMode="password_toggle"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nueva Contraseña"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="24dp"
-                app:endIconMode="password_toggle"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="Guardar Cambios"
-                android:backgroundTint="@color/green_active"
-                app:cornerRadius="12dp"
-                android:layout_marginBottom="24dp"/>
 
         </LinearLayout>
 

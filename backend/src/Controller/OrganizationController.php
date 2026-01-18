@@ -232,12 +232,27 @@ class OrganizationController extends AbstractController
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
                 'status' => $act->getESTADO(),
                 'volunteersCount' => $act->getVoluntarios()->count(),
+                'volunteers' => array_map(function($vol) {
+                     return [
+                         'id' => $vol->getId(),
+                         'name' => $vol->getNOMBRE(),
+                         'surname1' => $vol->getAPELLIDO1(),
+                         'surname2' => $vol->getAPELLIDO2(),
+                         'avatar' => $vol->getAVATAR()
+                     ];
+                }, $act->getVoluntarios()->toArray()),
                 'ods' => array_map(function($ods) {
                     return [
                         'id' => $ods->getNUMODS(),
                         'description' => $ods->getDESCRIPCION()
                     ];
-                }, $act->getOds()->toArray())
+                }, $act->getOds()->toArray()),
+                // Add Organization info for Mapper to pick up
+                'organization' => [
+                     'id' => $org->getCODORG(), // Use the org we already fetched
+                     'name' => $org->getNOMBRE(),
+                     'avatar' => $org->getAVATAR()
+                ]
             ];
         }
 

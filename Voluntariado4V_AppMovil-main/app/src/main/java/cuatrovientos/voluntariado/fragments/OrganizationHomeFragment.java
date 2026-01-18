@@ -113,6 +113,14 @@ public class OrganizationHomeFragment extends Fragment {
                             }
                         }
 
+                        // Map ODS
+                        List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
+                        if (apiAct.getOds() != null) {
+                            for (cuatrovientos.voluntariado.network.model.ApiOds apiOds : apiAct.getOds()) {
+                                odsList.add(new cuatrovientos.voluntariado.model.Ods(apiOds.getId(), apiOds.getDescription()));
+                            }
+                        }
+
                         // Map ApiActivity to VolunteerActivity
                          VolunteerActivity volAct = new VolunteerActivity(
                             apiAct.getTitle(),
@@ -128,7 +136,8 @@ public class OrganizationHomeFragment extends Fragment {
                             null, 
                             android.graphics.Color.BLUE, 
                             imageUrl,
-                            volunteerList // Pass the list here
+                            volunteerList, // Pass the list here
+                            odsList
                         );
                         volAct.setId(apiAct.getId());
                         

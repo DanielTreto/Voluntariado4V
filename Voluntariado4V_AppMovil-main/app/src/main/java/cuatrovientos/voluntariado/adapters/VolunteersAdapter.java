@@ -38,11 +38,15 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
     public void onBindViewHolder(@NonNull VolunteerViewHolder holder, int position) {
         Volunteer volunteer = volunteerList.get(position);
 
-        holder.tvName.setText(volunteer.getName());
+        String fullName = volunteer.getName();
+        if (volunteer.getSurname1() != null) fullName += " " + volunteer.getSurname1();
+        if (volunteer.getSurname2() != null) fullName += " " + volunteer.getSurname2();
+        
+        holder.tvName.setText(fullName);
         holder.tvRole.setText(volunteer.getRole());
         holder.tvEmail.setText(volunteer.getEmail());
         holder.tvPhone.setText(volunteer.getPhone());
-        holder.tvDate.setText(volunteer.getBirthDate());
+        holder.tvDni.setText(volunteer.getDni());
         holder.tvStatus.setText(volunteer.getStatus());
 
         if (volunteer.getAvatarUrl() != null) {
@@ -105,7 +109,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
     }
 
     public static class VolunteerViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvRole, tvEmail, tvPhone, tvStatus, tvDate;
+        TextView tvName, tvRole, tvEmail, tvPhone, tvStatus, tvDni;
         android.widget.ImageView btnMoreOptions;
         ImageView imgAvatar;
         LinearLayout actionsLayout;
@@ -118,7 +122,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             tvStatus = itemView.findViewById(R.id.chipStatus);
             tvEmail = itemView.findViewById(R.id.tvEmail);
             tvPhone = itemView.findViewById(R.id.tvPhone);
-            tvDate = itemView.findViewById(R.id.tvDate);
+            tvDni = itemView.findViewById(R.id.tvDni);
 
             // Controles de acción
             actionsLayout = itemView.findViewById(R.id.actionsLayout);

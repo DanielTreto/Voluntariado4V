@@ -133,7 +133,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
             if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
                 androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
                 cuatrovientos.voluntariado.dialogs.ActivityDetailDialog dialog = 
-                    cuatrovientos.voluntariado.dialogs.ActivityDetailDialog.newInstance(act);
+                    cuatrovientos.voluntariado.dialogs.ActivityDetailDialog.newInstance(act, isStudent);
                 dialog.show(activity.getSupportFragmentManager(), "ActivityDetailDialog");
             }
         });

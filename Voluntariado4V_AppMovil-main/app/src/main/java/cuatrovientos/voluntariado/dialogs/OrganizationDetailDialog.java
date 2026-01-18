@@ -33,7 +33,7 @@ public class OrganizationDetailDialog extends DialogFragment {
     private static final String ARG_ORG = "arg_org";
     private Organization organization;
     private RecyclerView recyclerActivities;
-    private ActivitiesAdapter activitiesAdapter;
+    private cuatrovientos.voluntariado.adapters.SimpleActivityAdapter activitiesAdapter;
 
     public static OrganizationDetailDialog newInstance(Organization org) {
          OrganizationDetailDialog fragment = new OrganizationDetailDialog();
@@ -76,6 +76,26 @@ public class OrganizationDetailDialog extends DialogFragment {
 
         ImageView btnClose = view.findViewById(R.id.btnClose);
         btnClose.setOnClickListener(v -> dismiss());
+
+        // Close Stack Logic
+        ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
+        
+        List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
+        List<DialogFragment> dialogs = new java.util.ArrayList<>();
+        for (androidx.fragment.app.Fragment f : fragments) {
+            if (f instanceof DialogFragment) {
+                dialogs.add((DialogFragment) f);
+            }
+        }
+
+        if (dialogs.size() > 1) {
+            btnCloseStack.setVisibility(View.VISIBLE);
+            btnCloseStack.setOnClickListener(v -> {
+                 for (DialogFragment d : dialogs) {
+                     d.dismiss();
+                 }
+            });
+        }
 
         if (organization == null) return view;
 
@@ -137,11 +157,22 @@ public class OrganizationDetailDialog extends DialogFragment {
         } else {
              imgHeader.setImageResource(R.drawable.ic_business);
         }
+        
+        // Initial Population
+        updateUI(view);
+
+        // Fetch full details if likely incomplete (e.g. missing description or type)
+        // Only show loader if we are actually fetching
+        if (organization.getDescription() == null || organization.getDescription().isEmpty() || organization.getType() == null) {
+            fetchOrganizationDetails(view);
+        } else {
+             view.findViewById(R.id.layoutDetailContent).setVisibility(View.VISIBLE);
+        }
 
         // Setup RecyclerView
         recyclerActivities = view.findViewById(R.id.recyclerOrgActivities);
         recyclerActivities.setLayoutManager(new LinearLayoutManager(getContext()));
-        activitiesAdapter = new ActivitiesAdapter(new ArrayList<>());
+        activitiesAdapter = new cuatrovientos.voluntariado.adapters.SimpleActivityAdapter(new ArrayList<>());
         recyclerActivities.setAdapter(activitiesAdapter);
 
         loadActivities();
@@ -159,39 +190,33 @@ public class OrganizationDetailDialog extends DialogFragment {
                 if (response.isSuccessful() && response.body() != null) {
                     List<VolunteerActivity> mappedList = new ArrayList<>();
                     for (ApiActivity apiAct : response.body()) {
-                        String imageUrl = null;
-                        if (apiAct.getImagen() != null) {
-                             imageUrl = apiAct.getImagen().startsWith("http") ? apiAct.getImagen() : "http://10.0.2.2:8000" + apiAct.getImagen();
-                        }
+                        // Image URL handled by Mapper
                         
                         // Mapping ApiActivity to VolunteerActivity
                         // Note: VolunteerActivity constructor likely needs updating or careful usage.
                         // Checking VolunteerActivity again would be wise, but assuming standard format from previous knowledge.
                         // title, date, location, category, status, imageUrl, id
-                        VolunteerActivity volAct = new VolunteerActivity(
-                            apiAct.getTitle(),
-                            apiAct.getDescription(),
-                            apiAct.getLocation(),
-                            apiAct.getDate(),
-                            apiAct.getDuration(),
-                            apiAct.getEndDate(),
-                            apiAct.getMaxVolunteers(),
-                            apiAct.getType(),
-                            apiAct.getStatus(),
-                            organization.getName(),
-                            organization.getAvatarUrl(),
-                            android.graphics.Color.BLUE, // Default color or logic to pick based on category
-                            imageUrl
-                        );
+                        // Mapping ApiActivity to VolunteerActivity using standard Mapper
+                        // This ensures ODS and Volunteers are correctly populated
+                        VolunteerActivity volAct = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
                         
-                        // Add participant avatars (ApiActivity doesn't return them in basic list? 
-                        // Ah, ApiController returns 'volunteers' list inside activity.
-                        // ApiActivity class must have getVolunteers().
-                        // I need to check ApiActivity.java.
-                        // I'll assume for now I can skip avatars or they are not in the list view for organization details 
-                        // OR ApiActivity has them.
-                        // Let's add safely.
-                        mappedList.add(volAct);
+                        // Override Organization info since we are in Org Context (though Mapper does it too if API has it)
+                        // ActivityMapper sets Org Name/Avatar from apiAct.getOrganization().
+                        // apiService.getOrganizationActivities returns Activity list but nested Org might be null 
+                        // or partial in some endpoints.
+                        // However, we have 'organization' object here. 
+                        // Let's rely on mapper first. If it's missing, we could patch it.
+                        // But wait, the backend for getOrganizationActivities just returns list of activities, 
+                        // it does NOT nest 'organization' inside each activity in the current Controller code I just saw/edited?
+                        // Checked Controller: It returns id, title... etc. It does NOT return 'organization' field in the JSON loop.
+                        // So Mapper will have null Organization.
+                        // We must manual set it since we know it.
+                        
+                        if (volAct != null) {
+                            volAct.setOrganizationName(organization.getName());
+                            volAct.setOrganizationAvatar(organization.getAvatarUrl());
+                            mappedList.add(volAct);
+                        }
                     }
                     activitiesAdapter.updateList(mappedList);
                 }
@@ -204,7 +229,111 @@ public class OrganizationDetailDialog extends DialogFragment {
             }
         });
     }
-    
+
+    private void updateUI(View view) {
+        if (organization == null || view == null) return;
+
+        TextView tvName = view.findViewById(R.id.tvDetailName);
+        TextView tvStatus = view.findViewById(R.id.tvDetailStatus);
+        TextView tvEmail = view.findViewById(R.id.tvDetailEmail);
+        TextView tvDesc = view.findViewById(R.id.tvDetailDesc);
+        TextView tvPhone = view.findViewById(R.id.tvDetailPhone);
+        TextView tvType = view.findViewById(R.id.tvDetailType);
+        TextView tvSector = view.findViewById(R.id.tvDetailSector);
+        TextView tvScope = view.findViewById(R.id.tvDetailScope);
+        TextView tvContact = view.findViewById(R.id.tvDetailContact);
+
+        tvName.setText(organization.getName());
+        tvEmail.setText(organization.getEmail() != null ? organization.getEmail() : "Correo no disponible");
+        
+        tvStatus.setText(organization.getStatus() != null ? organization.getStatus() : "Desconocido");
+        if ("Active".equalsIgnoreCase(organization.getStatus()) || "Activo".equalsIgnoreCase(organization.getStatus())) {
+             tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
+             tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+             tvStatus.setText("Activo");
+        } else {
+             tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
+             tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
+             tvStatus.setText("Pendiente");
+        }
+
+        tvPhone.setText(organization.getPhone() != null ? organization.getPhone() : "");
+        tvType.setText(organization.getType() != null ? organization.getType() : "");
+        tvSector.setText(organization.getSector() != null ? organization.getSector() : "");
+        tvScope.setText(organization.getScope() != null ? organization.getScope() : "");
+        
+        if (organization.getContactPerson() != null && !organization.getContactPerson().isEmpty()) {
+            tvContact.setText(organization.getContactPerson());
+        } else {
+            tvContact.setText("Sin persona de contacto asignada");
+        }
+
+        if (organization.getDescription() != null && !organization.getDescription().isEmpty()) {
+            tvDesc.setText(organization.getDescription());
+        } else {
+            tvDesc.setText("Sin descripción disponible.");
+        }
+    }
+
+    private void fetchOrganizationDetails(View view) {
+        if (organization.getId() == null) return;
+
+        android.widget.ProgressBar progressBar = view.findViewById(R.id.progressBar);
+        View contentLayout = view.findViewById(R.id.layoutDetailContent);
+
+        progressBar.setVisibility(View.VISIBLE);
+        contentLayout.setVisibility(View.GONE);
+
+        ApiService apiService = RetrofitClient.getClient().create(ApiService.class);
+        apiService.getOrganization(organization.getId()).enqueue(new Callback<Organization>() {
+             @Override
+             public void onResponse(Call<Organization> call, Response<Organization> response) {
+                 if (response.isSuccessful() && response.body() != null) {
+                     // Update current organization object with fetched details
+                     Organization fetched = response.body();
+                     organization.setEmail(fetched.getEmail());
+                     organization.setDescription(fetched.getDescription());
+                     organization.setType(fetched.getType());
+                     organization.setPhone(fetched.getPhone());
+                     organization.setSector(fetched.getSector());
+                     organization.setScope(fetched.getScope());
+                     organization.setContactPerson(fetched.getContactPerson());
+                     organization.setStatus(fetched.getStatus());
+                     // Avoid overwriting Name/Avatar if they are visually correct, but safe to overwrite usually.
+                     organization.setName(fetched.getName());
+                     organization.setAvatarUrl(fetched.getAvatarUrl());
+                     
+                     if (getContext() != null) {
+                         updateUI(view);
+                         // Also refresh avatar if URL changed/loaded
+                         ImageView imgHeader = view.findViewById(R.id.imgDetailHeader);
+                         if (organization.getAvatarUrl() != null && !organization.getAvatarUrl().isEmpty()) {
+                              Glide.with(getContext()) // Use getContext() safely inside callback
+                                  .load(organization.getAvatarUrl())
+                                  .placeholder(R.drawable.ic_business)
+                                  .error(R.drawable.ic_business)
+                                  .centerCrop()
+                                  .into(imgHeader);
+                         }
+                     }
+                 }
+                 if (getContext() != null) {
+                     progressBar.setVisibility(View.GONE);
+                     contentLayout.setVisibility(View.VISIBLE);
+                 }
+             }
+
+             @Override
+             public void onFailure(Call<Organization> call, Throwable t) {
+                 if (getContext() != null) {
+                     progressBar.setVisibility(View.GONE);
+                     contentLayout.setVisibility(View.VISIBLE);
+                     Toast.makeText(getContext(), "Error cargando detalles", Toast.LENGTH_SHORT).show();
+                 }
+             }
+        });
+    }
+
     @Override
     public void onStart() {
         super.onStart();

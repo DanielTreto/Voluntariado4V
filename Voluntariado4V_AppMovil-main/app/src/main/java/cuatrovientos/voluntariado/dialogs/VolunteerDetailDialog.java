@@ -74,6 +74,31 @@ public class VolunteerDetailDialog extends DialogFragment {
         tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
         tvBirthDate.setText("Fecha Nac.: " + (volunteer.getBirthDate() != null ? volunteer.getBirthDate() : ""));
 
+        // Preferences
+        com.google.android.material.chip.ChipGroup chipGroup = view.findViewById(R.id.chipGroupPreferences);
+        TextView tvNoPreferences = view.findViewById(R.id.tvDetailNoPreferences);
+        
+        if (volunteer.getPreferences() != null && !volunteer.getPreferences().isEmpty()) {
+            chipGroup.setVisibility(View.VISIBLE);
+            tvNoPreferences.setVisibility(View.GONE);
+            chipGroup.removeAllViews();
+            
+            for (String pref : volunteer.getPreferences()) {
+                com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(getContext());
+                chip.setText(pref);
+                chip.setTextColor(android.graphics.Color.WHITE);
+                chip.setChipCornerRadius(0f); // Make it rectangular like activity cards
+                
+                int color = cuatrovientos.voluntariado.utils.ActivityMapper.getColorForType(pref);
+                chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(color));
+                
+                chipGroup.addView(chip);
+            }
+        } else {
+            chipGroup.setVisibility(View.GONE);
+            tvNoPreferences.setVisibility(View.VISIBLE);
+        }
+
         // Status Check
         tvStatus.setText(volunteer.getStatus());
         if ("Active".equalsIgnoreCase(volunteer.getStatus()) || "ACTIVO".equalsIgnoreCase(volunteer.getStatus())) {

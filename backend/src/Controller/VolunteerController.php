@@ -38,7 +38,8 @@ class VolunteerController extends AbstractController
                 'course' => $v->getCODCICLO(),
                 'status' => $v->getESTADO(),
                 'avatar' => $v->getAVATAR(),
-                'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
+                'avatar' => $v->getAVATAR(),
+                'preferences' => array_map(fn($t) => $t->getDESCRIPCION(), $v->getPreferencias()->toArray()),
             ];
         }
 
@@ -69,7 +70,7 @@ class VolunteerController extends AbstractController
             'course' => $v->getCODCICLO(),
             'status' => $v->getESTADO(),
             'avatar' => $v->getAVATAR(),
-            'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
+            'preferences' => array_map(fn($t) => $t->getDESCRIPCION(), $v->getPreferencias()->toArray()),
         ];
 
         $response = new JsonResponse($data);
@@ -335,6 +336,7 @@ class VolunteerController extends AbstractController
                 }, $act->getOds()->toArray()),
                 'volunteers' => $vols,
                 'organization' => $act->getOrganizacion() ? [
+                    'id' => $act->getOrganizacion()->getCODORG(),
                     'name' => $act->getOrganizacion()->getNOMBRE(),
                     'avatar' => $act->getOrganizacion()->getAVATAR()
                 ] : null

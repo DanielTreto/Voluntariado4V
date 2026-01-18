@@ -97,7 +97,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="12345678A"
-                android:drawableStart="@drawable/ic_info_outline"
+                android:drawableStart="@drawable/ic_badge"
                 android:drawablePadding="8dp"
                 app:drawableTint="@color/modal_text_primary"
                 android:gravity="center_vertical"
@@ -126,6 +126,31 @@
                 app:drawableTint="@color/modal_text_primary"
                 android:gravity="center_vertical"
                 android:textColor="@color/modal_text_secondary"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Preferencias"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:textSize="18sp"
+                android:textColor="@color/modal_text_primary"/>
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupPreferences"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <TextView
+                android:id="@+id/tvDetailNoPreferences"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Sin preferencias especificadas"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@color/modal_text_secondary"
+                android:visibility="gone"/>
 
             <TextView
                 android:layout_width="match_parent"

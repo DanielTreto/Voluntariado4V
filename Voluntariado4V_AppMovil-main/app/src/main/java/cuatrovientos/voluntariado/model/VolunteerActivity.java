@@ -58,8 +58,15 @@ public class VolunteerActivity {
     public int getMaxVolunteers() { return maxVolunteers; }
     public String getCategory() { return category; }
     public String getStatus() { return status; }
+    private String organizationId;
+    public String getOrganizationId() { return organizationId; }
+    public void setOrganizationId(String organizationId) { this.organizationId = organizationId; }
+
     public String getOrganizationName() { return organizationName; }
+    public void setOrganizationName(String organizationName) { this.organizationName = organizationName; }
+
     public String getOrganizationAvatar() { return organizationAvatar; }
+    public void setOrganizationAvatar(String organizationAvatar) { this.organizationAvatar = organizationAvatar; }
     public int getImageColor() { return imageColor; }
     public String getImageUrl() { return imageUrl; }
     public java.util.List<Volunteer> getParticipants() { return participants; }

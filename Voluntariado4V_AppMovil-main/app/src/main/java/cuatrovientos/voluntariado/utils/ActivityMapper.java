@@ -61,8 +61,10 @@ public class ActivityMapper {
         // 5. Organization Mapping
         String orgName = "Cuatrovientos"; // Default
         String orgAvatar = null;
+        String orgId = null;
         if (apiAct.getOrganization() != null) {
             orgName = apiAct.getOrganization().getName();
+            orgId = apiAct.getOrganization().getId(); // Ensure ApiOrganization has getId()
             String orgAvPath = apiAct.getOrganization().getAvatar();
             if (orgAvPath != null && !orgAvPath.startsWith("http")) {
                 orgAvatar = "http://10.0.2.2:8000/" + orgAvPath;
@@ -98,6 +100,7 @@ public class ActivityMapper {
                 odsList
         );
         volAct.setId(apiAct.getId());
+        volAct.setOrganizationId(orgId);
         
         return volAct;
     }

@@ -18,10 +18,22 @@ import cuatrovientos.voluntariado.model.VolunteerActivity;
 public class ActivityDetailDialog extends DialogFragment {
 
     private VolunteerActivity activity;
+    private boolean isStudent = false;
 
     public static ActivityDetailDialog newInstance(VolunteerActivity activity) {
+        // Default to false or maybe consider overloading
+        // For compatibility with other calls (though I should update them)
+        // Let's overload or default. 
+        // User requested "Only for volunteer dashboard".
+        // If called without arg, safe assumption? Or better to explicit?
+        // Let's update calls.
+        return newInstance(activity, false);
+    }
+    
+    public static ActivityDetailDialog newInstance(VolunteerActivity activity, boolean isStudent) {
         ActivityDetailDialog fragment = new ActivityDetailDialog();
         fragment.activity = activity;
+        fragment.isStudent = isStudent;
         return fragment;
     }
 
@@ -50,7 +62,7 @@ public class ActivityDetailDialog extends DialogFragment {
         TextView tvMaxVolunteers = view.findViewById(R.id.tvDetailMaxVolunteers);
         TextView tvStatus = view.findViewById(R.id.tvDetailStatus);
         
-        ImageView imgOrgAvatar = view.findViewById(R.id.imgOrgAvatar);
+        ImageView imgOrgAvatar = view.findViewById(R.id.imgDetailOrg);
         TextView tvOrgName = view.findViewById(R.id.tvOrgName);
 
         TextView tvVolunteersTitle = view.findViewById(R.id.tvVolunteersTitle);
@@ -105,6 +117,33 @@ public class ActivityDetailDialog extends DialogFragment {
                      .into(imgOrgAvatar);
             } else {
                  imgOrgAvatar.setImageResource(R.drawable.ic_business);
+            }
+
+            android.widget.LinearLayout layoutOrg = view.findViewById(R.id.layoutDetailOrg);
+            ImageView btnOrgDetailArrow = view.findViewById(R.id.btnOrgDetailArrow);
+
+            if (isStudent) {
+                 btnOrgDetailArrow.setVisibility(View.VISIBLE);
+                 layoutOrg.setOnClickListener(v -> {
+                    String orgId = activity.getOrganizationId();
+                     if (orgId != null && !orgId.isEmpty()) {
+                         cuatrovientos.voluntariado.model.Organization tempOrg = new cuatrovientos.voluntariado.model.Organization();
+                         tempOrg.setId(orgId); // Only ID needed for loadActivities logic
+                         tempOrg.setName(activity.getOrganizationName());
+                         tempOrg.setAvatarUrl(activity.getOrganizationAvatar());
+                         
+                         cuatrovientos.voluntariado.dialogs.OrganizationDetailDialog orgDialog = 
+                             cuatrovientos.voluntariado.dialogs.OrganizationDetailDialog.newInstance(tempOrg);
+                         orgDialog.show(getParentFragmentManager(), "OrganizationDetailDialog_FromActivity");
+                    } else {
+                        android.widget.Toast.makeText(getContext(), "Información de organización no disponible", android.widget.Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                 btnOrgDetailArrow.setVisibility(View.GONE);
+                 layoutOrg.setClickable(false);
+                 layoutOrg.setFocusable(false);
+                 layoutOrg.setOnClickListener(null);
             }
 
 
@@ -215,6 +254,28 @@ public class ActivityDetailDialog extends DialogFragment {
         }
 
         btnClose.setOnClickListener(v -> dismiss());
+
+        // Close Stack Logic
+        ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
+        
+        // Count DialogFragments
+        List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
+        List<DialogFragment> dialogs = new java.util.ArrayList<>();
+        for (androidx.fragment.app.Fragment f : fragments) {
+            if (f instanceof DialogFragment) {
+                dialogs.add((DialogFragment) f);
+            }
+        }
+
+        if (dialogs.size() > 1) {
+            btnCloseStack.setVisibility(View.VISIBLE);
+            btnCloseStack.setOnClickListener(v -> {
+                 // Close ALL dialogs to return to main screen (e.g. Activity List)
+                 for (DialogFragment d : dialogs) {
+                     d.dismiss();
+                 }
+            });
+        }
 
         return view;
     }
