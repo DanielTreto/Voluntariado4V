@@ -65,7 +65,8 @@ class AuthController extends AbstractController
                     'name' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
                     'email' => $volunteer->getCORREO(),
                     'firebaseUid' => $volunteer->getFirebaseUid(),
-                    'avatar' => $volunteer->getAVATAR()
+                    'avatar' => $volunteer->getAVATAR(),
+                    'status' => $volunteer->getESTADO()
                 ]);
             }
 
@@ -78,7 +79,8 @@ class AuthController extends AbstractController
                     'name' => $org->getNOMBRE(),
                     'email' => $org->getCORREO(),
                     'firebaseUid' => $org->getFirebaseUid(),
-                    'avatar' => $org->getAVATAR()
+                    'avatar' => $org->getAVATAR(),
+                    'status' => $org->getESTADO()
                 ]);
             }
         }
@@ -96,7 +98,8 @@ class AuthController extends AbstractController
                         'name' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
                         'email' => $volunteer->getCORREO(),
                         'firebaseUid' => $volunteer->getFirebaseUid(),
-                        'avatar' => $volunteer->getAVATAR()
+                        'avatar' => $volunteer->getAVATAR(),
+                        'status' => $volunteer->getESTADO()
                     ]);
                 }
                 
@@ -110,7 +113,8 @@ class AuthController extends AbstractController
                         'name' => $org->getNOMBRE(),
                         'email' => $org->getCORREO(),
                         'firebaseUid' => $org->getFirebaseUid(),
-                        'avatar' => $org->getAVATAR()
+                        'avatar' => $org->getAVATAR(),
+                        'status' => $org->getESTADO()
                     ]);
                 }
 

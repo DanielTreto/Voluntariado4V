@@ -41,4 +41,10 @@ public class LoginResponse {
     public String getAvatar() {
         return avatar;
     }
+
+    public String getStatus() {
+        return status;
+    }
+
+    private String status; // Added status field
 }

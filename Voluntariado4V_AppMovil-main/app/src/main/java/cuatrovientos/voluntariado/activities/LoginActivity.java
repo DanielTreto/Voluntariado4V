@@ -62,6 +62,17 @@ public class LoginActivity extends AppCompatActivity {
                     cuatrovientos.voluntariado.network.LoginResponse loginResponse = response.body();
                     
                     if (loginResponse.isSuccess()) {
+                        
+                        // Check Status FIRST
+                        String status = loginResponse.getStatus();
+                        if (status != null && (
+                            "SUSPENDED".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) ||
+                            "PENDING".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)
+                        )) {
+                             showErrorDialog("Acceso Denegado", "Su cuenta está actualmente en estado: " + status + ".\nContacte con el administrador.");
+                             return;
+                        }
+
                         String role = loginResponse.getRole();
                         
                         // Save Session
@@ -76,42 +87,44 @@ public class LoginActivity extends AppCompatActivity {
 
                         if ("volunteer".equalsIgnoreCase(role)) {
                             Intent intent = new Intent(LoginActivity.this, StudentActivity.class);
-                            // Intent extras kept for backward compatibility if needed, but Prefs is primary now
-                            intent.putExtra("USER_ID", loginResponse.getId());
-                            intent.putExtra("USER_NAME", loginResponse.getName());
-                            intent.putExtra("USER_EMAIL", loginResponse.getEmail());
                             startActivity(intent);
                             finish();
                         } else if ("organization".equalsIgnoreCase(role)) {
                             Intent intent = new Intent(LoginActivity.this, OrganizationActivity.class);
-                            intent.putExtra("USER_ID", loginResponse.getId());
-                            intent.putExtra("USER_NAME", loginResponse.getName());
-                            intent.putExtra("USER_EMAIL", loginResponse.getEmail());
                             startActivity(intent);
                             finish();
                         } else if ("admin".equalsIgnoreCase(role) || "administrator".equalsIgnoreCase(role)) {
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            // Save session extras if needed, though MainActivity loads from Prefs now
-                            intent.putExtra("USER_ID", loginResponse.getId());
-                            intent.putExtra("USER_NAME", loginResponse.getName());
-                            intent.putExtra("USER_EMAIL", loginResponse.getEmail());
                             startActivity(intent);
                             finish();
                         } else {
-                            Toast.makeText(LoginActivity.this, "Rol desconocido: " + role, Toast.LENGTH_LONG).show();
+                            showErrorDialog("Error de Rol", "Rol desconocido: " + role);
                         }
                     } else {
-                        Toast.makeText(LoginActivity.this, "Credenciales incorrectas: " + loginResponse.getError(), Toast.LENGTH_SHORT).show();
+                        showErrorDialog("Error de Acceso", "Credenciales incorrectas.\n" + (loginResponse.getError() != null ? loginResponse.getError() : "Verifique sus datos."));
                     }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Error en el servidor: " + response.code(), Toast.LENGTH_SHORT).show();
+                    if (response.code() == 404) {
+                        showErrorDialog("Error de Acceso", "El correo o la contraseña son incorrectos.");
+                    } else {
+                        showErrorDialog("Error del Servidor", "Código de error: " + response.code());
+                    }
                 }
             }
 
             @Override
             public void onFailure(retrofit2.Call<cuatrovientos.voluntariado.network.LoginResponse> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Fallo de conexión: " + t.getMessage(), Toast.LENGTH_LONG).show();
+                showErrorDialog("Error de Conexión", "Fallo al conectar: " + t.getMessage());
             }
         });
+    }
+
+    private void showErrorDialog(String title, String message) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Aceptar", null)
+            .setIcon(android.R.drawable.ic_dialog_alert)
+            .show();
     }
 }

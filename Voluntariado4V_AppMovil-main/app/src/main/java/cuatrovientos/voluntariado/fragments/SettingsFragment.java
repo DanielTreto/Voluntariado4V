@@ -22,9 +22,7 @@ import com.bumptech.glide.Glide;
 
 public class SettingsFragment extends Fragment {
 
-    private LinearLayout containerAccountDetails;
-    private MaterialButton btnToggleDetails;
-    private SwitchMaterial switchNotifications;
+
     private TextView tvProfileName;
     private TextView tvProfileEmail;
     private android.widget.ImageView imgProfile;
@@ -36,9 +34,7 @@ public class SettingsFragment extends Fragment {
 
         // Initialize Views
         MaterialButton btnLogout = view.findViewById(R.id.btnLogout);
-        btnToggleDetails = view.findViewById(R.id.btnToggleDetails);
-        containerAccountDetails = view.findViewById(R.id.containerAccountDetails);
-        switchNotifications = view.findViewById(R.id.switchNotifications);
+
         tvProfileName = view.findViewById(R.id.tvProfileName);
         tvProfileEmail = view.findViewById(R.id.tvProfileEmail);
         imgProfile = view.findViewById(R.id.imgProfile);
@@ -68,13 +64,7 @@ public class SettingsFragment extends Fragment {
             }
 
             // Populate Read-Only Details
-            com.google.android.material.textfield.TextInputEditText etName = view.findViewById(R.id.etEditName);
-            com.google.android.material.textfield.TextInputEditText etEmail = view.findViewById(R.id.etEditEmail);
-            com.google.android.material.textfield.TextInputEditText etAvatar = view.findViewById(R.id.etEditPhotoUrl);
-            
-            if (etName != null) etName.setText(name);
-            if (etEmail != null) etEmail.setText(email);
-            if (etAvatar != null) etAvatar.setText(avatar);
+
 
             // Dark Mode Logic
             SwitchMaterial switchDarkMode = view.findViewById(R.id.switchDarkMode);
@@ -106,27 +96,10 @@ public class SettingsFragment extends Fragment {
         }
 
         // Toggle Account Details Form
-        btnToggleDetails.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (containerAccountDetails.getVisibility() == View.GONE) {
-                    containerAccountDetails.setVisibility(View.VISIBLE);
-                    btnToggleDetails.setText("Ocultar detalles de la cuenta");
-                } else {
-                    containerAccountDetails.setVisibility(View.GONE);
-                    btnToggleDetails.setText("Ver detalles de la cuenta");
-                }
-            }
-        });
+
 
         // Notifications Switch Listener
-        switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                Toast.makeText(getContext(), "Notificaciones Activadas", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getContext(), "Notificaciones Desactivadas", Toast.LENGTH_SHORT).show();
-            }
-        });
+
 
         // Logout Logic
         btnLogout.setOnClickListener(new View.OnClickListener() {

@@ -88,58 +88,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Notification Section -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="#E2E8F0"
-            android:layout_marginBottom="24dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:padding="16dp"
-                android:background="@color/white">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_bell"
-                    app:tint="@color/colorPrimary"
-                    android:layout_marginEnd="16dp"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Notificaciones Push"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Recibe alertas de actividad"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_secondary"/>
-                </LinearLayout>
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchNotifications"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
         <!-- Dark Mode Section -->
         <com.google.android.material.card.MaterialCardView
@@ -194,80 +143,9 @@
         </com.google.android.material.card.MaterialCardView>
 
 
-        <!-- Account Details Toggle -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnToggleDetails"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Ver detalles de la cuenta"
-            android:backgroundTint="@color/colorPrimary"
-            app:cornerRadius="12dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp"/>
 
-        <!-- Read-only Details View -->
-        <LinearLayout
-            android:id="@+id/containerAccountDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nombre Completo"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEditName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName"
-                    android:focusable="false"
-                    android:clickable="false"
-                    android:cursorVisible="false"/>
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="URL Foto de Perfil"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEditPhotoUrl"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textUri"
-                    android:focusable="false"
-                    android:clickable="false"
-                    android:cursorVisible="false"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Correo Electrónico"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="24dp"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEditEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
-                    android:focusable="false"
-                    android:clickable="false"
-                    android:cursorVisible="false"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>
