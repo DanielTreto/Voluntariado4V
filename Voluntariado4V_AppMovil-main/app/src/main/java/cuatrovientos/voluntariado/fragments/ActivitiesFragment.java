@@ -44,7 +44,7 @@ public class ActivitiesFragment extends Fragment {
         fetchActivities();
 
         // 2. Inicializar el adaptador con una lista vacía temporalmente
-        adapter = new ActivitiesAdapter(new ArrayList<>());
+        adapter = new ActivitiesAdapter(new ArrayList<>(), true);
         recyclerView.setAdapter(adapter);
 
         // 3. Cargar la vista inicial CORRECTA (Solicitudes va primero ahora)

@@ -253,11 +253,6 @@ public class ActivityDetailDialog extends DialogFragment {
             }
         }
 
-        btnClose.setOnClickListener(v -> dismiss());
-
-        // Close Stack Logic
-        ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
-        
         // Count DialogFragments
         List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
         List<DialogFragment> dialogs = new java.util.ArrayList<>();
@@ -267,14 +262,19 @@ public class ActivityDetailDialog extends DialogFragment {
             }
         }
 
+        // BTN CLOSE (X) -> Now closes ALL (Close Stack)
+        btnClose.setOnClickListener(v -> {
+             for (DialogFragment d : dialogs) {
+                 d.dismiss();
+             }
+        });
+
+        // BTN BACK (Arrow) -> Now closes ONLY CURRENT (Dismiss)
+        ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
+
         if (dialogs.size() > 1) {
             btnCloseStack.setVisibility(View.VISIBLE);
-            btnCloseStack.setOnClickListener(v -> {
-                 // Close ALL dialogs to return to main screen (e.g. Activity List)
-                 for (DialogFragment d : dialogs) {
-                     d.dismiss();
-                 }
-            });
+            btnCloseStack.setOnClickListener(v -> dismiss());
         }
 
         return view;

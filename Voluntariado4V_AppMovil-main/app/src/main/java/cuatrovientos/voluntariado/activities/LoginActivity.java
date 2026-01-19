@@ -37,7 +37,20 @@ public class LoginActivity extends AppCompatActivity {
 
                 // Temporary Admin backdoor until backend supports it
                 if (username.equalsIgnoreCase("admin") && password.equalsIgnoreCase("admin")) {
+                     // 1. SAVE SESSION
+                     android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+                     android.content.SharedPreferences.Editor editor = prefs.edit();
+                     editor.putString("USER_ID", "1"); // Mock ID
+                     editor.putString("USER_NAME", "Administrador");
+                     editor.putString("USER_EMAIL", "admin@4vientos.org");
+                     editor.putString("USER_ROLE", "admin");
+                     editor.putString("USER_AVATAR", null);
+                     editor.apply();
+
+                     // 2. Launch Activity
                      Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                     // Setup Intent with flag to clear task (optional but good practice)
+                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                      startActivity(intent);
                      finish();
                      return;

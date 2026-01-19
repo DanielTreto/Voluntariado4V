@@ -45,7 +45,29 @@ public class VolunteerDetailDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_volunteer_detail, container, false);
 
         ImageView btnClose = view.findViewById(R.id.btnClose);
-        btnClose.setOnClickListener(v -> dismiss());
+        
+        // Count DialogFragments
+        java.util.List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
+        java.util.List<DialogFragment> dialogs = new java.util.ArrayList<>();
+        for (androidx.fragment.app.Fragment f : fragments) {
+            if (f instanceof DialogFragment) {
+                dialogs.add((DialogFragment) f);
+            }
+        }
+
+        // BTN CLOSE (X) -> Close All (Stack)
+        btnClose.setOnClickListener(v -> {
+             for (DialogFragment d : dialogs) {
+                 d.dismiss();
+             }
+        });
+
+        // BTN BACK (Arrow) -> Close Current
+        ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
+        if (dialogs.size() > 1) {
+            btnCloseStack.setVisibility(View.VISIBLE);
+            btnCloseStack.setOnClickListener(v -> dismiss());
+        }
 
         if (volunteer == null) return view;
 
@@ -131,6 +153,43 @@ public class VolunteerDetailDialog extends DialogFragment {
                  .into(imgHeader);
         } else {
              imgHeader.setImageResource(R.drawable.ic_profile_placeholder);
+        }
+
+        // Setup RecyclerView
+        androidx.recyclerview.widget.RecyclerView recyclerActivities = view.findViewById(R.id.recyclerVolunteerActivities);
+        recyclerActivities.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
+        cuatrovientos.voluntariado.adapters.SimpleActivityAdapter activitiesAdapter = new cuatrovientos.voluntariado.adapters.SimpleActivityAdapter(new java.util.ArrayList<>());
+        recyclerActivities.setAdapter(activitiesAdapter);
+
+        // Load Activities
+        if (volunteer.getId() != null) {
+            cuatrovientos.voluntariado.network.ApiService apiService = cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
+            apiService.getVolunteerActivities(volunteer.getId()).enqueue(new retrofit2.Callback<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
+                @Override
+                public void onResponse(retrofit2.Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        java.util.List<cuatrovientos.voluntariado.model.VolunteerActivity> mappedList = new java.util.ArrayList<>();
+                        for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
+                            // Filter logic: Exclude Finished
+                            String status = apiAct.getStatus();
+                            if (status != null && (status.equalsIgnoreCase("Finished") || status.equalsIgnoreCase("FINALIZADA"))) {
+                                continue;
+                            }
+                            
+                            cuatrovientos.voluntariado.model.VolunteerActivity volAct = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
+                            if (volAct != null) {
+                                mappedList.add(volAct);
+                            }
+                        }
+                        activitiesAdapter.updateList(mappedList);
+                    }
+                }
+
+                @Override
+                public void onFailure(retrofit2.Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, Throwable t) {
+                    // Fail silently or log
+                }
+            });
         }
 
         return view;

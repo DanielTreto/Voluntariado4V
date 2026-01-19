@@ -26,12 +26,25 @@
                 android:id="@+id/btnClose"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:src="@drawable/ic_close"
                 android:layout_gravity="top|end"
                 android:layout_margin="16dp"
                 app:tint="@android:color/white"
                 android:background="#80000000"
                 android:padding="4dp"/>
+
+            <ImageView
+                android:id="@+id/btnCloseStack"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_arrow_back" 
+                android:layout_gravity="top|end"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="64dp"
+                app:tint="@android:color/white"
+                android:background="#80000000"
+                android:padding="4dp"
+                android:visibility="gone"/>
         </FrameLayout>
 
         <LinearLayout
@@ -169,6 +182,22 @@
                 android:text="Sin descripción disponible."
                 android:lineSpacingExtra="4dp"
                 android:textColor="@color/modal_text_secondary"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Actividades Apuntadas"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:textSize="18sp"
+                android:textColor="@color/modal_text_primary"/>
+            
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerVolunteerActivities"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:nestedScrollingEnabled="false"/>
 
         </LinearLayout>
     </LinearLayout>

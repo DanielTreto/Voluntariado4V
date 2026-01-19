@@ -75,11 +75,6 @@ public class OrganizationDetailDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_organization_detail, container, false);
 
         ImageView btnClose = view.findViewById(R.id.btnClose);
-        btnClose.setOnClickListener(v -> dismiss());
-
-        // Close Stack Logic
-        ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
-        
         List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
         List<DialogFragment> dialogs = new java.util.ArrayList<>();
         for (androidx.fragment.app.Fragment f : fragments) {
@@ -88,13 +83,18 @@ public class OrganizationDetailDialog extends DialogFragment {
             }
         }
 
+        // BTN CLOSE (X) -> Close All (Stack)
+        btnClose.setOnClickListener(v -> {
+             for (DialogFragment d : dialogs) {
+                 d.dismiss();
+             }
+        });
+
+        // BTN BACK (Arrow) -> Close Current
+        ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
         if (dialogs.size() > 1) {
             btnCloseStack.setVisibility(View.VISIBLE);
-            btnCloseStack.setOnClickListener(v -> {
-                 for (DialogFragment d : dialogs) {
-                     d.dismiss();
-                 }
-            });
+            btnCloseStack.setOnClickListener(v -> dismiss());
         }
 
         if (organization == null) return view;
