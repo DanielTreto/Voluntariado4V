@@ -24,6 +24,9 @@ public class StudentHistoryFragment extends Fragment {
     private ActivitiesAdapter adapter;
     private LinearLayout emptyHistory;
 
+    private List<VolunteerActivity> masterHistoryList = new ArrayList<>();
+    private String currentSearchQuery = "";
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -32,6 +35,20 @@ public class StudentHistoryFragment extends Fragment {
         rvHistory = view.findViewById(R.id.rvHistory);
         emptyHistory = view.findViewById(R.id.emptyHistory);
         rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Setup Search
+        android.widget.EditText etSearchHistory = view.findViewById(R.id.etSearchHistory);
+        etSearchHistory.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString();
+                filterList(currentSearchQuery);
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         // Default empty adapter
         adapter = new ActivitiesAdapter(new ArrayList<>(), true);
@@ -46,6 +63,34 @@ public class StudentHistoryFragment extends Fragment {
         return view;
     }
 
+    private void filterList(String query) {
+        List<VolunteerActivity> filteredList = new ArrayList<>();
+        if (query.isEmpty()) {
+            filteredList.addAll(masterHistoryList);
+        } else {
+            String q = query.toLowerCase();
+            for (VolunteerActivity act : masterHistoryList) {
+                if (act.getTitle().toLowerCase().contains(q) || 
+                    act.getCategory().toLowerCase().contains(q) ||
+                    (act.getLocation() != null && act.getLocation().toLowerCase().contains(q))) {
+                    filteredList.add(act);
+                }
+            }
+        }
+        
+        if (adapter != null) {
+            adapter.updateList(filteredList);
+        }
+
+        if (filteredList.isEmpty()) {
+            rvHistory.setVisibility(View.GONE);
+            emptyHistory.setVisibility(View.VISIBLE);
+        } else {
+            rvHistory.setVisibility(View.VISIBLE);
+            emptyHistory.setVisibility(View.GONE);
+        }
+    }
+
     private void loadData(String userId) {
         if (userId == null) return;
 
@@ -56,6 +101,7 @@ public class StudentHistoryFragment extends Fragment {
             @Override
             public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    masterHistoryList.clear();
                     List<VolunteerActivity> historyList = new ArrayList<>();
                     
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
@@ -66,16 +112,8 @@ public class StudentHistoryFragment extends Fragment {
                         }
                     }
                     
-                    adapter = new ActivitiesAdapter(historyList, true);
-                    rvHistory.setAdapter(adapter);
-
-                    if (historyList.isEmpty()) {
-                        rvHistory.setVisibility(View.GONE);
-                        emptyHistory.setVisibility(View.VISIBLE);
-                    } else {
-                        rvHistory.setVisibility(View.VISIBLE);
-                        emptyHistory.setVisibility(View.GONE);
-                    }
+                    masterHistoryList.addAll(historyList);
+                    filterList(currentSearchQuery);
                 }
             }
              @Override

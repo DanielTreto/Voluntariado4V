@@ -34,6 +34,8 @@ public class VolunteersFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_volunteers, container, false);
     }
 
+    private String currentSearchQuery = "";
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -42,7 +44,25 @@ public class VolunteersFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerVolunteers);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // 2. Crear los DATOS (Lista Maestra)
+        // Setup Search Bar
+        android.widget.EditText etSearch = view.findViewById(R.id.etSearch);
+        etSearch.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString();
+                TabLayout tabLayout = getView().findViewById(R.id.tabLayout);
+                if (tabLayout.getSelectedTabPosition() == 0) {
+                     filterList("Solicitudes");
+                } else {
+                     filterList("Registrados");
+                }
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
         // 2. Crear los DATOS (Lista Maestra)
         masterList = new ArrayList<>();
         fetchVolunteers();
@@ -113,10 +133,12 @@ public class VolunteersFragment extends Fragment {
                     }
                     // Refresh current view (defaulting to Solicitudes initially)
                     TabLayout tabLayout = getView().findViewById(R.id.tabLayout);
-                    if (tabLayout.getSelectedTabPosition() == 0) {
-                        filterList("Solicitudes");
-                    } else {
-                        filterList("Registrados");
+                    if (tabLayout != null) {
+                         if (tabLayout.getSelectedTabPosition() == 0) {
+                             filterList("Solicitudes");
+                         } else {
+                             filterList("Registrados");
+                         }
                     }
                 } else {
                     android.util.Log.e("VolunteersFragment", "Error fetching volunteers: " + response.code());
@@ -153,15 +175,39 @@ public class VolunteersFragment extends Fragment {
         if (masterList == null) return; // Guard against null
 
         for (Volunteer v : masterList) {
+            boolean matchesTab = false;
+            // 1. Check Tab Status
             if (tabName.equals("Solicitudes")) {
-                // Si es la pestaña Solicitudes, solo queremos los "Pending"
                 if (v.getStatus().equals("Pending")) {
-                    filteredList.add(v);
+                    matchesTab = true;
                 }
             } else {
-                // Si es la pestaña Registrados, queremos "Active" o "Suspended"
                 if (v.getStatus().equals("Active") || v.getStatus().equals("Suspended")) {
+                    matchesTab = true;
+                }
+            }
+            
+            // 2. Check Search Query
+            if (matchesTab) {
+                if (currentSearchQuery.isEmpty()) {
                     filteredList.add(v);
+                } else {
+                    String query = currentSearchQuery.toLowerCase();
+                    boolean matchesSearch = false;
+                    
+                    // Name
+                    String fullName = (v.getName() + " " + (v.getSurname1() != null ? v.getSurname1() : "") + " " + (v.getSurname2() != null ? v.getSurname2() : "")).toLowerCase();
+                    if (fullName.contains(query)) matchesSearch = true;
+                    
+                    // Email
+                    if (v.getEmail().toLowerCase().contains(query)) matchesSearch = true;
+                    
+                    // DNI
+                    if (v.getDni() != null && v.getDni().toLowerCase().contains(query)) matchesSearch = true;
+                    
+                    if (matchesSearch) {
+                        filteredList.add(v);
+                    }
                 }
             }
         }

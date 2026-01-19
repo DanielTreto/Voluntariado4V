@@ -31,12 +31,33 @@ public class OrganizationsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_organizations, container, false);
     }
 
+    private String currentSearchQuery = "";
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerOrganizations);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // Setup Search Bar
+        android.widget.EditText etSearch = view.findViewById(R.id.etSearchOrg);
+        etSearch.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString();
+                TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
+                if (tabLayout.getSelectedTabPosition() == 0) {
+                     filterList("Solicitudes");
+                } else {
+                     filterList("Registradas");
+                }
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         masterList = new ArrayList<>();
         fetchOrganizations();
@@ -103,10 +124,12 @@ public class OrganizationsFragment extends Fragment {
                         ));
                     }
                     TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
-                    if (tabLayout.getSelectedTabPosition() == 0) {
-                        filterList("Solicitudes");
-                    } else {
-                        filterList("Registradas");
+                    if (tabLayout != null) {
+                        if (tabLayout.getSelectedTabPosition() == 0) {
+                            filterList("Solicitudes");
+                        } else {
+                            filterList("Registradas");
+                        }
                     }
                 } else {
                     android.util.Log.e("OrganizationsFragment", "Error fetching organizations: " + response.code());
@@ -141,13 +164,31 @@ public class OrganizationsFragment extends Fragment {
         if (masterList == null) return;
 
         for (Organization org : masterList) {
+            boolean matchesTab = false;
             if (tabName.equals("Solicitudes")) {
                 if (org.getStatus().equals("Pending")) {
-                    filteredList.add(org);
+                    matchesTab = true;
                 }
             } else {
                 if (org.getStatus().equals("Active")) {
+                    matchesTab = true;
+                }
+            }
+            
+            if (matchesTab) {
+                if (currentSearchQuery.isEmpty()) {
                     filteredList.add(org);
+                } else {
+                    String query = currentSearchQuery.toLowerCase();
+                    boolean matchesSearch = false;
+                    
+                    if (org.getName().toLowerCase().contains(query)) matchesSearch = true;
+                    if (org.getEmail().toLowerCase().contains(query)) matchesSearch = true;
+                    if (org.getContactPerson() != null && org.getContactPerson().toLowerCase().contains(query)) matchesSearch = true;
+                    
+                    if (matchesSearch) {
+                        filteredList.add(org);
+                    }
                 }
             }
         }

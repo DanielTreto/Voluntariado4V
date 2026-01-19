@@ -32,12 +32,33 @@ public class ActivitiesFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_activities, container, false);
     }
 
+    private String currentSearchQuery = "";
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         RecyclerView recyclerView = view.findViewById(R.id.recyclerActivities);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // Setup Search Bar
+        android.widget.EditText etSearch = view.findViewById(R.id.etSearchAct);
+        etSearch.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString();
+                TabLayout tabLayout = getView().findViewById(R.id.tabLayoutAct);
+                if (tabLayout.getSelectedTabPosition() == 0) {
+                     filterList("Solicitudes");
+                } else {
+                     filterList("Registradas");
+                }
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         // 1. Crear los datos PRIMERO
         masterList = new ArrayList<>();
@@ -91,10 +112,12 @@ public class ActivitiesFragment extends Fragment {
                     }
                     // Refresh current tab
                     TabLayout tabLayout = getView().findViewById(R.id.tabLayoutAct);
-                    if (tabLayout.getSelectedTabPosition() == 0) {
-                        filterList("Solicitudes");
-                    } else {
-                        filterList("Registradas");
+                    if (tabLayout != null) {
+                         if (tabLayout.getSelectedTabPosition() == 0) {
+                             filterList("Solicitudes");
+                         } else {
+                             filterList("Registradas");
+                         }
                     }
                 } else {
                     android.util.Log.e("ActivitiesFragment", "Error fetching activities: " + response.code());
@@ -118,15 +141,32 @@ public class ActivitiesFragment extends Fragment {
         List<VolunteerActivity> filteredList = new ArrayList<>();
 
         for (VolunteerActivity act : masterList) {
+            boolean matchesTab = false;
             if (tabName.equals("Solicitudes")) {
                 // Filtramos por estado "Pending"
                 if (act.getStatus().equals("Pending")) {
-                    filteredList.add(act);
+                    matchesTab = true;
                 }
             } else { // Caso "Registradas"
                 // Filtramos por estado "Active", "Finished", "Suspended", "InProgress"
                 if (act.getStatus().equals("Active") || act.getStatus().equals("Finished") || act.getStatus().equals("Suspended") || act.getStatus().equals("InProgress")) {
+                    matchesTab = true;
+                }
+            }
+            
+            if (matchesTab) {
+                if (currentSearchQuery.isEmpty()) {
                     filteredList.add(act);
+                } else {
+                    String query = currentSearchQuery.toLowerCase();
+                    boolean matchesSearch = false;
+                    
+                    if (act.getTitle().toLowerCase().contains(query)) matchesSearch = true;
+                    if (act.getCategory().toLowerCase().contains(query)) matchesSearch = true;
+                    
+                    if (matchesSearch) {
+                        filteredList.add(act);
+                    }
                 }
             }
         }

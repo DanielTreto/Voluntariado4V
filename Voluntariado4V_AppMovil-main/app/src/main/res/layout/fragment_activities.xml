@@ -7,6 +7,21 @@
     android:orientation="vertical"
     android:background="@color/background_light">
 
+    <EditText
+        android:id="@+id/etSearchAct"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_card_outline"
+        android:drawableStart="@drawable/ic_search"
+        android:drawablePadding="12dp"
+        android:hint="Buscar actividades..."
+        android:padding="12dp"
+        android:inputType="text"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_secondary" />
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutAct"
         android:layout_width="match_parent"

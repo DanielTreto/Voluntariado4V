@@ -21,8 +21,10 @@ public class OrganizationHistoryFragment extends Fragment {
 
     private RecyclerView rvHistory;
     private ActivitiesAdapter adapter;
-
     private android.widget.LinearLayout emptyStateView;
+
+    private List<VolunteerActivity> masterHistoryList = new ArrayList<>();
+    private String currentSearchQuery = "";
 
     @Nullable
     @Override
@@ -33,6 +35,20 @@ public class OrganizationHistoryFragment extends Fragment {
         rvHistory = view.findViewById(R.id.rvHistory);
         emptyStateView = view.findViewById(R.id.emptyHistory); // ID from fragment_student_history.xml
         rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // Setup Search
+        android.widget.EditText etSearchHistory = view.findViewById(R.id.etSearchHistory);
+        etSearchHistory.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString();
+                filterList(currentSearchQuery);
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         // Retrieve User ID from SharedPreferences
         android.content.SharedPreferences prefs = getActivity().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
@@ -52,6 +68,27 @@ public class OrganizationHistoryFragment extends Fragment {
         return view;
     }
 
+    private void filterList(String query) {
+        List<VolunteerActivity> filteredList = new ArrayList<>();
+        if (query.isEmpty()) {
+            filteredList.addAll(masterHistoryList);
+        } else {
+            String q = query.toLowerCase();
+            for (VolunteerActivity act : masterHistoryList) {
+                if (act.getTitle().toLowerCase().contains(q) || 
+                    act.getCategory().toLowerCase().contains(q) ||
+                    (act.getLocation() != null && act.getLocation().toLowerCase().contains(q))) {
+                    filteredList.add(act);
+                }
+            }
+        }
+        
+        if (adapter != null) {
+            adapter.updateList(filteredList);
+        }
+        showEmptyState(filteredList.isEmpty());
+    }
+
     private void showEmptyState(boolean show) {
         if (show) {
             rvHistory.setVisibility(View.GONE);
@@ -68,6 +105,7 @@ public class OrganizationHistoryFragment extends Fragment {
             @Override
             public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    masterHistoryList.clear();
                     List<VolunteerActivity> mappedList = new ArrayList<>();
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         
@@ -84,34 +122,6 @@ public class OrganizationHistoryFragment extends Fragment {
                         
                         // Map Volunteers if available
                         List<cuatrovientos.voluntariado.model.Volunteer> volunteerList = new ArrayList<>();
-                        if (apiAct.getVolunteers() != null) {
-                            for (cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol : apiAct.getVolunteers()) {
-                                String volName = apiVol.getName();
-                                if (apiVol.getSurname1() != null) volName += " " + apiVol.getSurname1();
-                                if (apiVol.getSurname2() != null) volName += " " + apiVol.getSurname2();
-                                
-                                String volAvatar = null;
-                                if (apiVol.getAvatar() != null) {
-                                     volAvatar = apiVol.getAvatar().startsWith("http") ? apiVol.getAvatar() : "http://10.0.2.2:8000" + apiVol.getAvatar();
-                                }
-
-                                volunteerList.add(new cuatrovientos.voluntariado.model.Volunteer(
-                                    apiVol.getId(),          // 1. id
-                                    apiVol.getName(),        // 2. name
-                                    apiVol.getSurname1(),    // 3. surname1
-                                    apiVol.getSurname2(),    // 4. surname2
-                                    apiVol.getEmail(),       // 5. email
-                                    apiVol.getPhone(),       // 6. phone
-                                    null,                    // 7. dni
-                                    null,                    // 8. birthDate
-                                    null,                    // 9. description
-                                    "Voluntario",            // 10. role
-                                    null,                    // 11. preferences
-                                    "Active",                // 12. status
-                                    volAvatar                // 13. avatarUrl
-                                ));
-                            }
-                        }
 
                         // Map ODS
                         List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
@@ -142,8 +152,8 @@ public class OrganizationHistoryFragment extends Fragment {
                         
                         mappedList.add(volAct);
                     }
-                    adapter.updateList(mappedList);
-                    showEmptyState(mappedList.isEmpty());
+                    masterHistoryList.addAll(mappedList);
+                    filterList(currentSearchQuery);
                     
                 } else {
                     android.widget.Toast.makeText(getContext(), "Error al cargar historial", android.widget.Toast.LENGTH_SHORT).show();

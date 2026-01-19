@@ -25,8 +25,12 @@ public class StudentHomeFragment extends Fragment {
     private ActivitiesAdapter adapterMy;
     private List<VolunteerActivity> myActivitiesList = new ArrayList<>();
     private List<VolunteerActivity> availableActivitiesList = new ArrayList<>();
+    private List<VolunteerActivity> masterMyList = new ArrayList<>();
+    private List<VolunteerActivity> masterAvailableList = new ArrayList<>();
+    
     private android.widget.LinearLayout emptyMyActivities;
     private android.widget.LinearLayout emptyAvailableActivities;
+    private String currentSearchQuery = "";
 
     @Nullable
     @Override
@@ -41,6 +45,20 @@ public class StudentHomeFragment extends Fragment {
         rvAvailableActivities.setLayoutManager(new LinearLayoutManager(getContext()));
         rvMyActivities.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Setup Search
+        android.widget.EditText etSearchStudentDash = view.findViewById(R.id.etSearchStudentDash);
+        etSearchStudentDash.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString();
+                filterList(currentSearchQuery);
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
         // Initialize adapters
         adapterAvailable = new ActivitiesAdapter(availableActivitiesList, true);
         rvAvailableActivities.setAdapter(adapterAvailable);
@@ -51,6 +69,54 @@ public class StudentHomeFragment extends Fragment {
         loadData();
 
         return view;
+    }
+
+    private void filterList(String query) {
+        String q = query.toLowerCase();
+
+        // 1. Filter My Activities
+        myActivitiesList.clear();
+        if (query.isEmpty()) {
+            myActivitiesList.addAll(masterMyList);
+        } else {
+            for (VolunteerActivity act : masterMyList) {
+                if (act.getTitle().toLowerCase().contains(q) || 
+                    act.getCategory().toLowerCase().contains(q) ||
+                    (act.getLocation() != null && act.getLocation().toLowerCase().contains(q))) {
+                    myActivitiesList.add(act);
+                }
+            }
+        }
+        adapterMy.notifyDataSetChanged();
+        if (myActivitiesList.isEmpty()) {
+            rvMyActivities.setVisibility(View.GONE);
+            emptyMyActivities.setVisibility(View.VISIBLE);
+        } else {
+            rvMyActivities.setVisibility(View.VISIBLE);
+            emptyMyActivities.setVisibility(View.GONE);
+        }
+
+        // 2. Filter Available Activities
+        availableActivitiesList.clear();
+        if (query.isEmpty()) {
+            availableActivitiesList.addAll(masterAvailableList);
+        } else {
+            for (VolunteerActivity act : masterAvailableList) {
+                if (act.getTitle().toLowerCase().contains(q) || 
+                    act.getCategory().toLowerCase().contains(q) ||
+                    (act.getLocation() != null && act.getLocation().toLowerCase().contains(q))) {
+                    availableActivitiesList.add(act);
+                }
+            }
+        }
+        adapterAvailable.notifyDataSetChanged();
+        if (availableActivitiesList.isEmpty()) {
+            rvAvailableActivities.setVisibility(View.GONE);
+            emptyAvailableActivities.setVisibility(View.VISIBLE);
+        } else {
+            rvAvailableActivities.setVisibility(View.VISIBLE);
+            emptyAvailableActivities.setVisibility(View.GONE);
+        }
     }
 
     private void loadData() {
@@ -69,7 +135,7 @@ public class StudentHomeFragment extends Fragment {
             @Override
             public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    myActivitiesList.clear();
+                    masterMyList.clear();
                     List<Integer> myActivityIds = new ArrayList<>();
                     
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
@@ -78,18 +144,11 @@ public class StudentHomeFragment extends Fragment {
                         if (status.equalsIgnoreCase("FINALIZADA")) continue;
 
                         VolunteerActivity va = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
-                        myActivitiesList.add(va);
+                        masterMyList.add(va);
                         myActivityIds.add(apiAct.getId());
                     }
-                    adapterMy.notifyDataSetChanged();
-                    
-                    if (myActivitiesList.isEmpty()) {
-                        rvMyActivities.setVisibility(View.GONE);
-                        emptyMyActivities.setVisibility(View.VISIBLE);
-                    } else {
-                        rvMyActivities.setVisibility(View.VISIBLE);
-                        emptyMyActivities.setVisibility(View.GONE);
-                    }
+                    // Apply initial filter (probably empty)
+                    filterList(currentSearchQuery);
 
                     // After fetching my activities, fetch ALL and filter
                     fetchAvailableActivities(apiService, myActivityIds);
@@ -109,7 +168,7 @@ public class StudentHomeFragment extends Fragment {
             @Override
             public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    availableActivitiesList.clear();
+                    masterAvailableList.clear();
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         // Filter: Exclude my activities (already joined)
                         if (excludeIds.contains(apiAct.getId())) continue;
@@ -119,18 +178,10 @@ public class StudentHomeFragment extends Fragment {
                         if (status == null || 
                            (status.equalsIgnoreCase("ACTIVO") || status.equalsIgnoreCase("PENDIENTE") || status.equalsIgnoreCase("EN_PROGRESO"))) {
                            
-                           availableActivitiesList.add(cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct));
+                           masterAvailableList.add(cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct));
                         }
                     }
-                    adapterAvailable.notifyDataSetChanged();
-
-                    if (availableActivitiesList.isEmpty()) {
-                        rvAvailableActivities.setVisibility(View.GONE);
-                        emptyAvailableActivities.setVisibility(View.VISIBLE);
-                    } else {
-                        rvAvailableActivities.setVisibility(View.VISIBLE);
-                        emptyAvailableActivities.setVisibility(View.GONE);
-                    }
+                    filterList(currentSearchQuery);
                 }
             }
              @Override
