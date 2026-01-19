@@ -27,6 +27,7 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/bg_card_outline"
         android:drawableStart="@drawable/ic_search"
+        android:drawableTint="@color/text_secondary"
         android:drawablePadding="12dp"
         android:hint="Buscar actividades..."
         android:padding="12dp"

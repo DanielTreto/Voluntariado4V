@@ -48,27 +48,9 @@ public class SimpleActivityAdapter extends RecyclerView.Adapter<SimpleActivityAd
 
         // Status Logic
         String status = act.getStatus();
-        holder.tvStatus.setText(status);
-        if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
-            holder.tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
-            holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-            holder.tvStatus.setText("Activa");
-        } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
-            holder.tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
-            holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
-            holder.tvStatus.setText("Pendiente");
-        } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
-            holder.tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE"));
-            holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"));
-            holder.tvStatus.setText("Finalizada");
-        } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
-            holder.tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E3F2FD"));
-            holder.tvStatus.setTextColor(android.graphics.Color.parseColor("#2196F3"));
-            holder.tvStatus.setText("En Progreso");
-        } else {
-             holder.tvStatus.setBackgroundColor(android.graphics.Color.LTGRAY);
-             holder.tvStatus.setTextColor(android.graphics.Color.DKGRAY);
-        }
+        holder.tvStatus.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(status));
+        holder.tvStatus.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(status));
+        holder.tvStatus.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(status));
 
         // Color for Type (Rectangular Tag)
         holder.tvType.setBackgroundColor(act.getImageColor());

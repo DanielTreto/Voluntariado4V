@@ -115,42 +115,10 @@ public class OrganizationHistoryFragment extends Fragment {
                             continue;
                         }
 
-                        String imageUrl = null;
-                        if (apiAct.getImagen() != null) {
-                             imageUrl = apiAct.getImagen().startsWith("http") ? apiAct.getImagen() : "http://10.0.2.2:8000" + apiAct.getImagen();
+                        VolunteerActivity volAct = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
+                        if (volAct != null) {
+                            mappedList.add(volAct);
                         }
-                        
-                        // Map Volunteers if available
-                        List<cuatrovientos.voluntariado.model.Volunteer> volunteerList = new ArrayList<>();
-
-                        // Map ODS
-                        List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
-                        if (apiAct.getOds() != null) {
-                            for (cuatrovientos.voluntariado.network.model.ApiOds apiOds : apiAct.getOds()) {
-                                odsList.add(new cuatrovientos.voluntariado.model.Ods(apiOds.getId(), apiOds.getDescription()));
-                            }
-                        }
-
-                         VolunteerActivity volAct = new VolunteerActivity(
-                            apiAct.getTitle(),
-                            apiAct.getDescription(),
-                            apiAct.getLocation(),
-                            apiAct.getDate(),
-                            apiAct.getDuration(),
-                            apiAct.getEndDate(),
-                            apiAct.getMaxVolunteers(),
-                            apiAct.getType(),
-                            apiAct.getStatus(),
-                            "Mi Organización", 
-                            null, 
-                            android.graphics.Color.GRAY, // Gray for history
-                            imageUrl,
-                            volunteerList, // Pass the list here
-                            odsList // Pass ODS list
-                        );
-                        volAct.setId(apiAct.getId());
-                        
-                        mappedList.add(volAct);
                     }
                     masterHistoryList.addAll(mappedList);
                     filterList(currentSearchQuery);

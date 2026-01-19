@@ -22,6 +22,11 @@ public class StudentActivity extends AppCompatActivity {
         setContentView(R.layout.activity_student_main); 
         
         userId = getIntent().getStringExtra("USER_ID"); // Capture ID passed from LoginActivity
+        
+        if (userId == null) {
+            android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+            userId = prefs.getString("USER_ID", null);
+        }
 
         BottomNavigationView bottomNav = findViewById(R.id.student_bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);

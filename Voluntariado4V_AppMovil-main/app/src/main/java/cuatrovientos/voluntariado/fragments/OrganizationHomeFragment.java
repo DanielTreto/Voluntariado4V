@@ -116,71 +116,10 @@ public class OrganizationHomeFragment extends Fragment {
                             continue;
                         }
 
-                        String imageUrl = null;
-                        if (apiAct.getImagen() != null) {
-                             imageUrl = apiAct.getImagen().startsWith("http") ? apiAct.getImagen() : "http://10.0.2.2:8000" + apiAct.getImagen();
+                        VolunteerActivity volAct = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
+                        if (volAct != null) {
+                            mappedList.add(volAct);
                         }
-                        
-                        // Map Volunteers if available
-                        List<cuatrovientos.voluntariado.model.Volunteer> volunteerList = new ArrayList<>();
-                        if (apiAct.getVolunteers() != null) {
-                            for (cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol : apiAct.getVolunteers()) {
-                                String volName = apiVol.getName();
-                                if (apiVol.getSurname1() != null) volName += " " + apiVol.getSurname1();
-                                if (apiVol.getSurname2() != null) volName += " " + apiVol.getSurname2();
-                                
-                                String volAvatar = null;
-                                if (apiVol.getAvatar() != null) {
-                                     volAvatar = apiVol.getAvatar().startsWith("http") ? apiVol.getAvatar() : "http://10.0.2.2:8000" + apiVol.getAvatar();
-                                }
-
-                                volunteerList.add(new cuatrovientos.voluntariado.model.Volunteer(
-                                    apiVol.getId(),          // 1. id
-                                    apiVol.getName(),        // 2. name
-                                    apiVol.getSurname1(),    // 3. surname1
-                                    apiVol.getSurname2(),    // 4. surname2
-                                    apiVol.getEmail(),       // 5. email
-                                    apiVol.getPhone(),       // 6. phone
-                                    null,                    // 7. dni
-                                    null,                    // 8. birthDate
-                                    null,                    // 9. description
-                                    "Voluntario",            // 10. role
-                                    null,                    // 11. preferences
-                                    "Active",                // 12. status
-                                    volAvatar                // 13. avatarUrl
-                                ));
-                            }
-                        }
-
-                        // Map ODS
-                        List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
-                        if (apiAct.getOds() != null) {
-                            for (cuatrovientos.voluntariado.network.model.ApiOds apiOds : apiAct.getOds()) {
-                                odsList.add(new cuatrovientos.voluntariado.model.Ods(apiOds.getId(), apiOds.getDescription()));
-                            }
-                        }
-
-                        // Map ApiActivity to VolunteerActivity
-                         VolunteerActivity volAct = new VolunteerActivity(
-                            apiAct.getTitle(),
-                            apiAct.getDescription(),
-                            apiAct.getLocation(),
-                            apiAct.getDate(),
-                            apiAct.getDuration(),
-                            apiAct.getEndDate(),
-                            apiAct.getMaxVolunteers(),
-                            apiAct.getType(),
-                            apiAct.getStatus(),
-                            "Mi Organización", 
-                            null, 
-                            android.graphics.Color.BLUE, 
-                            imageUrl,
-                            volunteerList, // Pass the list here
-                            odsList
-                        );
-                        volAct.setId(apiAct.getId());
-                        
-                        mappedList.add(volAct);
                     }
                     masterList.addAll(mappedList);
                     filterList(currentSearchQuery);

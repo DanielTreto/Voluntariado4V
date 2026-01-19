@@ -73,13 +73,14 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             });
 
             // Colores para Active/Suspended
+            // Colores para Active/Suspended
             if (volunteer.getStatus().equals("Active")) {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9")); // Verde claro
                 holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")); // Verde texto
                 holder.tvStatus.setText("Activo");
-            } else {
+            } else if (volunteer.getStatus().equals("Suspended")) {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE")); // Rojo claro
-                holder.tvStatus.setTextColor(Color.parseColor("#F44336")); // Rojo texto
+                holder.tvStatus.setTextColor(Color.parseColor("#D32F2F")); // Rojo oscuro texto
                 holder.tvStatus.setText("Suspendido");
             }
 

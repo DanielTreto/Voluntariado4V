@@ -29,7 +29,7 @@ import cuatrovientos.voluntariado.dialogs.ActivityDetailDialog;
 public class EventsFragment extends Fragment {
 
     private Calendar currentMonth;
-    private TextView tvMonthTitle;
+    // private TextView tvMonthTitle; (Removed)
     private RecyclerView recyclerView;
     private CalendarAdapter adapter;
     private List<VolunteerActivity> activities;
@@ -51,9 +51,8 @@ public class EventsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerCalendar);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 7));
 
-        tvMonthTitle = view.findViewById(R.id.tvMonthTitle);
-        Button btnPrevMonth = view.findViewById(R.id.btnPrevMonth);
-        Button btnNextMonth = view.findViewById(R.id.btnNextMonth);
+        android.widget.Spinner spinnerMonth = view.findViewById(R.id.spinnerMonth);
+        android.widget.Spinner spinnerYear = view.findViewById(R.id.spinnerYear);
 
         // Inicializar calendario al mes actual
         currentMonth = Calendar.getInstance();
@@ -61,16 +60,46 @@ public class EventsFragment extends Fragment {
         activities = new ArrayList<>();
         fetchActivities();
 
-        // Listeners
-        btnPrevMonth.setOnClickListener(v -> {
-            currentMonth.add(Calendar.MONTH, -1);
-            updateCalendar();
-        });
+        // Setup Month Spinner
+        String[] months = new String[]{"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+        android.widget.ArrayAdapter<String> monthAdapter = new android.widget.ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, months);
+        monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerMonth.setAdapter(monthAdapter);
+        spinnerMonth.setSelection(currentMonth.get(Calendar.MONTH));
 
-        btnNextMonth.setOnClickListener(v -> {
-            currentMonth.add(Calendar.MONTH, 1);
-            updateCalendar();
-        });
+        // Setup Year Spinner
+        List<String> years = new ArrayList<>();
+        int currentYear = currentMonth.get(Calendar.YEAR);
+        for (int i = currentYear - 2; i <= currentYear + 5; i++) {
+            years.add(String.valueOf(i));
+        }
+        android.widget.ArrayAdapter<String> yearAdapter = new android.widget.ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, years);
+        yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerYear.setAdapter(yearAdapter);
+        // Select current year (index 2 because we started -2)
+        spinnerYear.setSelection(2); 
+
+        // Listeners
+        android.widget.AdapterView.OnItemSelectedListener listener = new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                int selectedMonth = spinnerMonth.getSelectedItemPosition();
+                String selectedYearStr = (String) spinnerYear.getSelectedItem();
+                
+                if (selectedYearStr != null) {
+                    int selectedYear = Integer.parseInt(selectedYearStr);
+                    currentMonth.set(Calendar.MONTH, selectedMonth);
+                    currentMonth.set(Calendar.YEAR, selectedYear);
+                    updateCalendar();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+        };
+
+        spinnerMonth.setOnItemSelectedListener(listener);
+        spinnerYear.setOnItemSelectedListener(listener);
     }
 
     private void fetchActivities() {
@@ -117,11 +146,7 @@ public class EventsFragment extends Fragment {
     }
 
     private void updateCalendar() {
-        // 1. Actualizar Título
-        SimpleDateFormat sdf = new SimpleDateFormat("MMMM yyyy", new Locale("es", "ES"));
-        String title = sdf.format(currentMonth.getTime());
-        title = title.substring(0, 1).toUpperCase() + title.substring(1);
-        tvMonthTitle.setText(title);
+        // 1. (Titulo eliminado, controlado por Spinners)
 
         List<EventDay> days = new ArrayList<>();
 

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.ActivitiesAdapter;
@@ -23,9 +24,7 @@ public class ActivitiesFragment extends Fragment {
     private List<VolunteerActivity> masterList;
     private ActivitiesAdapter adapter;
 
-    public ActivitiesFragment() {
-        // Required empty public constructor
-    }
+    public ActivitiesFragment() { }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -33,6 +32,10 @@ public class ActivitiesFragment extends Fragment {
     }
 
     private String currentSearchQuery = "";
+    private String currentTypeFilter = "Todos";
+    private String currentOdsFilter = "Todos";
+    private String currentStatusFilter = "Todos";
+    private boolean isAscending = true;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -41,63 +44,134 @@ public class ActivitiesFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerActivities);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        // Setup Search Bar
         android.widget.EditText etSearch = view.findViewById(R.id.etSearchAct);
+        TabLayout tabLayout = view.findViewById(R.id.tabLayoutAct);
+
         etSearch.addTextChangedListener(new android.text.TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 currentSearchQuery = s.toString();
-                TabLayout tabLayout = getView().findViewById(R.id.tabLayoutAct);
-                if (tabLayout.getSelectedTabPosition() == 0) {
+                if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            }
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
+        btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
+
+        android.widget.Button btnFilterOds = view.findViewById(R.id.btnFilterODS);
+        btnFilterOds.setOnClickListener(v -> showOdsFilterDialog());
+
+        android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
+        btnFilterStatus.setOnClickListener(v -> showStatusFilterDialog());
+
+        android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
+        btnSortActivities.setOnClickListener(v -> {
+            isAscending = !isAscending;
+            btnSortActivities.setText(isAscending ? "Orden: A-Z" : "Orden: Z-A");
+            
+            TabLayout tabs = getView().findViewById(R.id.tabLayoutAct); 
+            if (tabs != null) {
+                if (tabs.getSelectedTabPosition() == 0) {
                      filterList("Solicitudes");
                 } else {
                      filterList("Registradas");
                 }
             }
-            @Override
-            public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // 1. Crear los datos PRIMERO
         masterList = new ArrayList<>();
         fetchActivities();
 
-        // 2. Inicializar el adaptador con una lista vacía temporalmente
         adapter = new ActivitiesAdapter(new ArrayList<>(), true);
         recyclerView.setAdapter(adapter);
-
-        // 3. Cargar la vista inicial CORRECTA (Solicitudes va primero ahora)
-        // Esto soluciona que aparezca vacío al principio
         filterList("Solicitudes");
 
-        // 4. Configurar el Listener
-        TabLayout tabLayout = view.findViewById(R.id.tabLayoutAct);
-
-        // Asegurarnos que la pestaña seleccionada visualmente es la 0
-        if (tabLayout.getTabAt(0) != null) {
-            tabLayout.getTabAt(0).select();
-        }
+        if (tabLayout.getTabAt(0) != null) tabLayout.getTabAt(0).select();
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 0) {
-                    // Pestaña 1: Solicitudes
-                    filterList("Solicitudes");
-                } else {
-                    // Pestaña 2: Registradas (Actividades)
-                    filterList("Registradas");
-                }
+            @Override public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
             }
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
     }
 
+    private void showStatusFilterDialog() {
+        String[] statuses = {"Todos", "Active", "Suspended", "Finished", "InProgress"};
+        String[] displayStatuses = {"Todos", "Activas", "Suspendidas", "Finalizadas", "En Progreso"};
+        
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Estado")
+            .setItems(displayStatuses, (dialog, which) -> {
+                currentStatusFilter = statuses[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterStatus);
+                if (btn != null) btn.setText(currentStatusFilter.equals("Todos") ? "Estado" : displayStatuses[which]);
+                
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutAct);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
+    }
+
+    private void showTypeFilterDialog() {
+        if (masterList == null) return;
+        java.util.Set<String> typesSet = new java.util.HashSet<>();
+        typesSet.add("Todos");
+        for (VolunteerActivity act : masterList) {
+            if (act.getCategory() != null && !act.getCategory().isEmpty()) typesSet.add(act.getCategory());
+        }
+        
+        List<String> typesList = new ArrayList<>(typesSet);
+        Collections.sort(typesList);
+        String[] typesArray = typesList.toArray(new String[0]);
+
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Tipo")
+            .setItems(typesArray, (dialog, which) -> {
+                currentTypeFilter = typesArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterType);
+                if (btn != null) btn.setText(currentTypeFilter.equals("Todos") ? "Tipo" : currentTypeFilter);
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutAct);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
+    }
+
+    private void showOdsFilterDialog() {
+        if (masterList == null) return;
+        java.util.Set<Integer> odsSet = new java.util.HashSet<>();
+        for (VolunteerActivity act : masterList) {
+            if (act.getOds() != null) {
+                for (cuatrovientos.voluntariado.model.Ods ods : act.getOds()) odsSet.add(ods.getId());
+            }
+        }
+        
+        List<Integer> odsList = new ArrayList<>(odsSet);
+        Collections.sort(odsList);
+        List<String> options = new ArrayList<>();
+        options.add("Todos");
+        for (Integer id : odsList) options.add(String.valueOf(id));
+        String[] odsArray = options.toArray(new String[0]);
+
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por ODS")
+            .setItems(odsArray, (dialog, which) -> {
+                currentOdsFilter = odsArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterODS);
+                if (btn != null) btn.setText(currentOdsFilter.equals("Todos") ? "ODS" : "ODS " + currentOdsFilter);
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutAct);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
+    }
+    
     private void fetchActivities() {
         cuatrovientos.voluntariado.network.ApiService apiService = 
             cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
@@ -110,71 +184,90 @@ public class ActivitiesFragment extends Fragment {
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         masterList.add(cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct));
                     }
-                    // Refresh current tab
-                    TabLayout tabLayout = getView().findViewById(R.id.tabLayoutAct);
-                    if (tabLayout != null) {
-                         if (tabLayout.getSelectedTabPosition() == 0) {
-                             filterList("Solicitudes");
-                         } else {
-                             filterList("Registradas");
-                         }
+                    if (getView() != null) {
+                        TabLayout tabLayout = getView().findViewById(R.id.tabLayoutAct);
+                        if (tabLayout != null) {
+                             if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                             else filterList("Registradas");
+                        }
                     }
                 } else {
                     android.util.Log.e("ActivitiesFragment", "Error fetching activities: " + response.code());
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Error al cargar actividades", android.widget.Toast.LENGTH_SHORT).show();
-                    }
                 }
             }
 
             @Override
             public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, Throwable t) {
                 android.util.Log.e("ActivitiesFragment", "Network error: " + t.getMessage());
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Error de conexión", android.widget.Toast.LENGTH_SHORT).show();
-                }
             }
         });
     }
 
     private void filterList(String tabName) {
         List<VolunteerActivity> filteredList = new ArrayList<>();
+        
+        if (masterList == null) return;
 
         for (VolunteerActivity act : masterList) {
             boolean matchesTab = false;
+            // 1. Tab Logic
             if (tabName.equals("Solicitudes")) {
-                // Filtramos por estado "Pending"
-                if (act.getStatus().equals("Pending")) {
-                    matchesTab = true;
-                }
-            } else { // Caso "Registradas"
-                // Filtramos por estado "Active", "Finished", "Suspended", "InProgress"
+                if (act.getStatus().equals("Pending")) matchesTab = true;
+            } else {
                 if (act.getStatus().equals("Active") || act.getStatus().equals("Finished") || act.getStatus().equals("Suspended") || act.getStatus().equals("InProgress")) {
                     matchesTab = true;
                 }
             }
             
-            if (matchesTab) {
+            boolean matchesType = true;
+            if (!currentTypeFilter.equals("Todos")) {
+                if (act.getCategory() == null || !act.getCategory().equalsIgnoreCase(currentTypeFilter)) matchesType = false;
+            }
+
+            boolean matchesOds = true;
+            if (!currentOdsFilter.equals("Todos")) {
+                boolean hasOds = false;
+                try {
+                    int filterId = Integer.parseInt(currentOdsFilter);
+                    if (act.getOds() != null) {
+                        for (cuatrovientos.voluntariado.model.Ods ods : act.getOds()) {
+                            if (ods.getId() == filterId) {
+                                 hasOds = true;
+                                 break;
+                            }
+                        }
+                    }
+                } catch (NumberFormatException e) { }
+                if (!hasOds) matchesOds = false;
+            }
+
+            // 4. Status Filter
+            boolean matchesStatus = true;
+            if (!tabName.equals("Solicitudes") && !currentStatusFilter.equals("Todos")) {
+                 if (!act.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
+            }
+
+            if (matchesTab && matchesType && matchesOds && matchesStatus) {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(act);
                 } else {
                     String query = currentSearchQuery.toLowerCase();
                     boolean matchesSearch = false;
-                    
                     if (act.getTitle().toLowerCase().contains(query)) matchesSearch = true;
                     if (act.getCategory().toLowerCase().contains(query)) matchesSearch = true;
-                    
-                    if (matchesSearch) {
-                        filteredList.add(act);
-                    }
+                    if (matchesSearch) filteredList.add(act);
                 }
             }
         }
 
-        // Importante: Actualizar el adaptador
-        if (adapter != null) {
-            adapter.updateList(filteredList);
-        }
+        Collections.sort(filteredList, (a1, a2) -> {
+            String title1 = a1.getTitle().toLowerCase();
+            String title2 = a2.getTitle().toLowerCase();
+            if (isAscending) return title1.compareTo(title2);
+            else return title2.compareTo(title1);
+        });
+
+        if (adapter != null) adapter.updateList(filteredList);
 
         RecyclerView recyclerView = getView().findViewById(R.id.recyclerActivities);
         android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyActivities);

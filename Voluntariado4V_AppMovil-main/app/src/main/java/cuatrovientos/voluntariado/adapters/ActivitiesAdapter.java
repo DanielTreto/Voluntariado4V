@@ -62,27 +62,9 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
 
         // Status Tag Logic
         String status = act.getStatus();
-        holder.tvStatusTag.setText(status);
-        if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
-            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9")); // Light Green
-            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#4CAF50")); // Green
-            holder.tvStatusTag.setText("Activa");
-        } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
-            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1")); // Light Orange
-            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#FFA000")); // Orange
-            holder.tvStatusTag.setText("Pendiente");
-        } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
-            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE")); // Light Red
-            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#F44336")); // Red
-            holder.tvStatusTag.setText("Finalizada");
-        } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
-            holder.tvStatusTag.setBackgroundColor(android.graphics.Color.parseColor("#E3F2FD")); // Light Blue
-            holder.tvStatusTag.setTextColor(android.graphics.Color.parseColor("#2196F3")); // Blue
-            holder.tvStatusTag.setText("En Progreso");
-        } else {
-             holder.tvStatusTag.setBackgroundColor(android.graphics.Color.LTGRAY);
-             holder.tvStatusTag.setTextColor(android.graphics.Color.DKGRAY);
-        }
+        holder.tvStatusTag.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(status));
+        holder.tvStatusTag.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(status));
+        holder.tvStatusTag.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(status));
 
         // Volunteer Avatars Logic
         List<String> avatars = act.getParticipantAvatars();

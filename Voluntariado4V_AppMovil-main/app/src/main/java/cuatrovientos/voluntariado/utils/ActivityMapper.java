@@ -18,7 +18,7 @@ public class ActivityMapper {
 
         if (rawStatus.equalsIgnoreCase("ACTIVO")) status = "Active";
         else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
-        else if (rawStatus.equalsIgnoreCase("SUSPENDIDO")) status = "Suspended";
+        else if (rawStatus.equalsIgnoreCase("SUSPENDIDO") || rawStatus.equalsIgnoreCase("SUSPENDIDA")) status = "Suspended";
         else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
         else if (rawStatus.equalsIgnoreCase("EN_PROGRESO")) status = "InProgress";
         else status = rawStatus; // Fallback
@@ -53,7 +53,8 @@ public class ActivityMapper {
                         "Voluntario", // Role
                         null, // Preferences
                         "Active", // Status (Assumed)
-                        avatarUrl
+                        avatarUrl,
+                        apiVol.getCourse() // Course
                 ));
             }
         }
@@ -64,7 +65,7 @@ public class ActivityMapper {
         String orgId = null;
         if (apiAct.getOrganization() != null) {
             orgName = apiAct.getOrganization().getName();
-            orgId = apiAct.getOrganization().getId(); // Ensure ApiOrganization has getId()
+            orgId = apiAct.getOrganization().getId();
             String orgAvPath = apiAct.getOrganization().getAvatar();
             if (orgAvPath != null && !orgAvPath.startsWith("http")) {
                 orgAvatar = "http://10.0.2.2:8000/" + orgAvPath;
@@ -106,16 +107,65 @@ public class ActivityMapper {
     }
 
     public static int getColorForType(String type) {
-        if (type == null) return 0xFF9E9E9E; // Gray default
+        if (type == null) return 0xFF616161; // Darker Gray default
         switch (type) {
             case "Medio Ambiente": return 0xFF2E7D32; // Green
             case "Social": return 0xFF1976D2; // Blue
             case "Tecnológico": return 0xFFFFC107; // Amber
             case "Educativo": return 0xFF512DA8; // Deep Purple
-            case "Deporte": return 0xFFFF9800; // Orange (Matching StudentHomeFragment original logic but standardized)
+            case "Deporte": return 0xFFFF9800; // Orange
             case "Salud": return 0xFFF44336; // Red
-            case "Cultura": return 0xFF9C27B0; // Purple
-            default: return 0xFFEF5350; // Red default
+            case "Cultural": return 0xFFF44336; // Red
+            case "General": return 0xFF616161; // Darker Gray
+            default: return 0xFF616161; // Darker Gray default
+        }
+    }
+
+    public static int getStatusBackgroundColor(String status) {
+        if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#E8F5E9"); // Light Green
+        } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#FFF8E1"); // Light Orange
+        } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#FFEBEE"); // Light Red
+        } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#E3F2FD"); // Light Blue
+        } else if ("Suspended".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#FFEBEE"); // Light Red
+        } else {
+            return android.graphics.Color.LTGRAY;
+        }
+    }
+
+    public static int getStatusTextColor(String status) {
+        if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#4CAF50"); // Green
+        } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#FFA000"); // Orange
+        } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#F44336"); // Red
+        } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#2196F3"); // Blue
+        } else if ("Suspended".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status)) {
+            return android.graphics.Color.parseColor("#D32F2F"); // Darker Red
+        } else {
+            return android.graphics.Color.DKGRAY;
+        }
+    }
+
+    public static String getStatusLabel(String status) {
+        if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
+            return "Activa";
+        } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
+            return "Pendiente";
+        } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
+            return "Finalizada";
+        } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
+            return "En Progreso";
+        } else if ("Suspended".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status)) {
+            return "Suspendida";
+        } else {
+            return status != null ? status : "Desconocido";
         }
     }
 }

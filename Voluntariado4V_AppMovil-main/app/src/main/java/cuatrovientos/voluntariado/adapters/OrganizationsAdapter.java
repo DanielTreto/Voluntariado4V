@@ -97,10 +97,18 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
             // 3. Mostrar CONTADOR DE VOLUNTARIOS
             holder.tvInfo.setText("Voluntariados creados: " + org.getVolunteersCount());
 
-            // 4. Color Activo (Verde)
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9"));
-            holder.tvStatus.setTextColor(Color.parseColor("#4CAF50"));
-            holder.tvStatus.setText("Activo");
+            // 4. Color Activo (Verde) o Suspendido (Rojo)
+            if (org.getStatus().equals("Active")) {
+                holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9"));
+                holder.tvStatus.setTextColor(Color.parseColor("#4CAF50"));
+                holder.tvStatus.setText("Activa");
+            } else if (org.getStatus().equals("Suspended")) {
+                holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE"));
+                holder.tvStatus.setTextColor(Color.parseColor("#D32F2F"));
+                holder.tvStatus.setText("Suspendida");
+            } else {
+                holder.tvStatus.setText(org.getStatus());
+            }
         }
     }
 

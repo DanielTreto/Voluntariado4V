@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.tabs.TabLayout;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 
 import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.OrganizationsAdapter;
@@ -32,6 +33,9 @@ public class OrganizationsFragment extends Fragment {
     }
 
     private String currentSearchQuery = "";
+    private String currentTypeFilter = "Todos";
+    private String currentStatusFilter = "Todos";
+    private boolean isAscending = true;
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -40,23 +44,31 @@ public class OrganizationsFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.recyclerOrganizations);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        // Setup Search Bar
         android.widget.EditText etSearch = view.findViewById(R.id.etSearchOrg);
+        TabLayout tabLayout = view.findViewById(R.id.tabLayoutOrg);
+        
         etSearch.addTextChangedListener(new android.text.TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 currentSearchQuery = s.toString();
-                TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
-                if (tabLayout.getSelectedTabPosition() == 0) {
-                     filterList("Solicitudes");
-                } else {
-                     filterList("Registradas");
-                }
+                if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
             }
-            @Override
-            public void afterTextChanged(android.text.Editable s) {}
+            @Override public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
+        btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
+
+        android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
+        btnFilterStatus.setOnClickListener(v -> showStatusFilterDialog());
+
+        android.widget.Button btnSortOrganizations = view.findViewById(R.id.btnSortOrganizations);
+        btnSortOrganizations.setOnClickListener(v -> {
+            isAscending = !isAscending;
+            btnSortOrganizations.setText(isAscending ? "Orden: A-Z" : "Orden: Z-A");
+            if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
+            else filterList("Registradas");
         });
 
         masterList = new ArrayList<>();
@@ -65,24 +77,59 @@ public class OrganizationsFragment extends Fragment {
         adapter = new OrganizationsAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
-        // Cargar vista inicial (Solicitudes)
         filterList("Solicitudes");
 
-        TabLayout tabLayout = view.findViewById(R.id.tabLayoutOrg);
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 0) {
-                    filterList("Solicitudes");
-                } else {
-                    filterList("Registradas");
-                }
+            @Override public void onTabSelected(TabLayout.Tab tab) {
+                if (tab.getPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
             }
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
+    }
+
+    private void showStatusFilterDialog() {
+        String[] statuses = {"Todos", "Active", "Suspended"};
+        String[] displayStatuses = {"Todos", "Activas", "Suspendidas"};
+        
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Estado")
+            .setItems(displayStatuses, (dialog, which) -> {
+                currentStatusFilter = statuses[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterStatus);
+                if (btn != null) btn.setText(currentStatusFilter.equals("Todos") ? "Estado" : displayStatuses[which]);
+                
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutOrg);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
+    }
+
+    private void showTypeFilterDialog() {
+        if (masterList == null) return;
+        java.util.Set<String> typesSet = new java.util.HashSet<>();
+        typesSet.add("Todos");
+        for (Organization org : masterList) {
+            if (org.getType() != null && !org.getType().isEmpty()) typesSet.add(org.getType());
+        }
+        
+        List<String> typesList = new ArrayList<>(typesSet);
+        Collections.sort(typesList);
+        String[] typesArray = typesList.toArray(new String[0]);
+
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Tipo")
+            .setItems(typesArray, (dialog, which) -> {
+                currentTypeFilter = typesArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterType);
+                if (btn != null) btn.setText(currentTypeFilter.equals("Todos") ? "Tipo" : currentTypeFilter);
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutOrg);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
     }
 
     private void fetchOrganizations() {
@@ -100,11 +147,8 @@ public class OrganizationsFragment extends Fragment {
                         String avatarPath = apiOrg.getAvatar();
                         String avatarUrl = null;
                         if (avatarPath != null) {
-                            if (avatarPath.startsWith("http")) {
-                                avatarUrl = avatarPath;
-                            } else {
-                                avatarUrl = "http://10.0.2.2:8000" + avatarPath;
-                            }
+                            if (avatarPath.startsWith("http")) avatarUrl = avatarPath;
+                            else avatarUrl = "http://10.0.2.2:8000" + avatarPath;
                         }
 
                         masterList.add(new Organization(
@@ -113,38 +157,31 @@ public class OrganizationsFragment extends Fragment {
                             apiOrg.getEmail(),
                             apiOrg.getDescription(),
                             apiOrg.getType(),
-                            apiOrg.getPhone(),
+                            apiOrg.getPhone() != null ? apiOrg.getPhone() : "",
                             apiOrg.getSector(),
                             apiOrg.getScope(),
                             apiOrg.getContactPerson(),
-                            "2023-01-01", 
+                            "2023-01-01",
                             volunteersCount,
-                            status, // FIXED: Use mapped status field
+                            status,
                             avatarUrl
                         ));
                     }
-                    TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
-                    if (tabLayout != null) {
-                        if (tabLayout.getSelectedTabPosition() == 0) {
-                            filterList("Solicitudes");
-                        } else {
-                            filterList("Registradas");
+                    if (getView() != null) {
+                        TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
+                        if (tabLayout != null) {
+                            if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                            else filterList("Registradas");
                         }
                     }
                 } else {
                     android.util.Log.e("OrganizationsFragment", "Error fetching organizations: " + response.code());
-                    if (getContext() != null) {
-                        android.widget.Toast.makeText(getContext(), "Error al cargar organizaciones", android.widget.Toast.LENGTH_SHORT).show();
-                    }
                 }
             }
 
             @Override
             public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> call, Throwable t) {
                 android.util.Log.e("OrganizationsFragment", "Network error: " + t.getMessage());
-                if (getContext() != null) {
-                    android.widget.Toast.makeText(getContext(), "Error de conexión", android.widget.Toast.LENGTH_SHORT).show();
-                }
             }
         });
     }
@@ -154,7 +191,8 @@ public class OrganizationsFragment extends Fragment {
         switch (backendStatus.toUpperCase()) {
             case "ACTIVO": return "Active";
             case "PENDIENTE": return "Pending";
-            case "SUSPENDIDO": return "Suspended";
+            case "SUSPENDIDO": 
+            case "SUSPENDIDA": return "Suspended";
             default: return "Pending";
         }
     }
@@ -165,17 +203,28 @@ public class OrganizationsFragment extends Fragment {
 
         for (Organization org : masterList) {
             boolean matchesTab = false;
+            // 1. Tab Status
             if (tabName.equals("Solicitudes")) {
-                if (org.getStatus().equals("Pending")) {
-                    matchesTab = true;
-                }
+                if (org.getStatus().equals("Pending")) matchesTab = true;
             } else {
-                if (org.getStatus().equals("Active")) {
-                    matchesTab = true;
-                }
+                // Modificado: Incluir "Suspended" en la lista de Registradas
+                if (org.getStatus().equals("Active") || org.getStatus().equals("Suspended")) matchesTab = true;
             }
             
-            if (matchesTab) {
+            // 2. Type Filter
+            boolean matchesType = true;
+            if (!currentTypeFilter.equals("Todos")) {
+                if (org.getType() == null || !org.getType().equalsIgnoreCase(currentTypeFilter)) matchesType = false;
+            }
+
+            // 3. Status Filter
+            boolean matchesStatus = true;
+            if (!tabName.equals("Solicitudes") && !currentStatusFilter.equals("Todos")) {
+                 if (!org.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
+            }
+
+            // 4. Search Query
+            if (matchesTab && matchesType && matchesStatus) {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(org);
                 } else {
@@ -186,15 +235,19 @@ public class OrganizationsFragment extends Fragment {
                     if (org.getEmail().toLowerCase().contains(query)) matchesSearch = true;
                     if (org.getContactPerson() != null && org.getContactPerson().toLowerCase().contains(query)) matchesSearch = true;
                     
-                    if (matchesSearch) {
-                        filteredList.add(org);
-                    }
+                    if (matchesSearch) filteredList.add(org);
                 }
             }
         }
-        if (adapter != null) {
-            adapter.updateList(filteredList);
-        }
+        
+        Collections.sort(filteredList, (o1, o2) -> {
+            String name1 = o1.getName().toLowerCase();
+            String name2 = o2.getName().toLowerCase();
+            if (isAscending) return name1.compareTo(name2);
+            else return name2.compareTo(name1);
+        });
+
+        if (adapter != null) adapter.updateList(filteredList);
 
         RecyclerView recyclerView = getView().findViewById(R.id.recyclerOrganizations);
         android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyOrganizations);

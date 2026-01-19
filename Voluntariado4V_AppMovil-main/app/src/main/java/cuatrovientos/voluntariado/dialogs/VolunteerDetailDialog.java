@@ -202,10 +202,11 @@ public class VolunteerDetailDialog extends DialogFragment {
                              apiVol.getDni(),
                              apiVol.getDateOfBirth(),
                              apiVol.getDescription(),
-                             apiVol.getCourse(), // Mapping course to role
+                             "Voluntario", // Role
                              apiVol.getPreferences(),
                              apiVol.getStatus(),
-                             apiVol.getAvatar()
+                             apiVol.getAvatar(),
+                             apiVol.getCourse() // Course
                          );
                          
                          // Refresh UI

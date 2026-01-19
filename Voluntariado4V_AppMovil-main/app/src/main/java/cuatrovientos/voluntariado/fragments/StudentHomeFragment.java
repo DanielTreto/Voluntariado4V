@@ -139,11 +139,12 @@ public class StudentHomeFragment extends Fragment {
                     List<Integer> myActivityIds = new ArrayList<>();
                     
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
-                        // Filter: Exclude FINISHED activities (They go to History)
-                        String status = apiAct.getStatus() != null ? apiAct.getStatus() : "ACTIVO";
-                        if (status.equalsIgnoreCase("FINALIZADA")) continue;
-
                         VolunteerActivity va = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
+                        
+                        // Filter: Exclude FINISHED activities (They go to History)
+                        // Using normalized status from ActivityMapper ("Active", "Pending", "Finished", etc.)
+                        if ("Finished".equalsIgnoreCase(va.getStatus())) continue;
+
                         masterMyList.add(va);
                         myActivityIds.add(apiAct.getId());
                     }

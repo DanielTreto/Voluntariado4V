@@ -11,7 +11,7 @@
     <item
         android:id="@+id/nav_calendar"
         android:icon="@drawable/ic_date_range"
-        android:title="Calendario" />
+        android:title="Eventos" />
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings"

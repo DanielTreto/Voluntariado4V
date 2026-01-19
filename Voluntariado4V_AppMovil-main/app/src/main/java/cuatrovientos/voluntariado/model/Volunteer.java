@@ -14,8 +14,9 @@ public class Volunteer {
     private java.util.List<String> preferences; // New
     private String status;
     private String avatarUrl;
+    private String course; // New field
 
-    public Volunteer(String id, String name, String surname1, String surname2, String email, String phone, String dni, String birthDate, String description, String role, java.util.List<String> preferences, String status, String avatarUrl) {
+    public Volunteer(String id, String name, String surname1, String surname2, String email, String phone, String dni, String birthDate, String description, String role, java.util.List<String> preferences, String status, String avatarUrl, String course) {
         this.id = id;
         this.name = name;
         this.surname1 = surname1;
@@ -29,6 +30,7 @@ public class Volunteer {
         this.preferences = preferences;
         this.status = status;
         this.avatarUrl = avatarUrl;
+        this.course = course;
     }
 
     public String getId() { return id; }
@@ -40,10 +42,11 @@ public class Volunteer {
     public String getDni() { return dni; }
     public String getBirthDate() { return birthDate; }
     public String getDescription() { return description; }
-    public String getRole() { return role; } // Kept from original, as it's a field and in new constructor
+    public String getRole() { return role; }
     public java.util.List<String> getPreferences() { return preferences; }
     public String getStatus() { return status; }
-    public String getAvatarUrl() { return avatarUrl; } // Kept from original, as it's a field and in new constructor
+    public String getAvatarUrl() { return avatarUrl; }
+    public String getCourse() { return course; }
     // The 'getDate()' method was in the provided new getters, but the 'date' field was removed.
     // This method is removed to maintain consistency with the fields.
 }
