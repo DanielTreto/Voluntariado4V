@@ -185,6 +185,14 @@ public class ActivityDetailDialog extends DialogFragment {
 
             // Volunteers List
             List<cuatrovientos.voluntariado.model.Volunteer> volunteers = activity.getParticipants();
+
+            
+            // Check Admin Role for Volunteer Navigation
+            android.content.SharedPreferences prefs = requireContext().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
+            String role = prefs.getString("USER_ROLE", "");
+            boolean isAdmin = "admin".equalsIgnoreCase(role) || "administrator".equalsIgnoreCase(role);
+
+            // Volunteers List Rendering with Admin Logic
             if (volunteers != null && !volunteers.isEmpty()) {
                 tvVolunteersTitle.setVisibility(View.VISIBLE);
                 layoutVolunteers.setVisibility(View.VISIBLE);
@@ -194,9 +202,25 @@ public class ActivityDetailDialog extends DialogFragment {
                      View volView = inflater.inflate(R.layout.item_volunteer_avatar, layoutVolunteers, false);
                      ImageView imgVol = volView.findViewById(R.id.imgVolunteerAvatar);
                      TextView tvName = volView.findViewById(R.id.tvVolunteerName);
+                     ImageView btnArrow = volView.findViewById(R.id.btnVolunteerDetailArrow);
                      
                      tvName.setText(v.getName());
                      Glide.with(this).load(v.getAvatarUrl()).circleCrop().placeholder(R.drawable.ic_profile_placeholder).error(R.drawable.ic_profile_placeholder).into(imgVol);
+                     
+                     if (isAdmin) {
+                         btnArrow.setVisibility(View.VISIBLE);
+                         volView.setClickable(true);
+                         volView.setFocusable(true);
+                         // Add ripple background programmatically if needed, or rely on parent
+                         
+                         volView.setOnClickListener(clickedView -> {
+                             cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog volDialog = 
+                                 cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog.newInstance(v);
+                             volDialog.show(getParentFragmentManager(), "VolunteerDetail_FromActivity");
+                         });
+                     } else {
+                         btnArrow.setVisibility(View.GONE);
+                     }
                      
                      layoutVolunteers.addView(volView);
                 }

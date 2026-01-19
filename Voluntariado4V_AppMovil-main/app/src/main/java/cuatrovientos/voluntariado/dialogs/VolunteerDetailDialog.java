@@ -70,6 +70,19 @@ public class VolunteerDetailDialog extends DialogFragment {
         }
 
         if (volunteer == null) return view;
+        
+        android.widget.ProgressBar progressBar = view.findViewById(R.id.progressBar);
+        android.widget.LinearLayout layoutContent = view.findViewById(R.id.layoutDetailContent);
+        
+        // Initial Loading State
+        if (volunteer.getId() != null) {
+            progressBar.setVisibility(View.VISIBLE);
+            layoutContent.setVisibility(View.GONE);
+        } else {
+             // If no ID, we can't fetch, so just show what we have
+             progressBar.setVisibility(View.GONE);
+             layoutContent.setVisibility(View.VISIBLE);
+        }
 
         ImageView imgHeader = view.findViewById(R.id.imgDetailHeader);
         TextView tvName = view.findViewById(R.id.tvDetailName);
@@ -100,49 +113,53 @@ public class VolunteerDetailDialog extends DialogFragment {
         com.google.android.material.chip.ChipGroup chipGroup = view.findViewById(R.id.chipGroupPreferences);
         TextView tvNoPreferences = view.findViewById(R.id.tvDetailNoPreferences);
         
-        if (volunteer.getPreferences() != null && !volunteer.getPreferences().isEmpty()) {
-            chipGroup.setVisibility(View.VISIBLE);
-            tvNoPreferences.setVisibility(View.GONE);
-            chipGroup.removeAllViews();
-            
-            for (String pref : volunteer.getPreferences()) {
-                com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(getContext());
-                chip.setText(pref);
-                chip.setTextColor(android.graphics.Color.WHITE);
-                chip.setChipCornerRadius(0f); // Make it rectangular like activity cards
+        // Helper to update UI from cached or fetched data
+        Runnable updateUI = () -> {
+            if (volunteer.getPreferences() != null && !volunteer.getPreferences().isEmpty()) {
+                chipGroup.setVisibility(View.VISIBLE);
+                tvNoPreferences.setVisibility(View.GONE);
+                chipGroup.removeAllViews();
                 
-                int color = cuatrovientos.voluntariado.utils.ActivityMapper.getColorForType(pref);
-                chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(color));
-                
-                chipGroup.addView(chip);
+                for (String pref : volunteer.getPreferences()) {
+                    com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(getContext());
+                    chip.setText(pref);
+                    chip.setTextColor(android.graphics.Color.WHITE);
+                    chip.setChipCornerRadius(0f); // Make it rectangular like activity cards
+                    
+                    int color = cuatrovientos.voluntariado.utils.ActivityMapper.getColorForType(pref);
+                    chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(color));
+                    
+                    chipGroup.addView(chip);
+                }
+            } else {
+                chipGroup.setVisibility(View.GONE);
+                tvNoPreferences.setVisibility(View.VISIBLE);
             }
-        } else {
-            chipGroup.setVisibility(View.GONE);
-            tvNoPreferences.setVisibility(View.VISIBLE);
-        }
-
-        // Status Check
-        tvStatus.setText(volunteer.getStatus());
-        if ("Active".equalsIgnoreCase(volunteer.getStatus()) || "ACTIVO".equalsIgnoreCase(volunteer.getStatus())) {
-            tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
-            tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-            tvStatus.setText("Activo");
-        } else if ("Suspended".equalsIgnoreCase(volunteer.getStatus())) {
-            tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE"));
-            tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"));
-             tvStatus.setText("Suspendido");
-        } else {
-             tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
-             tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
-             tvStatus.setText("Pendiente");
-        }
-
-        if (volunteer.getDescription() != null && !volunteer.getDescription().isEmpty()) {
-            tvDesc.setText(volunteer.getDescription());
-        } else {
-            tvDesc.setText("Sin descripción disponible.");
-        }
-
+    
+            // Status Check
+            tvStatus.setText(volunteer.getStatus());
+            if ("Active".equalsIgnoreCase(volunteer.getStatus()) || "ACTIVO".equalsIgnoreCase(volunteer.getStatus())) {
+                tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
+                tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+                tvStatus.setText("Activo");
+            } else if ("Suspended".equalsIgnoreCase(volunteer.getStatus())) {
+                tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE"));
+                tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"));
+                 tvStatus.setText("Suspendido");
+            } else {
+                 tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
+                 tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
+                 tvStatus.setText("Pendiente");
+            }
+    
+            if (volunteer.getDescription() != null && !volunteer.getDescription().isEmpty()) {
+                tvDesc.setText(volunteer.getDescription());
+            } else {
+                tvDesc.setText("Sin descripción disponible.");
+            }
+        };
+        
+        updateUI.run(); // Run initially with passed data
 
         if (volunteer.getAvatarUrl() != null && !volunteer.getAvatarUrl().isEmpty()) {
              Glide.with(this)
@@ -161,9 +178,62 @@ public class VolunteerDetailDialog extends DialogFragment {
         cuatrovientos.voluntariado.adapters.SimpleActivityAdapter activitiesAdapter = new cuatrovientos.voluntariado.adapters.SimpleActivityAdapter(new java.util.ArrayList<>());
         recyclerActivities.setAdapter(activitiesAdapter);
 
-        // Load Activities
+        // Fetch Full Details & Activities
         if (volunteer.getId() != null) {
             cuatrovientos.voluntariado.network.ApiService apiService = cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
+            
+            // 1. Fetch Full Profile
+            apiService.getVolunteer(volunteer.getId()).enqueue(new retrofit2.Callback<cuatrovientos.voluntariado.network.model.ApiVolunteer>() {
+                @Override
+                public void onResponse(retrofit2.Call<cuatrovientos.voluntariado.network.model.ApiVolunteer> call, retrofit2.Response<cuatrovientos.voluntariado.network.model.ApiVolunteer> response) {
+                     progressBar.setVisibility(View.GONE);
+                     layoutContent.setVisibility(View.VISIBLE);
+
+                    if (response.isSuccessful() && response.body() != null) {
+                         cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol = response.body();
+                         // Update local volunteer object
+                         volunteer = new Volunteer(
+                             apiVol.getId(),
+                             apiVol.getName(),
+                             apiVol.getSurname1(),
+                             apiVol.getSurname2(),
+                             apiVol.getEmail(),
+                             apiVol.getPhone(),
+                             apiVol.getDni(),
+                             apiVol.getDateOfBirth(),
+                             apiVol.getDescription(),
+                             apiVol.getCourse(), // Mapping course to role
+                             apiVol.getPreferences(),
+                             apiVol.getStatus(),
+                             apiVol.getAvatar()
+                         );
+                         
+                         // Refresh UI
+                         if (getContext() != null) {
+                             // Update Texts
+                             String fullN = volunteer.getName();
+                             if (volunteer.getSurname1() != null) fullN += " " + volunteer.getSurname1();
+                             if (volunteer.getSurname2() != null) fullN += " " + volunteer.getSurname2();
+                             tvName.setText(fullN);
+                             
+                             tvEmail.setText(volunteer.getEmail());
+                             tvPhone.setText(volunteer.getPhone());
+                             tvRole.setText(volunteer.getRole());
+                             tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
+                             tvBirthDate.setText("Fecha Nac.: " + (volunteer.getBirthDate() != null ? volunteer.getBirthDate() : ""));
+                             
+                             updateUI.run(); // Re-run helper to update standard fields
+                         }
+                    }
+                }
+                @Override
+                public void onFailure(retrofit2.Call<cuatrovientos.voluntariado.network.model.ApiVolunteer> call, Throwable t) { 
+                     progressBar.setVisibility(View.GONE);
+                     layoutContent.setVisibility(View.VISIBLE);
+                }
+            });
+
+            // 2. Fetch Activities
             apiService.getVolunteerActivities(volunteer.getId()).enqueue(new retrofit2.Callback<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
                 @Override
                 public void onResponse(retrofit2.Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
