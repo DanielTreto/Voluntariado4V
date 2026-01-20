@@ -33,6 +33,75 @@
         android:textColor="@color/text_primary"
         android:textColorHint="@color/text_secondary" />
 
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSortActivities"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Orden: A-Z"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Estado"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterType"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Tipo"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterODS"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="ODS"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterCapacity"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Plazas"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvHistory"
         android:layout_width="match_parent"

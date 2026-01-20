@@ -311,6 +311,11 @@ class VolunteerController extends AbstractController
         $data = [];
 
         foreach ($activities as $act) {
+            // Filter out SUSPENDIDA activities
+            if ($act->getESTADO() === 'SUSPENDIDA') {
+                continue;
+            }
+
             $vols = [];
             foreach ($act->getVoluntarios() as $v) {
                 $fullName = $v->getNOMBRE() . ' ' . $v->getAPELLIDO1();

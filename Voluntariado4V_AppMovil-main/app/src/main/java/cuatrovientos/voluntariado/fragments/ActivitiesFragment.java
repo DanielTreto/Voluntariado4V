@@ -71,7 +71,7 @@ public class ActivitiesFragment extends Fragment {
         btnFilterCapacity.setOnClickListener(v -> showCapacityFilterDialog());
 
         android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
-        btnSortActivities.setOnClickListener(v -> showSortDialog());
+        btnSortActivities.setOnClickListener(v -> toggleSort());
 
         masterList = new ArrayList<>();
         fetchActivities();
@@ -92,23 +92,21 @@ public class ActivitiesFragment extends Fragment {
         });
     }
 
-    private void showSortDialog() {
-        String[] options = {"Nombre (A-Z)", "Nombre (Z-A)", "Fecha (Próximas)", "Fecha (Lejanas)"};
-        new android.app.AlertDialog.Builder(getContext())
-            .setTitle("Ordenar por")
-            .setItems(options, (dialog, which) -> {
-                android.widget.Button btn = getView().findViewById(R.id.btnSortActivities);
-                switch(which) {
-                    case 0: currentSortOption = "NameAsc"; if(btn!=null) btn.setText("Orden: A-Z"); break;
-                    case 1: currentSortOption = "NameDesc"; if(btn!=null) btn.setText("Orden: Z-A"); break;
-                    case 2: currentSortOption = "DateAsc"; if(btn!=null) btn.setText("Orden: Prox. Fecha"); break;
-                    case 3: currentSortOption = "DateDesc"; if(btn!=null) btn.setText("Orden: Lej. Fecha"); break;
-                }
-                TabLayout tabs = getView().findViewById(R.id.tabLayoutAct);
-                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
-                else filterList("Registradas");
-            })
-            .show();
+    private void toggleSort() {
+        android.widget.Button btn = getView().findViewById(R.id.btnSortActivities);
+        if (btn == null) return;
+        
+        if (currentSortOption.equals("NameAsc")) {
+            currentSortOption = "NameDesc";
+            btn.setText("Orden: Z-A");
+        } else {
+            currentSortOption = "NameAsc";
+            btn.setText("Orden: A-Z");
+        }
+        
+        TabLayout tabs = getView().findViewById(R.id.tabLayoutAct);
+        if (tabs != null && tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+        else filterList("Registradas");
     }
 
     private void showCapacityFilterDialog() {
