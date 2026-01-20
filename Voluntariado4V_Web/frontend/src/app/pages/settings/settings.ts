@@ -21,7 +21,7 @@ export class SettingsComponent implements OnInit {
   selectedFile: File | null = null;
   avatarPreview: string | null = null;
 
-  currentUserId: number | null = null;
+  currentUserId: number | string | null = null;
   currentUserRole: string | null = null;
   ciclos: any[] = [];
   activityTypes: any[] = [];

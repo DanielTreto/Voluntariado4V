@@ -51,7 +51,7 @@ export class AdminSettingsComponent implements OnInit {
     loadData() {
         if (!this.currentUserId) return;
 
-        this.apiService.getAdmin(Number(this.currentUserId)).subscribe({
+        this.apiService.getAdmin(this.currentUserId).subscribe({
             next: (data) => {
                 // Map backend response specifically for Admin
                 this.settingsForm.patchValue({
@@ -103,7 +103,7 @@ export class AdminSettingsComponent implements OnInit {
 
         const data = this.settingsForm.value;
 
-        this.apiService.updateAdmin(Number(this.currentUserId), data).subscribe({
+        this.apiService.updateAdmin(this.currentUserId!, data).subscribe({
             next: (res) => {
                 if (this.selectedFile) {
                     this.uploadAvatar();

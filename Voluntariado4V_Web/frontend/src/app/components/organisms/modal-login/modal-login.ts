@@ -84,7 +84,10 @@ export class ModalLogin {
         this.sendTokenToBackend(token);
       })
       .catch((error: any) => {
-        console.warn('Firebase Login Error, attempting direct backend login...', error);
+        // Only log if it's NOT a standard "user not found" or "invalid credential" error (which is expected for SQL users)
+        if (error.code !== 'auth/user-not-found' && error.code !== 'auth/invalid-credential' && error.code !== 'auth/wrong-password') {
+          console.warn('Firebase Login Error, attempting direct backend login...', error);
+        }
         // Fallback or Primary for non-Firebase users: Attempt direct SQL login
         this.apiService.login({
           email: this.credentials.email,

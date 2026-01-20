@@ -27,7 +27,7 @@ export class ModalRegisterVol implements OnInit {
     dateOfBirth: '',
     description: '',
     course: '',
-    course: '',
+
     password: '',
     preferences: [] as number[],
     availability: [] as any[]

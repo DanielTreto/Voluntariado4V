@@ -20,15 +20,15 @@ export class ApiService {
     return this.http.get<any[]>(`${this.apiUrl}/volunteers`);
   }
 
-  deleteVolunteer(id: number): Observable<any> {
+  deleteVolunteer(id: number | string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/volunteers/${id}`);
   }
 
-  updateVolunteerStatus(id: number, status: string): Observable<any> {
+  updateVolunteerStatus(id: number | string, status: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/volunteers/${id}/status`, { status });
   }
 
-  getVolunteer(id: number): Observable<any> {
+  getVolunteer(id: number | string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/volunteers/${id}`);
   }
 
@@ -36,23 +36,23 @@ export class ApiService {
     return this.http.get<any[]>(`${this.apiUrl}/organizations`);
   }
 
-  getOrganization(id: number): Observable<any> {
+  getOrganization(id: number | string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/organizations/${id}`);
   }
 
-  getAdmin(id: number): Observable<any> {
+  getAdmin(id: number | string): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/admin/${id}`);
   }
 
-  updateAdmin(id: number, data: any): Observable<any> {
+  updateAdmin(id: number | string, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/admin/${id}`, data);
   }
 
-  updateOrganizationStatus(id: number, status: string): Observable<any> {
+  updateOrganizationStatus(id: number | string, status: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/organizations/${id}/status`, { status });
   }
 
-  getOrganizationActivities(orgId: number): Observable<any[]> {
+  getOrganizationActivities(orgId: number | string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/organizations/${orgId}/activities`);
   }
 
@@ -101,14 +101,14 @@ export class ApiService {
     return this.http.get<any[]>(`${this.apiUrl}/activities/${activityId}/volunteers`);
   }
 
-  updateVolunteer(id: number, data: any): Observable<any> {
+  updateVolunteer(id: number | string, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/volunteers/${id}`, data);
   }
 
-  updateOrganization(id: number, data: any): Observable<any> {
+  updateOrganization(id: number | string, data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/organizations/${id}`, data);
   }
-  getVolunteerActivities(volunteerId: number): Observable<any[]> {
+  getVolunteerActivities(volunteerId: number | string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/volunteers/${volunteerId}/activities`);
   }
 

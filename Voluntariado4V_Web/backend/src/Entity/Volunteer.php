@@ -294,4 +294,32 @@ class Volunteer
         $this->preferencias->removeElement($preferencia);
         return $this;
     }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Disponibilidad>
+     */
+    public function getDisponibilidades(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->disponibilidades;
+    }
+
+    public function addDisponibilidad(Disponibilidad $disponibilidad): static
+    {
+        if (!$this->disponibilidades->contains($disponibilidad)) {
+            $this->disponibilidades->add($disponibilidad);
+            $disponibilidad->setVoluntario($this);
+        }
+        return $this;
+    }
+
+    public function removeDisponibilidad(Disponibilidad $disponibilidad): static
+    {
+        if ($this->disponibilidades->removeElement($disponibilidad)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilidad->getVoluntario() === $this) {
+                $disponibilidad->setVoluntario(null);
+            }
+        }
+        return $this;
+    }
 }

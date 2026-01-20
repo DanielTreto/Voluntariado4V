@@ -306,24 +306,41 @@ class VolunteerController extends AbstractController
         }
 
         if (isset($data['availability']) && is_array($data['availability'])) {
-             // Clear existing availability
-             $existingAvails = $volunteer->getDisponibilidades(); // Assuming mapping exists, checking entity...
-             // Wait, remove loop might be tricky if collection modifies.
-             // Using direct repository delete might be safer or clearing collection.
+             $existingAvails = $volunteer->getDisponibilidades();
+             $map = [];
              foreach ($existingAvails as $av) {
-                 $entityManager->remove($av);
+                 $map[$av->getDIA()] = $av;
              }
-             // Using flush in end
-             
+
+             $submittedDays = [];
              foreach ($data['availability'] as $avail) {
-                if (isset($avail['day']) && isset($avail['hours'])) {
-                    $disponibilidad = new Disponibilidad();
-                    $disponibilidad->setVoluntario($volunteer);
-                    $disponibilidad->setDIA($avail['day']);
-                    $disponibilidad->setNUM_HORAS((int)$avail['hours']);
-                    $entityManager->persist($disponibilidad);
-                }
-            }
+                 if (isset($avail['day']) && isset($avail['hours'])) {
+                     $day = $avail['day'];
+                     $hours = (int)$avail['hours'];
+                     $submittedDays[] = $day;
+                     
+                     if (isset($map[$day])) {
+                         // Update existing
+                         $map[$day]->setNUM_HORAS($hours);
+                     } else {
+                         // Create new
+                         $disponibilidad = new Disponibilidad();
+                         $disponibilidad->setVoluntario($volunteer);
+                         $disponibilidad->setDIA($day);
+                         $disponibilidad->setNUM_HORAS($hours);
+                         $entityManager->persist($disponibilidad);
+                         $volunteer->addDisponibilidad($disponibilidad);
+                     }
+                 }
+             }
+
+             // Remove availabilities that are no longer present
+             foreach ($map as $day => $av) {
+                 if (!in_array($day, $submittedDays)) {
+                     $volunteer->removeDisponibilidad($av);
+                     $entityManager->remove($av);
+                 }
+             }
         }
 
         // Validate
