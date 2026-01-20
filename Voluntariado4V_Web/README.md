@@ -37,9 +37,29 @@ Antes de empezar, asegúrate de tener instalado en tu equipo:
 
 ---
 
-## 🚀 Instalación y Puesta en Marcha
 
-Sigue estos pasos para descargar y ejecutar el proyecto desde cero.
+## ⚡ Quick Start (Windows)
+
+We have included automated scripts to simplify the installation process.
+
+### 1. Installation
+Run the `install.bat` script. This will:
+*   Check for required tools (PHP, Composer, Node/NPM).
+*   Install Backend dependencies.
+*   Setup the Database (Create & Schema).
+*   Install Frontend dependencies.
+
+### 2. Execution
+Run the `start.bat` script. This will:
+*   Launch the Symfony Backend server.
+*   Launch the Angular Frontend server.
+*   Open your browser automatically.
+
+---
+
+## 🚀 Manual Installation and Setup
+If you prefer to install manually or are on a non-Windows system, follow these steps:
+
 
 ### 1. Clonar el repositorio
 ```bash
