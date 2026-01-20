@@ -100,11 +100,14 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         if (imageUrl == null || imageUrl.isEmpty()) {
             imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
         }
+        String fallbackUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
+        
         holder.imgHeader.setColorFilter(null); 
         Glide.with(holder.itemView.getContext())
                 .load(imageUrl)
                 .centerCrop()
-                .placeholder(R.drawable.ic_launcher_background) 
+                .placeholder(R.drawable.ic_launcher_foreground) 
+                .error(Glide.with(holder.itemView.getContext()).load(fallbackUrl))
                 .into(holder.imgHeader);
         
         // Buttons Logic
