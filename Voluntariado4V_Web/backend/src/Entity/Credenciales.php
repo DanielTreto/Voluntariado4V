@@ -15,7 +15,7 @@ class Credenciales
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(name: 'user_type', length: 20)]
     #[Assert\NotBlank]
     private ?string $userType = null;
 
@@ -35,6 +35,10 @@ class Credenciales
     #[ORM\OneToOne(targetEntity: Organizacion::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(name: "CODORG", referencedColumnName: "CODORG", nullable: true)]
     private ?Organizacion $organizacion = null;
+
+    #[ORM\OneToOne(targetEntity: Administrator::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: "id_admin", referencedColumnName: "id", nullable: true)]
+    private ?Administrator $administrador = null;
 
     public function getId(): ?int
     {
@@ -97,6 +101,18 @@ class Credenciales
     public function setOrganizacion(?Organizacion $organizacion): static
     {
         $this->organizacion = $organizacion;
+
+        return $this;
+    }
+
+    public function getAdministrator(): ?Administrator
+    {
+        return $this->administrador;
+    }
+
+    public function setAdministrator(?Administrator $administrador): static
+    {
+        $this->administrador = $administrador;
 
         return $this;
     }
