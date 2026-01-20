@@ -63,7 +63,8 @@ public class SimpleActivityAdapter extends RecyclerView.Adapter<SimpleActivityAd
                 // Check if user is a student/volunteer to enable recursive navigation
                 android.content.SharedPreferences prefs = activity.getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
                 String userRole = prefs.getString("USER_ROLE", "");
-                boolean isStudent = "volunteer".equalsIgnoreCase(userRole) || "admin".equalsIgnoreCase(userRole) || "administrator".equalsIgnoreCase(userRole);
+                boolean isStudent = "volunteer".equalsIgnoreCase(userRole) || "admin".equalsIgnoreCase(userRole) || "administrator".equalsIgnoreCase(userRole) 
+                                    || "organization".equalsIgnoreCase(userRole) || "organizacion".equalsIgnoreCase(userRole);
 
                 cuatrovientos.voluntariado.dialogs.ActivityDetailDialog dialog = 
                     cuatrovientos.voluntariado.dialogs.ActivityDetailDialog.newInstance(act, isStudent);

@@ -12,24 +12,21 @@ if ($conn === false) {
     die(print_r(sqlsrv_errors(), true));
 }
 
-// Wipe Database
-echo "Wiping database...\n";
-$wipeSql = "
-    DECLARE @sql NVARCHAR(MAX) = N'';
-    SELECT @sql += N'ALTER TABLE ' + QUOTENAME(schema_name(schema_id)) + '.' + QUOTENAME(name) + ' DROP CONSTRAINT ' + QUOTENAME(object_name(object_id)) + ';'
-    FROM sys.foreign_keys;
-    EXEC sp_executesql @sql;
-    
-    SET @sql = N'';
-    SELECT @sql += N'DROP TABLE ' + QUOTENAME(schema_name(schema_id)) + '.' + QUOTENAME(name) + ';'
-    FROM sys.tables;
-    EXEC sp_executesql @sql;
+// Drop Database (Force Fresh Start)
+echo "Dropping database VOLUNTARIADOBD if exists...\n";
+$dropSql = "
+    IF EXISTS (SELECT name FROM sys.databases WHERE name = N'VOLUNTARIADOBD')
+    BEGIN
+        ALTER DATABASE [VOLUNTARIADOBD] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        DROP DATABASE [VOLUNTARIADOBD];
+    END
 ";
-if (sqlsrv_query($conn, "USE VOLUNTARIADOBD")) {
-    sqlsrv_query($conn, $wipeSql);
-    echo "Database wiped.\n";
+
+if (sqlsrv_query($conn, $dropSql)) {
+    echo "Database VOLUNTARIADOBD dropped (if it existed).\n";
 } else {
-    echo "Could not use VOLUNTARIADOBD, assuming it doesn't exist yet.\n";
+    echo "Error dropping database:\n";
+    print_r(sqlsrv_errors());
 }
 
 $sqlFile = 'full_database_setup.sql';

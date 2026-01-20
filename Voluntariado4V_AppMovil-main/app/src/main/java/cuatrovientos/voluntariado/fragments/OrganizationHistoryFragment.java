@@ -76,7 +76,7 @@ public class OrganizationHistoryFragment extends Fragment {
         String userId = prefs.getString("USER_ID", null);
 
         // Initialize empty adapter
-        adapter = new ActivitiesAdapter(new ArrayList<>(), false); // false = org view (no buttons, no arrow)
+        adapter = new ActivitiesAdapter(new ArrayList<>(), true); // true = allow details
         rvHistory.setAdapter(adapter);
 
         if (userId != null) {

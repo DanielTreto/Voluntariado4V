@@ -84,7 +84,7 @@ public class OrganizationHomeFragment extends Fragment {
         }
 
         // Initialize empty adapter
-        adapter = new ActivitiesAdapter(new ArrayList<>(), false);
+        adapter = new ActivitiesAdapter(new ArrayList<>(), true);
         rvMyActivities.setAdapter(adapter);
 
         return view;

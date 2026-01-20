@@ -109,7 +109,7 @@ public class VolunteerDetailDialog extends DialogFragment {
         TextView tvAvailability = view.findViewById(R.id.tvDetailAvailability); // New
         
         tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
-        tvBirthDate.setText("Fecha Nac.: " + (volunteer.getBirthDate() != null ? volunteer.getBirthDate() : ""));
+        tvBirthDate.setText("Fecha Nac.: " + formatDate(volunteer.getBirthDate()));
         // Placeholder for Availability field (since it is missing in API model)
         tvAvailability.setText("Disponibilidad: Lunes a Viernes, 16:00 - 20:00");
 
@@ -235,7 +235,7 @@ public class VolunteerDetailDialog extends DialogFragment {
                              tvRole.setText(volunteer.getCourse() != null && !volunteer.getCourse().isEmpty() ? volunteer.getCourse() : "Sin curso");
                              
                              tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
-                             tvBirthDate.setText("Fecha Nac.: " + (volunteer.getBirthDate() != null ? volunteer.getBirthDate() : ""));
+                             tvBirthDate.setText("Fecha Nac.: " + formatDate(volunteer.getBirthDate()));
                              
                              // Availability Logic
                              if (volunteer.getAvailability() != null && !volunteer.getAvailability().isEmpty()) {
@@ -300,6 +300,21 @@ public class VolunteerDetailDialog extends DialogFragment {
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.MATCH_PARENT;
             dialog.getWindow().setLayout(width, height);
+        }
+    }
+    private String formatDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return "";
+        try {
+            // Assume input is like yyyy-MM-dd
+            String cleanDate = dateStr.contains("T") ? dateStr.split("T")[0] : dateStr;
+            // Also handle if it's already separated by slashes but wrong order? Unlikely if from API.
+            // Just standard ISO handling
+            java.text.SimpleDateFormat inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+            java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+            java.util.Date date = inputFormat.parse(cleanDate);
+            return outputFormat.format(date);
+        } catch (Exception e) {
+            return dateStr; // Fallback
         }
     }
 }

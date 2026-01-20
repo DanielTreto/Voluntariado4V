@@ -36,6 +36,10 @@ class Credenciales
     #[ORM\JoinColumn(name: "CODORG", referencedColumnName: "CODORG", nullable: true)]
     private ?Organizacion $organizacion = null;
 
+    #[ORM\OneToOne(targetEntity: Administrator::class, cascade: ['persist', 'remove'])]
+    #[ORM\JoinColumn(name: "CODADMIN", referencedColumnName: "id", nullable: true)]
+    private ?Administrator $administrador = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -97,6 +101,18 @@ class Credenciales
     public function setOrganizacion(?Organizacion $organizacion): static
     {
         $this->organizacion = $organizacion;
+
+        return $this;
+    }
+
+    public function getAdministrador(): ?Administrator
+    {
+        return $this->administrador;
+    }
+
+    public function setAdministrador(?Administrator $administrador): static
+    {
+        $this->administrador = $administrador;
 
         return $this;
     }

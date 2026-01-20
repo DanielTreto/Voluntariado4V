@@ -170,7 +170,8 @@ public class ActivityDetailDialog extends DialogFragment {
             // Check Admin Role for Volunteer Navigation
             android.content.SharedPreferences prefs = requireContext().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
             String role = prefs.getString("USER_ROLE", "");
-            boolean isAdmin = "admin".equalsIgnoreCase(role) || "administrator".equalsIgnoreCase(role);
+            boolean isAdmin = "admin".equalsIgnoreCase(role) || "administrator".equalsIgnoreCase(role) 
+                              || "organization".equalsIgnoreCase(role) || "organizacion".equalsIgnoreCase(role);
 
             // Volunteers List Rendering with Admin Logic
             if (volunteers != null && !volunteers.isEmpty()) {
