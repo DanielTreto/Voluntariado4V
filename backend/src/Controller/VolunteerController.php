@@ -40,6 +40,10 @@ class VolunteerController extends AbstractController
                 'avatar' => $v->getAVATAR(),
                 'avatar' => $v->getAVATAR(),
                 'preferences' => array_map(fn($t) => $t->getDESCRIPCION(), $v->getPreferencias()->toArray()),
+                'availability' => array_map(fn($d) => [
+                    'day' => $d->getDIA(),
+                    'time' => $d->getHORA()
+                ], $v->getDisponibilidades()->toArray()),
             ];
         }
 
@@ -71,6 +75,10 @@ class VolunteerController extends AbstractController
             'status' => $v->getESTADO(),
             'avatar' => $v->getAVATAR(),
             'preferences' => array_map(fn($t) => $t->getDESCRIPCION(), $v->getPreferencias()->toArray()),
+            'availability' => array_map(fn($d) => [
+                'day' => $d->getDIA(),
+                'time' => $d->getHORA()
+            ], $v->getDisponibilidades()->toArray()),
         ];
 
         $response = new JsonResponse($data);
