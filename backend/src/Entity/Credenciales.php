@@ -105,6 +105,18 @@ class Credenciales
         return $this;
     }
 
+    public function getAdministrator(): ?Administrator
+    {
+        return $this->administrador;
+    }
+
+    public function setAdministrator(?Administrator $administrador): static
+    {
+        $this->administrador = $administrador;
+
+        return $this;
+    }
+
     public function getAdministrador(): ?Administrator
     {
         return $this->administrador;

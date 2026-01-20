@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .load(savedAvatar)
                 .placeholder(R.drawable.ic_profile_placeholder)
                 .error(R.drawable.ic_profile_placeholder)
-                .circleCrop()
+                .centerCrop()
                 .into(navImage);
         } else {
              navImage.setImageResource(R.drawable.ic_profile_placeholder);

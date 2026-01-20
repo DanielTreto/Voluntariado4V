@@ -119,15 +119,27 @@ class AuthController extends AbstractController
                 }
 
                 // Handle Admin login
-                if ($cred->getUserType() === 'admin' || $cred->getUserType() === 'administrator') {
+                $admin = $cred->getAdministrator(); // Assuming getAdministrator exists
+                if ($admin) {
                      return new JsonResponse([
                         'success' => true,
                         'role' => 'admin',
-                        'id' => $cred->getId(), // Use Cred ID or 0
-                        'name' => 'Administrador', // Or a stored name if we had one
+                        'id' => $admin->getId(),
+                        'name' => trim($admin->getNombre() . ' ' . $admin->getApellidos()),
+                        'email' => $admin->getCorreo(),
+                        'firebaseUid' => $admin->getFirebaseUid() ?? 'admin-uid',
+                        'avatar' => $admin->getAVATAR()
+                    ]);
+                } else if ($cred->getUserType() === 'admin' || $cred->getUserType() === 'administrator') {
+                    // Fallback if relation is missing but type is correct
+                     return new JsonResponse([
+                        'success' => true,
+                        'role' => 'admin',
+                        'id' => 'adm001', // Fallback ID
+                        'name' => 'Administrador',
                         'email' => $cred->getCorreo(),
                         'firebaseUid' => 'admin-uid',
-                        'avatar' => null // Use default placeholder
+                        'avatar' => null
                     ]);
                 }
             }

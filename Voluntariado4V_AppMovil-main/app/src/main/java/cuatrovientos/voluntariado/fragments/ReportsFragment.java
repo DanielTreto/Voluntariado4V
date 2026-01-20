@@ -248,7 +248,7 @@ public class ReportsFragment extends Fragment {
                                       color = Color.parseColor("#2196F3"); // Blue
                                   } else if ("FINALIZADA".equals(status)) {
                                       label = "Finalizadas";
-                                      color = Color.parseColor("#F44336"); // Red
+                                      color = Color.parseColor("#757575"); // Gray
                                   } else if ("DENEGADA".equals(status)) {
                                       label = "Denegadas";
                                       color = Color.parseColor("#616161"); // Dark Gray
