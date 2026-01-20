@@ -120,9 +120,42 @@
     </div>
 
     <div class="mb-4">
-      <label class="form-label small text-secondary">Descripción / Intereses</label>
+      <label class="form-label small text-secondary">Descripción / Biografía</label>
       <textarea [(ngModel)]="volunteer.description" name="description" class="form-control custom-input"
         rows="2"></textarea>
+    </div>
+
+    <!-- AVAILABILITY -->
+    <div class="mb-4">
+      <label class="form-label small text-secondary fw-bold">Disponibilidad (Horas diarias)</label>
+      <div class="bg-light p-3 rounded-3">
+        <div class="row g-2">
+          <div class="col-6 col-md-4" *ngFor="let day of days">
+            <div class="form-floating">
+              <input type="number" min="0" max="24" class="form-control form-control-sm"
+                [(ngModel)]="availabilityMap[day]" [name]="'avail_'+day" placeholder="0">
+              <label class="small">{{ day | titlecase }}</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-text small mt-2">Indica cuántas horas tienes disponibles cada día.</div>
+      </div>
+    </div>
+
+    <!-- INTERESTS -->
+    <div class="mb-4" *ngIf="activityTypes.length > 0">
+      <label class="form-label small text-secondary fw-bold">Intereses</label>
+      <div class="card bg-white border">
+        <div class="card-body p-2" style="max-height: 150px; overflow-y: auto;">
+          <div *ngFor="let type of activityTypes" class="form-check">
+            <input class="form-check-input" type="checkbox" [value]="type.id"
+              (change)="togglePreference(type.id, $event)" [id]="'pref_'+type.id">
+            <label class="form-check-label small" [for]="'pref_'+type.id">
+              {{ type.description }}
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="form-check mb-4">

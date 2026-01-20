@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, output } from '@angular/core';
+import { Component, inject, output, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
 
@@ -10,7 +10,7 @@ import { ApiService } from '../../../services/api.service';
   templateUrl: './modal-register-vol.html',
   styleUrl: './modal-register-vol.scss',
 })
-export class ModalRegisterVol {
+export class ModalRegisterVol implements OnInit {
   onClose = output();
   onOpenLogin = output();
   onOpenRegisterOrg = output();
@@ -27,19 +27,37 @@ export class ModalRegisterVol {
     dateOfBirth: '',
     description: '',
     course: '',
-    password: ''
+    course: '',
+    password: '',
+    preferences: [] as number[],
+    availability: [] as any[]
   };
 
   globalError: string = '';
   submitting: boolean = false;
   errors: { [key: string]: string } = {};
   cycles: any[] = [];
+  activityTypes: any[] = [];
 
-  constructor() {
+  // Availability Logic
+  days: string[] = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
+  availabilityMap: { [key: string]: number } = {};
+
+  constructor() { }
+
+  ngOnInit() {
     this.apiService.getCiclos().subscribe({
       next: (data) => this.cycles = data,
       error: (e) => console.error('Error fetching cycles', e)
     });
+
+    this.apiService.getActivityTypes().subscribe({
+      next: (data) => this.activityTypes = data,
+      error: (e) => console.error('Error fetching activity types', e)
+    });
+
+    // Init availability map
+    this.days.forEach(day => this.availabilityMap[day] = 0);
   }
 
   closeModal(): void {
@@ -58,9 +76,32 @@ export class ModalRegisterVol {
     return true;
   }
 
+  // Preference Helper
+  togglePreference(typeId: number, event: any) {
+    if (event.target.checked) {
+      if (!this.volunteer.preferences.includes(typeId)) {
+        this.volunteer.preferences.push(typeId);
+      }
+    } else {
+      const index = this.volunteer.preferences.indexOf(typeId);
+      if (index > -1) {
+        this.volunteer.preferences.splice(index, 1);
+      }
+    }
+  }
+
   registerVolunteer(): void {
     this.globalError = '';
     this.submitting = true;
+
+    // Format Availability for Backend
+    const formattedAvailability = this.days.map(day => ({
+      day: day,
+      hours: this.availabilityMap[day] || 0
+    })).filter(a => a.hours >= 0); // Include 0 hours? Requirement says "cuantas horas". Usually 0 means not available. 
+    // If I send 0, backend stores 0. Let's send all.
+
+    this.volunteer.availability = formattedAvailability;
 
     this.apiService.registerVolunteer(this.volunteer).subscribe({
       next: (response) => {

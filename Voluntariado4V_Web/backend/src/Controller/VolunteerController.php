@@ -12,6 +12,7 @@ use App\Entity\Credenciales;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Ciclo;
+use App\Entity\Disponibilidad;
 use App\Repository\CicloRepository;
 use App\Repository\TipoActividadRepository;
 
@@ -39,6 +40,7 @@ class VolunteerController extends AbstractController
                 'status' => $v->getESTADO(),
                 'avatar' => $v->getAVATAR(),
                 'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
+                'availability' => array_map(fn($d) => ['day' => $d->getDIA(), 'hours' => $d->getNUM_HORAS()], $v->getDisponibilidades()->toArray()),
             ];
         }
 
@@ -70,6 +72,7 @@ class VolunteerController extends AbstractController
             'status' => $v->getESTADO(),
             'avatar' => $v->getAVATAR(),
             'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
+            'availability' => array_map(fn($d) => ['day' => $d->getDIA(), 'hours' => $d->getNUM_HORAS()], $v->getDisponibilidades()->toArray()),
         ];
 
         $response = new JsonResponse($data);
@@ -78,7 +81,7 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers', name: 'api_volunteers_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, CicloRepository $cicloRepository, VolunteerRepository $volunteerRepository): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, CicloRepository $cicloRepository, VolunteerRepository $volunteerRepository, TipoActividadRepository $tipoActividadRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -109,6 +112,12 @@ class VolunteerController extends AbstractController
                 $volunteer->setCiclo($ciclo);
             }
         }
+        
+        // Handle Preferences
+        if (isset($data['preferences']) && is_array($data['preferences'])) {
+            // Needed to inject TipoActividadRepository in create method signature
+            // Just fetching from EM or assume passed
+        }
 
 
 
@@ -125,6 +134,29 @@ class VolunteerController extends AbstractController
         $credenciales->setCorreo($data['email'] ?? '');
         $credenciales->setPassword($data['password'] ?? '');
         $entityManager->persist($credenciales);
+
+        // Process Preferences (Interests)
+        if (isset($data['preferences']) && is_array($data['preferences'])) {
+            foreach ($data['preferences'] as $typeId) {
+                $tipo = $tipoActividadRepository->find($typeId);
+                if ($tipo) {
+                    $volunteer->addPreferencia($tipo);
+                }
+            }
+        }
+
+        // Process Availability
+        if (isset($data['availability']) && is_array($data['availability'])) {
+            foreach ($data['availability'] as $avail) {
+                if (isset($avail['day']) && isset($avail['hours'])) {
+                    $disponibilidad = new Disponibilidad();
+                    $disponibilidad->setVoluntario($volunteer);
+                    $disponibilidad->setDIA($avail['day']);
+                    $disponibilidad->setNUM_HORAS((int)$avail['hours']);
+                    $entityManager->persist($disponibilidad);
+                }
+            }
+        }
 
         // Validation
         $errors = $validator->validate($volunteer);
@@ -269,6 +301,27 @@ class VolunteerController extends AbstractController
                 $tipo = $tipoActividadRepository->find($typeId);
                 if ($tipo) {
                     $volunteer->addPreferencia($tipo);
+                }
+            }
+        }
+
+        if (isset($data['availability']) && is_array($data['availability'])) {
+             // Clear existing availability
+             $existingAvails = $volunteer->getDisponibilidades(); // Assuming mapping exists, checking entity...
+             // Wait, remove loop might be tricky if collection modifies.
+             // Using direct repository delete might be safer or clearing collection.
+             foreach ($existingAvails as $av) {
+                 $entityManager->remove($av);
+             }
+             // Using flush in end
+             
+             foreach ($data['availability'] as $avail) {
+                if (isset($avail['day']) && isset($avail['hours'])) {
+                    $disponibilidad = new Disponibilidad();
+                    $disponibilidad->setVoluntario($volunteer);
+                    $disponibilidad->setDIA($avail['day']);
+                    $disponibilidad->setNUM_HORAS((int)$avail['hours']);
+                    $entityManager->persist($disponibilidad);
                 }
             }
         }

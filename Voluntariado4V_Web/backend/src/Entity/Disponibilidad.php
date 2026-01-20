@@ -20,10 +20,10 @@ class Disponibilidad
     #[Assert\NotBlank]
     private ?string $DIA = null;
 
-    #[ORM\Id]
-    #[ORM\Column(length: 10)]
-    #[Assert\NotBlank]
-    private ?string $HORA = null;
+    #[ORM\Column(name: 'NUM_HORAS', type: 'integer')]
+    #[Assert\NotNull]
+    #[Assert\PositiveOrZero]
+    private ?int $NUM_HORAS = 0;
 
     public function getVoluntario(): ?Volunteer
     {
@@ -47,14 +47,14 @@ class Disponibilidad
         return $this;
     }
 
-    public function getHORA(): ?string
+    public function getNUM_HORAS(): ?int
     {
-        return $this->HORA;
+        return $this->NUM_HORAS;
     }
 
-    public function setHORA(string $HORA): static
+    public function setNUM_HORAS(int $NUM_HORAS): static
     {
-        $this->HORA = $HORA;
+        $this->NUM_HORAS = $NUM_HORAS;
         return $this;
     }
 }

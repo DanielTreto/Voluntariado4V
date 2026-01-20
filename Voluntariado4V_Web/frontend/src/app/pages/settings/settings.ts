@@ -1,12 +1,12 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
@@ -27,6 +27,10 @@ export class SettingsComponent implements OnInit {
   activityTypes: any[] = [];
   title: string = 'Ajustes de Perfil';
 
+  // Availability
+  days: string[] = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES', 'SABADO', 'DOMINGO'];
+  availabilityMap: { [key: string]: number } = {};
+
   ngOnInit() {
     this.initForm();
 
@@ -41,6 +45,8 @@ export class SettingsComponent implements OnInit {
       this.currentUserId = 1; // Testing fallback
       this.currentUserRole = 'admin';
     }
+
+    this.days.forEach(day => this.availabilityMap[day] = 0);
 
     this.loadData();
   }
@@ -121,6 +127,15 @@ export class SettingsComponent implements OnInit {
           if (data.preferences) {
             this.settingsForm.patchValue({ preferences: data.preferences });
           }
+
+          if (data.availability && Array.isArray(data.availability)) {
+            data.availability.forEach((avail: any) => {
+              if (avail.day && avail.hours !== undefined) {
+                this.availabilityMap[avail.day] = avail.hours;
+              }
+            });
+          }
+
           this.loading = false;
           this.settingsForm.enable();
         },
@@ -182,6 +197,15 @@ export class SettingsComponent implements OnInit {
 
     // First update general data
     const data = this.settingsForm.value;
+
+    // Add Availability for Volunteer
+    if (this.currentUserRole === 'volunteer') {
+      const formattedAvailability = this.days.map(day => ({
+        day: day,
+        hours: this.availabilityMap[day] || 0
+      })).filter(a => a.hours >= 0);
+      data.availability = formattedAvailability;
+    }
 
     if (this.currentUserRole === 'volunteer') {
       this.apiService.updateVolunteer(this.currentUserId!, data).subscribe({
