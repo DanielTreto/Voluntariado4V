@@ -101,49 +101,77 @@
                 android:gravity="center_vertical"
                 android:textColor="@color/modal_text_secondary"/>
 
-            <TextView
-                android:id="@+id/tvDetailPhone"
+            <!-- Row 1: Phone and BirthDate -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="+34 600 000 000"
-                android:drawableStart="@android:drawable/sym_action_call" 
-                android:drawablePadding="8dp"
-                app:drawableTint="@color/modal_text_primary"
-                android:gravity="center_vertical"
-                android:textColor="@color/modal_text_secondary"/>
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/tvDetailPhone"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="+34 600 000 000"
+                    android:drawableStart="@android:drawable/sym_action_call"
+                    android:drawablePadding="8dp"
+                    app:drawableTint="@color/modal_text_primary"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/modal_text_secondary"/>
+
+                <TextView
+                    android:id="@+id/tvDetailBirthDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="01/01/2000"
+                    android:drawableStart="@drawable/ic_date_range"
+                    android:drawablePadding="8dp"
+                    app:drawableTint="@color/modal_text_primary"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/modal_text_secondary"/>
+            </LinearLayout>
+
+            <!-- Row 2: DNI and Course (Role) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:id="@+id/tvDetailDni"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="12345678A"
+                    android:drawableStart="@drawable/ic_badge"
+                    android:drawablePadding="8dp"
+                    app:drawableTint="@color/modal_text_primary"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/modal_text_secondary"/>
+
+                <TextView
+                    android:id="@+id/tvDetailRole"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Community Project"
+                    android:drawableStart="@drawable/ic_info_outline"
+                    android:drawablePadding="8dp"
+                    app:drawableTint="@color/modal_text_primary"
+                    android:gravity="center_vertical"
+                    android:textColor="@color/modal_text_secondary"/>
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/tvDetailDni"
+                android:id="@+id/tvDetailAvailability"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="12345678A"
-                android:drawableStart="@drawable/ic_badge"
-                android:drawablePadding="8dp"
-                app:drawableTint="@color/modal_text_primary"
-                android:gravity="center_vertical"
-                android:textColor="@color/modal_text_secondary"/>
-
-            <TextView
-                android:id="@+id/tvDetailBirthDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="01/01/2000"
-                android:drawableStart="@drawable/ic_date_range"
-                android:drawablePadding="8dp"
-                app:drawableTint="@color/modal_text_primary"
-                android:gravity="center_vertical"
-                android:textColor="@color/modal_text_secondary"/>
-            
-            <TextView
-                android:id="@+id/tvDetailRole"
-                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Community Project"
-                android:drawableStart="@drawable/ic_info_outline"
+                android:text="Lunes, Miércoles: 16:00 - 20:00"
+                android:drawableStart="@drawable/ic_history_clock"
                 android:drawablePadding="8dp"
                 app:drawableTint="@color/modal_text_primary"
                 android:gravity="center_vertical"

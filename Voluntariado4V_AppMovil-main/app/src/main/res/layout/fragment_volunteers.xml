@@ -70,7 +70,28 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_marginEnd="8dp"/>
 
-            <!-- Additional filters can be added here if needed -->
+            <!-- Additional filters -->
+            <Button
+                android:id="@+id/btnFilterPreferences"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Preferencias"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterAvailability"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Disponibilidad"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
         </LinearLayout>
     </HorizontalScrollView>
 

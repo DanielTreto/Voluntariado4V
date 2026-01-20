@@ -14,6 +14,7 @@ public class ApiVolunteer {
     private String status;
     private String avatar; // Restored
     private java.util.List<String> preferences; 
+    private java.util.List<ApiAvailability> availability;
 
     // Getters
     public String getId() { return id; }
@@ -29,4 +30,5 @@ public class ApiVolunteer {
     public String getStatus() { return status; }
     public String getAvatar() { return avatar; }
     public java.util.List<String> getPreferences() { return preferences; }
+    public java.util.List<ApiAvailability> getAvailability() { return availability; }
 }

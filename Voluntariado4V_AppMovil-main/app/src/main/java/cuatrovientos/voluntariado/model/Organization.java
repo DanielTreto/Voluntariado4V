@@ -14,10 +14,11 @@ public class Organization {
     private String volunteersCount;
     private String status;         
     private String avatarUrl;      
+    private java.util.Set<String> activityStatuses; // <--- NEW
 
     public Organization() {}
 
-    public Organization(String id, String name, String email, String description, String type, String phone, String sector, String scope, String contactPerson, String date, String volunteersCount, String status, String avatarUrl) {
+    public Organization(String id, String name, String email, String description, String type, String phone, String sector, String scope, String contactPerson, String date, String volunteersCount, String status, String avatarUrl, java.util.Set<String> activityStatuses) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -31,7 +32,11 @@ public class Organization {
         this.volunteersCount = volunteersCount;
         this.status = status;
         this.avatarUrl = avatarUrl;
+        this.activityStatuses = activityStatuses;
     }
+
+    public java.util.Set<String> getActivityStatuses() { return activityStatuses; }
+    public void setActivityStatuses(java.util.Set<String> activityStatuses) { this.activityStatuses = activityStatuses; }
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }

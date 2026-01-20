@@ -40,8 +40,15 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
         Organization org = orgList.get(position);
 
         holder.tvName.setText(org.getName());
-        holder.tvEmail.setText(org.getEmail());
+        holder.tvDescription.setText(org.getDescription() != null && !org.getDescription().isEmpty() ? org.getDescription() : "Sin descripción disponible.");
         holder.tvStatus.setText(org.getStatus());
+        
+        holder.tvEmailInfo.setText(org.getEmail());
+
+        // Settings Phone (Common for both)
+        String phone = org.getPhone();
+        if (phone == null || phone.isEmpty()) holder.tvPhone.setText("Sin teléfono");
+        else holder.tvPhone.setText(phone);
 
         if (org.getAvatarUrl() != null) {
              Glide.with(holder.itemView.getContext())
@@ -51,16 +58,13 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
                  .circleCrop()
                  .into(holder.imgLogo);
         } else {
-             // Reset to default if recycled
              holder.imgLogo.setImageResource(R.drawable.ic_business);
-             holder.imgLogo.setBackground(null); // Clear background
+             holder.imgLogo.setBackground(null);
         }
 
         if (org.getStatus().equals("Pending")) {
             // --- MODO SOLICITUD ---
-            // 1. Mostrar botones Aceptar/Denegar -> AHORA DENEGADO (SOLO VISUALIZAR)
             holder.actionsLayout.setVisibility(View.GONE);
-            // 2. Mostrar +
             holder.btnMoreOptions.setVisibility(View.VISIBLE);
             holder.btnMoreOptions.setOnClickListener(v -> {
                  if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
@@ -71,19 +75,17 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
                  }
             });
 
-            // 3. Mostrar FECHA
-            holder.tvInfo.setText("Fecha solicitud: " + org.getDate());
+            // Ocultar contador de voluntarios
+            holder.tvVolunteersCount.setVisibility(View.GONE);
 
-            // 4. Color Pendiente (Naranja para igualar Voluntarios)
+            // Color Pendiente
             holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1"));
             holder.tvStatus.setTextColor(Color.parseColor("#FFA000"));
             holder.tvStatus.setText("Pendiente");
 
         } else {
             // --- MODO REGISTRADA ---
-            // 1. Ocultar botones
             holder.actionsLayout.setVisibility(View.GONE);
-            // 2. Mostrar 3 puntos
             holder.btnMoreOptions.setVisibility(View.VISIBLE);
             holder.btnMoreOptions.setOnClickListener(v -> {
                  if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
@@ -94,10 +96,11 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
                  }
             });
 
-            // 3. Mostrar CONTADOR DE VOLUNTARIOS
-            holder.tvInfo.setText("Voluntariados creados: " + org.getVolunteersCount());
+            // Mostrar contador de voluntarios
+            holder.tvVolunteersCount.setVisibility(View.VISIBLE);
+            holder.tvVolunteersCount.setText(org.getVolunteersCount() + " Voluntariados creados");
 
-            // 4. Color Activo (Verde) o Suspendido (Rojo)
+            // Color Activo/Suspendido
             if (org.getStatus().equals("Active")) {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9"));
                 holder.tvStatus.setTextColor(Color.parseColor("#4CAF50"));
@@ -118,7 +121,7 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
     }
 
     public static class OrgViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvEmail, tvStatus, tvInfo;
+        TextView tvName, tvDescription, tvStatus, tvPhone, tvVolunteersCount, tvEmailInfo;
         android.widget.ImageView btnMoreOptions;
         ImageView imgLogo;
         LinearLayout actionsLayout;
@@ -127,9 +130,11 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
             super(itemView);
             imgLogo = itemView.findViewById(R.id.imgLogo);
             tvName = itemView.findViewById(R.id.tvOrgName);
-            tvEmail = itemView.findViewById(R.id.tvOrgEmail);
+            tvDescription = itemView.findViewById(R.id.tvOrgDescription);
             tvStatus = itemView.findViewById(R.id.chipOrgStatus);
-            tvInfo = itemView.findViewById(R.id.tvOrgInfo);
+            tvEmailInfo = itemView.findViewById(R.id.tvOrgEmailInfo);
+            tvPhone = itemView.findViewById(R.id.tvOrgPhone);
+            tvVolunteersCount = itemView.findViewById(R.id.tvOrgVolunteersCount);
             btnMoreOptions = itemView.findViewById(R.id.btnOrgMoreOptions);
             actionsLayout = itemView.findViewById(R.id.actionsOrgLayout);
         }

@@ -54,7 +54,8 @@ public class ActivityMapper {
                         null, // Preferences
                         "Active", // Status (Assumed)
                         avatarUrl,
-                        apiVol.getCourse() // Course
+                        apiVol.getCourse(), // Course
+                        null // Availability (Not needed for participants list)
                 ));
             }
         }

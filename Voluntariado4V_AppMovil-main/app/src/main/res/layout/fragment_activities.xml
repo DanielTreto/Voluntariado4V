@@ -80,6 +80,17 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_marginEnd="8dp"/>
 
+            <Button
+                android:id="@+id/btnFilterCapacity"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Plazas"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
         </LinearLayout>
     </HorizontalScrollView>
 

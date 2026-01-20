@@ -35,7 +35,8 @@ public class ActivitiesFragment extends Fragment {
     private String currentTypeFilter = "Todos";
     private String currentOdsFilter = "Todos";
     private String currentStatusFilter = "Todos";
-    private boolean isAscending = true;
+    private String currentCapacityFilter = "Todos";
+    private String currentSortOption = "NameAsc"; // NameAsc, NameDesc, DateAsc, DateDesc
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -66,20 +67,11 @@ public class ActivitiesFragment extends Fragment {
         android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
         btnFilterStatus.setOnClickListener(v -> showStatusFilterDialog());
 
+        android.widget.Button btnFilterCapacity = view.findViewById(R.id.btnFilterCapacity);
+        btnFilterCapacity.setOnClickListener(v -> showCapacityFilterDialog());
+
         android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
-        btnSortActivities.setOnClickListener(v -> {
-            isAscending = !isAscending;
-            btnSortActivities.setText(isAscending ? "Orden: A-Z" : "Orden: Z-A");
-            
-            TabLayout tabs = getView().findViewById(R.id.tabLayoutAct); 
-            if (tabs != null) {
-                if (tabs.getSelectedTabPosition() == 0) {
-                     filterList("Solicitudes");
-                } else {
-                     filterList("Registradas");
-                }
-            }
-        });
+        btnSortActivities.setOnClickListener(v -> showSortDialog());
 
         masterList = new ArrayList<>();
         fetchActivities();
@@ -98,6 +90,41 @@ public class ActivitiesFragment extends Fragment {
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
+    }
+
+    private void showSortDialog() {
+        String[] options = {"Nombre (A-Z)", "Nombre (Z-A)", "Fecha (Próximas)", "Fecha (Lejanas)"};
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Ordenar por")
+            .setItems(options, (dialog, which) -> {
+                android.widget.Button btn = getView().findViewById(R.id.btnSortActivities);
+                switch(which) {
+                    case 0: currentSortOption = "NameAsc"; if(btn!=null) btn.setText("Orden: A-Z"); break;
+                    case 1: currentSortOption = "NameDesc"; if(btn!=null) btn.setText("Orden: Z-A"); break;
+                    case 2: currentSortOption = "DateAsc"; if(btn!=null) btn.setText("Orden: Prox. Fecha"); break;
+                    case 3: currentSortOption = "DateDesc"; if(btn!=null) btn.setText("Orden: Lej. Fecha"); break;
+                }
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutAct);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
+    }
+
+    private void showCapacityFilterDialog() {
+        String[] options = {"Todos", "Con Plazas", "Llenas"};
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Plazas")
+            .setItems(options, (dialog, which) -> {
+                currentCapacityFilter = options[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterCapacity);
+                if (btn != null) btn.setText(currentCapacityFilter.equals("Todos") ? "Plazas" : currentCapacityFilter);
+                
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutAct);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
     }
 
     private void showStatusFilterDialog() {
@@ -144,20 +171,12 @@ public class ActivitiesFragment extends Fragment {
     }
 
     private void showOdsFilterDialog() {
-        if (masterList == null) return;
-        java.util.Set<Integer> odsSet = new java.util.HashSet<>();
-        for (VolunteerActivity act : masterList) {
-            if (act.getOds() != null) {
-                for (cuatrovientos.voluntariado.model.Ods ods : act.getOds()) odsSet.add(ods.getId());
-            }
+        // Hardcoded ODS 1-17
+        String[] odsArray = new String[18];
+        odsArray[0] = "Todos";
+        for (int i = 1; i <= 17; i++) {
+            odsArray[i] = String.valueOf(i);
         }
-        
-        List<Integer> odsList = new ArrayList<>(odsSet);
-        Collections.sort(odsList);
-        List<String> options = new ArrayList<>();
-        options.add("Todos");
-        for (Integer id : odsList) options.add(String.valueOf(id));
-        String[] odsArray = options.toArray(new String[0]);
 
         new android.app.AlertDialog.Builder(getContext())
             .setTitle("Filtrar por ODS")
@@ -247,7 +266,18 @@ public class ActivitiesFragment extends Fragment {
                  if (!act.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
             }
 
-            if (matchesTab && matchesType && matchesOds && matchesStatus) {
+            // 5. Capacity Filter
+            boolean matchesCapacity = true;
+            if (!currentCapacityFilter.equals("Todos")) {
+                 int currentParticipants = act.getParticipants() != null ? act.getParticipants().size() : 0;
+                 if (currentCapacityFilter.equals("Con Plazas")) {
+                     if (currentParticipants >= act.getMaxVolunteers()) matchesCapacity = false;
+                 } else if (currentCapacityFilter.equals("Llenas")) {
+                     if (currentParticipants < act.getMaxVolunteers()) matchesCapacity = false;
+                 }
+            }
+
+            if (matchesTab && matchesType && matchesOds && matchesStatus && matchesCapacity) {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(act);
                 } else {
@@ -261,23 +291,35 @@ public class ActivitiesFragment extends Fragment {
         }
 
         Collections.sort(filteredList, (a1, a2) -> {
-            String title1 = a1.getTitle().toLowerCase();
-            String title2 = a2.getTitle().toLowerCase();
-            if (isAscending) return title1.compareTo(title2);
-            else return title2.compareTo(title1);
+            if (currentSortOption.startsWith("Date")) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                java.util.Date d1, d2;
+                try { d1 = sdf.parse(a1.getDate()); } catch(Exception e) { d1 = new java.util.Date(0); }
+                try { d2 = sdf.parse(a2.getDate()); } catch(Exception e) { d2 = new java.util.Date(0); }
+                
+                if (currentSortOption.equals("DateAsc")) return d1.compareTo(d2);
+                else return d2.compareTo(d1);
+            } else {
+                String title1 = a1.getTitle().toLowerCase();
+                String title2 = a2.getTitle().toLowerCase();
+                if (currentSortOption.equals("NameAsc")) return title1.compareTo(title2);
+                else return title2.compareTo(title1);
+            }
         });
 
         if (adapter != null) adapter.updateList(filteredList);
 
-        RecyclerView recyclerView = getView().findViewById(R.id.recyclerActivities);
-        android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyActivities);
+        if (getView() != null) {
+            RecyclerView recyclerView = getView().findViewById(R.id.recyclerActivities);
+            android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyActivities);
 
-        if (filteredList.isEmpty()) {
-            recyclerView.setVisibility(View.GONE);
-            emptyView.setVisibility(View.VISIBLE);
-        } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            emptyView.setVisibility(View.GONE);
+            if (filteredList.isEmpty()) {
+                recyclerView.setVisibility(View.GONE);
+                emptyView.setVisibility(View.VISIBLE);
+            } else {
+                recyclerView.setVisibility(View.VISIBLE);
+                emptyView.setVisibility(View.GONE);
+            }
         }
     }
 }

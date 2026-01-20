@@ -32,6 +32,8 @@ public class VolunteersFragment extends Fragment {
     private String currentSearchQuery = "";
     private String currentCourseFilter = "Todos";
     private String currentStatusFilter = "Todos";
+    private String currentPreferenceFilter = "Todos";
+    private String currentAvailabilityFilter = "Todos";
     private boolean isAscending = true;
 
     @Override
@@ -59,6 +61,12 @@ public class VolunteersFragment extends Fragment {
 
         android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
         btnFilterStatus.setOnClickListener(v -> showStatusFilterDialog());
+
+        android.widget.Button btnFilterPreferences = view.findViewById(R.id.btnFilterPreferences);
+        btnFilterPreferences.setOnClickListener(v -> showPreferencesFilterDialog());
+
+        android.widget.Button btnFilterAvailability = view.findViewById(R.id.btnFilterAvailability);
+        btnFilterAvailability.setOnClickListener(v -> showAvailabilityFilterDialog());
 
         android.widget.Button btnSortVolunteers = view.findViewById(R.id.btnSortVolunteers);
         btnSortVolunteers.setOnClickListener(v -> {
@@ -129,6 +137,67 @@ public class VolunteersFragment extends Fragment {
             .show();
     }
 
+    private void showPreferencesFilterDialog() {
+        if (masterList == null) return;
+        java.util.Set<String> prefSet = new java.util.HashSet<>();
+        prefSet.add("Todos");
+        for (Volunteer v : masterList) {
+            if (v.getPreferences() != null) {
+                prefSet.addAll(v.getPreferences());
+            }
+        }
+        List<String> prefList = new ArrayList<>(prefSet);
+        Collections.sort(prefList);
+        String[] prefArray = prefList.toArray(new String[0]);
+
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Preferencia")
+            .setItems(prefArray, (dialog, which) -> {
+                currentPreferenceFilter = prefArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterPreferences);
+                if (btn != null) btn.setText(currentPreferenceFilter.equals("Todos") ? "Preferencias" : currentPreferenceFilter);
+                
+                TabLayout tabs = getView().findViewById(R.id.tabLayout);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registrados");
+            })
+            .show();
+    }
+
+    private void showAvailabilityFilterDialog() {
+        if (masterList == null) return;
+        java.util.Set<String> availSet = new java.util.HashSet<>();
+        availSet.add("Todos");
+        
+        for (Volunteer v : masterList) {
+            if (v.getAvailability() != null) {
+                for (String avString : v.getAvailability()) {
+                    // String format is "DAY: TIME"
+                    if (avString.contains(":")) {
+                        String day = avString.split(":")[0].trim().toUpperCase();
+                        availSet.add(day);
+                    }
+                }
+            }
+        }
+        List<String> availList = new ArrayList<>(availSet);
+        Collections.sort(availList);
+        String[] availArray = availList.toArray(new String[0]);
+
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Disponibilidad (Día)")
+            .setItems(availArray, (dialog, which) -> {
+                currentAvailabilityFilter = availArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterAvailability);
+                if (btn != null) btn.setText(currentAvailabilityFilter.equals("Todos") ? "Disponibilidad" : currentAvailabilityFilter);
+                
+                TabLayout tabs = getView().findViewById(R.id.tabLayout);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registrados");
+            })
+            .show();
+    }
+
     private void fetchVolunteers() {
         cuatrovientos.voluntariado.network.ApiService apiService = 
             cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
@@ -147,6 +216,13 @@ public class VolunteersFragment extends Fragment {
                             else avatarUrl = "http://10.0.2.2:8000" + avatarPath;
                         }
                         
+                        java.util.List<String> availability = new java.util.ArrayList<>();
+                        if (apiVol.getAvailability() != null) {
+                            for (cuatrovientos.voluntariado.network.model.ApiAvailability av : apiVol.getAvailability()) {
+                                availability.add(av.getDay() + ": " + av.getTime());
+                            }
+                        }
+
                         masterList.add(new Volunteer(
                             String.valueOf(apiVol.getId()),
                             apiVol.getName(),
@@ -161,7 +237,8 @@ public class VolunteersFragment extends Fragment {
                             apiVol.getPreferences(),
                             status,
                             avatarUrl,
-                            apiVol.getCourse()
+                            apiVol.getCourse(),
+                            availability
                         ));
                     }
                     if (getView() != null) {
@@ -218,7 +295,35 @@ public class VolunteersFragment extends Fragment {
                  if (!v.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
             }
 
-            if (matchesTab && matchesCourse && matchesStatus) {
+            // 4. Preference Filter
+            boolean matchesPreference = true;
+            if (!currentPreferenceFilter.equals("Todos")) {
+                matchesPreference = false;
+                if (v.getPreferences() != null) {
+                    for (String pref : v.getPreferences()) {
+                        if (pref.equalsIgnoreCase(currentPreferenceFilter)) {
+                            matchesPreference = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 5. Availability Filter
+            boolean matchesAvailability = true;
+            if (!currentAvailabilityFilter.equals("Todos")) {
+                matchesAvailability = false;
+                if (v.getAvailability() != null) {
+                    for (String avString : v.getAvailability()) {
+                        if (avString.toUpperCase().contains(currentAvailabilityFilter.toUpperCase())) {
+                            matchesAvailability = true;
+                             break;
+                        }
+                    }
+                }
+            }
+
+            if (matchesTab && matchesCourse && matchesStatus && matchesPreference && matchesAvailability) {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(v);
                 } else {
@@ -242,15 +347,17 @@ public class VolunteersFragment extends Fragment {
 
         if (adapter != null) adapter.updateList(filteredList);
 
-        RecyclerView recyclerView = getView().findViewById(R.id.recyclerVolunteers);
-        android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyVolunteers);
+        if (getView() != null) {
+            RecyclerView recyclerView = getView().findViewById(R.id.recyclerVolunteers);
+            android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyVolunteers);
 
-        if (filteredList.isEmpty()) {
-            recyclerView.setVisibility(View.GONE);
-            emptyView.setVisibility(View.VISIBLE);
-        } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            emptyView.setVisibility(View.GONE);
+            if (filteredList.isEmpty()) {
+                recyclerView.setVisibility(View.GONE);
+                emptyView.setVisibility(View.VISIBLE);
+            } else {
+                recyclerView.setVisibility(View.VISIBLE);
+                emptyView.setVisibility(View.GONE);
+            }
         }
     }
 }

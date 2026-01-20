@@ -79,32 +79,12 @@ public class ActivityDetailDialog extends DialogFragment {
             tvType.setBackgroundColor(activity.getImageColor());
             
             // Translate Status
+            // Translate Status using ActivityMapper for consistency
             String rawStatus = activity.getStatus();
-            String displayStatus = rawStatus;
-            int statusColor = 0xFF000000;
-            int statusBg = 0xFFE0E0E0;
             
-            if ("Active".equalsIgnoreCase(rawStatus) || "ACTIVO".equalsIgnoreCase(rawStatus)) {
-                displayStatus = "Activa";
-                statusColor = 0xFF4CAF50; // Green
-                statusBg = 0xFFE8F5E9;
-            } else if ("Pending".equalsIgnoreCase(rawStatus) || "PENDIENTE".equalsIgnoreCase(rawStatus)) {
-                displayStatus = "Pendiente";
-                statusColor = 0xFFFFA000; // Orange
-                statusBg = 0xFFFFF8E1;
-            } else if ("Finished".equalsIgnoreCase(rawStatus) || "FINALIZADA".equalsIgnoreCase(rawStatus)) {
-                displayStatus = "Finalizada";
-                statusColor = 0xFFF44336; // Red
-                statusBg = 0xFFFFEBEE;
-            } else if ("InProgress".equalsIgnoreCase(rawStatus) || "EN_PROGRESO".equalsIgnoreCase(rawStatus)) {
-                displayStatus = "En Progreso";
-                statusColor = 0xFF2196F3; // Blue
-                statusBg = 0xFFE3F2FD;
-            }
-            
-            tvStatus.setText(displayStatus);
-            tvStatus.setTextColor(statusColor);
-            tvStatus.setBackgroundColor(statusBg);
+            tvStatus.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(rawStatus));
+            tvStatus.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(rawStatus));
+            tvStatus.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(rawStatus));
 
             // Organization Logic
             tvOrgName.setText(activity.getOrganizationName() != null ? activity.getOrganizationName() : "Cuatrovientos");

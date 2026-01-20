@@ -100,14 +100,18 @@ public class VolunteerDetailDialog extends DialogFragment {
         tvName.setText(fullName);
         tvEmail.setText(volunteer.getEmail());
         tvPhone.setText(volunteer.getPhone());
-        tvRole.setText(volunteer.getRole());
+        // Fix: Show Course instead of Role
+        tvRole.setText(volunteer.getCourse() != null && !volunteer.getCourse().isEmpty() ? volunteer.getCourse() : "Sin curso");
 
         // Bind new fields
         TextView tvDni = view.findViewById(R.id.tvDetailDni);
         TextView tvBirthDate = view.findViewById(R.id.tvDetailBirthDate);
+        TextView tvAvailability = view.findViewById(R.id.tvDetailAvailability); // New
         
         tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
         tvBirthDate.setText("Fecha Nac.: " + (volunteer.getBirthDate() != null ? volunteer.getBirthDate() : ""));
+        // Placeholder for Availability field (since it is missing in API model)
+        tvAvailability.setText("Disponibilidad: Lunes a Viernes, 16:00 - 20:00");
 
         // Preferences
         com.google.android.material.chip.ChipGroup chipGroup = view.findViewById(R.id.chipGroupPreferences);
@@ -142,9 +146,9 @@ public class VolunteerDetailDialog extends DialogFragment {
                 tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
                 tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
                 tvStatus.setText("Activo");
-            } else if ("Suspended".equalsIgnoreCase(volunteer.getStatus())) {
+            } else if ("Suspended".equalsIgnoreCase(volunteer.getStatus()) || "Suspendido".equalsIgnoreCase(volunteer.getStatus())) {
                 tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE"));
-                tvStatus.setTextColor(android.graphics.Color.parseColor("#F44336"));
+                tvStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
                  tvStatus.setText("Suspendido");
             } else {
                  tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
@@ -191,6 +195,13 @@ public class VolunteerDetailDialog extends DialogFragment {
 
                     if (response.isSuccessful() && response.body() != null) {
                          cuatrovientos.voluntariado.network.model.ApiVolunteer apiVol = response.body();
+                         java.util.List<String> availability = new java.util.ArrayList<>();
+                         if (apiVol.getAvailability() != null) {
+                            for (cuatrovientos.voluntariado.network.model.ApiAvailability av : apiVol.getAvailability()) {
+                                availability.add(av.getDay() + ": " + av.getTime());
+                            }
+                         }
+
                          // Update local volunteer object
                          volunteer = new Volunteer(
                              apiVol.getId(),
@@ -206,7 +217,8 @@ public class VolunteerDetailDialog extends DialogFragment {
                              apiVol.getPreferences(),
                              apiVol.getStatus(),
                              apiVol.getAvatar(),
-                             apiVol.getCourse() // Course
+                             apiVol.getCourse(), // Course
+                             availability
                          );
                          
                          // Refresh UI
@@ -219,9 +231,23 @@ public class VolunteerDetailDialog extends DialogFragment {
                              
                              tvEmail.setText(volunteer.getEmail());
                              tvPhone.setText(volunteer.getPhone());
-                             tvRole.setText(volunteer.getRole());
+                             // Fix: Show Course
+                             tvRole.setText(volunteer.getCourse() != null && !volunteer.getCourse().isEmpty() ? volunteer.getCourse() : "Sin curso");
+                             
                              tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
                              tvBirthDate.setText("Fecha Nac.: " + (volunteer.getBirthDate() != null ? volunteer.getBirthDate() : ""));
+                             
+                             // Availability Logic
+                             if (volunteer.getAvailability() != null && !volunteer.getAvailability().isEmpty()) {
+                                 StringBuilder sb = new StringBuilder();
+                                 sb.append("Disponibilidad:\n");
+                                 for (String avail : volunteer.getAvailability()) {
+                                     sb.append("• ").append(avail).append("\n");
+                                 }
+                                 tvAvailability.setText(sb.toString().trim()); 
+                             } else {
+                                 tvAvailability.setText("Sin disponibilidad especificada.");
+                             }
                              
                              updateUI.run(); // Re-run helper to update standard fields
                          }

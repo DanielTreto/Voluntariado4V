@@ -59,15 +59,28 @@
                 android:layout_marginEnd="8dp"/>
 
             <Button
-                android:id="@+id/btnFilterType"
+                android:id="@+id/btnFilterScope"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:text="Tipo"
+                android:text="Ámbito"
                 android:textSize="12sp"
                 android:backgroundTint="@color/white"
                 android:textColor="@color/colorPrimary"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterActivityStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Actividades"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+
 
         </LinearLayout>
     </HorizontalScrollView>

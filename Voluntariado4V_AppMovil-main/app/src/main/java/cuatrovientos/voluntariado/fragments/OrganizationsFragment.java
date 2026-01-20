@@ -33,8 +33,9 @@ public class OrganizationsFragment extends Fragment {
     }
 
     private String currentSearchQuery = "";
-    private String currentTypeFilter = "Todos";
     private String currentStatusFilter = "Todos";
+    private String currentScopeFilter = "Todos";
+    private String currentActivityStatusFilter = "Todos";
     private boolean isAscending = true;
 
     @Override
@@ -57,11 +58,14 @@ public class OrganizationsFragment extends Fragment {
             @Override public void afterTextChanged(android.text.Editable s) {}
         });
 
-        android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
-        btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
-
         android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
         btnFilterStatus.setOnClickListener(v -> showStatusFilterDialog());
+
+        android.widget.Button btnFilterScope = view.findViewById(R.id.btnFilterScope);
+        btnFilterScope.setOnClickListener(v -> showScopeFilterDialog());
+
+        android.widget.Button btnFilterActivityStatus = view.findViewById(R.id.btnFilterActivityStatus);
+        btnFilterActivityStatus.setOnClickListener(v -> showActivityStatusFilterDialog());
 
         android.widget.Button btnSortOrganizations = view.findViewById(R.id.btnSortOrganizations);
         btnSortOrganizations.setOnClickListener(v -> {
@@ -107,24 +111,41 @@ public class OrganizationsFragment extends Fragment {
             .show();
     }
 
-    private void showTypeFilterDialog() {
+    private void showScopeFilterDialog() {
         if (masterList == null) return;
-        java.util.Set<String> typesSet = new java.util.HashSet<>();
-        typesSet.add("Todos");
+        java.util.Set<String> scopeSet = new java.util.HashSet<>();
+        scopeSet.add("Todos");
         for (Organization org : masterList) {
-            if (org.getType() != null && !org.getType().isEmpty()) typesSet.add(org.getType());
+            if (org.getScope() != null && !org.getScope().isEmpty()) scopeSet.add(org.getScope());
         }
         
-        List<String> typesList = new ArrayList<>(typesSet);
-        Collections.sort(typesList);
-        String[] typesArray = typesList.toArray(new String[0]);
+        List<String> scopeList = new ArrayList<>(scopeSet);
+        Collections.sort(scopeList);
+        String[] scopeArray = scopeList.toArray(new String[0]);
 
         new android.app.AlertDialog.Builder(getContext())
-            .setTitle("Filtrar por Tipo")
-            .setItems(typesArray, (dialog, which) -> {
-                currentTypeFilter = typesArray[which];
-                android.widget.Button btn = getView().findViewById(R.id.btnFilterType);
-                if (btn != null) btn.setText(currentTypeFilter.equals("Todos") ? "Tipo" : currentTypeFilter);
+            .setTitle("Filtrar por Ámbito")
+            .setItems(scopeArray, (dialog, which) -> {
+                currentScopeFilter = scopeArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterScope);
+                if (btn != null) btn.setText(currentScopeFilter.equals("Todos") ? "Ámbito" : currentScopeFilter);
+                TabLayout tabs = getView().findViewById(R.id.tabLayoutOrg);
+                if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                else filterList("Registradas");
+            })
+            .show();
+    }
+
+    private void showActivityStatusFilterDialog() {
+        String[] statuses = {"Todos", "Con actividades pendientes", "Con actividades activas", "Con actividades en progreso", "Con actividades finalizadas", "Con actividades suspendidas"};
+        
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Actividades")
+            .setItems(statuses, (dialog, which) -> {
+                currentActivityStatusFilter = statuses[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterActivityStatus);
+                if (btn != null) btn.setText(currentActivityStatusFilter.equals("Todos") ? "Actividades" : currentActivityStatusFilter);
+                
                 TabLayout tabs = getView().findViewById(R.id.tabLayoutOrg);
                 if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
                 else filterList("Registradas");
@@ -136,46 +157,116 @@ public class OrganizationsFragment extends Fragment {
         cuatrovientos.voluntariado.network.ApiService apiService = 
             cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
 
+        // Nested Call: 1. Get Organizations
         apiService.getOrganizations().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiOrganization>>() {
             @Override
-            public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    masterList.clear();
-                    for (cuatrovientos.voluntariado.network.model.ApiOrganization apiOrg : response.body()) {
-                        String status = mapStatus(apiOrg.getStatus());
-                        String volunteersCount = apiOrg.getDescription() != null && apiOrg.getDescription().isEmpty() ? "0" : "5"; 
-                        String avatarPath = apiOrg.getAvatar();
-                        String avatarUrl = null;
-                        if (avatarPath != null) {
-                            if (avatarPath.startsWith("http")) avatarUrl = avatarPath;
-                            else avatarUrl = "http://10.0.2.2:8000" + avatarPath;
+            public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> callOrg, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> responseOrg) {
+                if (responseOrg.isSuccessful() && responseOrg.body() != null) {
+                    List<cuatrovientos.voluntariado.network.model.ApiOrganization> apiOrgs = responseOrg.body();
+                    
+                    // Nested Call: 2. Get Activities for Counts
+                    apiService.getActivities().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
+                        @Override
+                        public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> callAct, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> responseAct) {
+                             // Calculate counts and statuses
+                             java.util.Map<String, Integer> orgCounts = new java.util.HashMap<>();
+                             java.util.Map<String, java.util.Set<String>> orgActivityStatuses = new java.util.HashMap<>();
+
+                             if (responseAct.isSuccessful() && responseAct.body() != null) {
+                                  for (cuatrovientos.voluntariado.network.model.ApiActivity act : responseAct.body()) {
+                                       if (act.getOrganization() != null && act.getOrganization().getId() != null) {
+                                            String orgId = act.getOrganization().getId();
+                                            orgCounts.put(orgId, orgCounts.getOrDefault(orgId, 0) + 1);
+                                            
+                                            if (!orgActivityStatuses.containsKey(orgId)) {
+                                                orgActivityStatuses.put(orgId, new java.util.HashSet<>());
+                                            }
+            
+                                            if (act.getStatus() != null) {
+                                                orgActivityStatuses.get(orgId).add(act.getStatus().toUpperCase());
+                                            }
+                                       }
+                                  }
+                             }
+
+                             // Build Master List
+                             masterList.clear();
+                             for (cuatrovientos.voluntariado.network.model.ApiOrganization apiOrg : apiOrgs) {
+                                String status = mapStatus(apiOrg.getStatus());
+                                String avatarPath = apiOrg.getAvatar();
+                                String avatarUrl = null;
+                                if (avatarPath != null) {
+                                    if (avatarPath.startsWith("http")) avatarUrl = avatarPath;
+                                    else avatarUrl = "http://10.0.2.2:8000" + avatarPath;
+                                }
+
+                                int count = orgCounts.getOrDefault(apiOrg.getId(), 0);
+                                java.util.Set<String> activityStatuses = orgActivityStatuses.getOrDefault(apiOrg.getId(), new java.util.HashSet<>());
+
+                                masterList.add(new Organization(
+                                    apiOrg.getId(),
+                                    apiOrg.getName(),
+                                    apiOrg.getEmail(),
+                                    apiOrg.getDescription(),
+                                    apiOrg.getType(),
+                                    apiOrg.getPhone() != null ? apiOrg.getPhone() : "",
+                                    apiOrg.getSector(),
+                                    apiOrg.getScope(),
+                                    apiOrg.getContactPerson(),
+                                    "2023-01-01",
+                                    String.valueOf(count), // Pass calculated count
+                                    status,
+                                    avatarUrl,
+                                    activityStatuses
+                                ));
+                            }
+
+                            if (getView() != null) {
+                                TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
+                                if (tabLayout != null) {
+                                    if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
+                                    else filterList("Registradas");
+                                }
+                            }
                         }
 
-                        masterList.add(new Organization(
-                            apiOrg.getId(),
-                            apiOrg.getName(),
-                            apiOrg.getEmail(),
-                            apiOrg.getDescription(),
-                            apiOrg.getType(),
-                            apiOrg.getPhone() != null ? apiOrg.getPhone() : "",
-                            apiOrg.getSector(),
-                            apiOrg.getScope(),
-                            apiOrg.getContactPerson(),
-                            "2023-01-01",
-                            volunteersCount,
-                            status,
-                            avatarUrl
-                        ));
-                    }
-                    if (getView() != null) {
-                        TabLayout tabLayout = getView().findViewById(R.id.tabLayoutOrg);
-                        if (tabLayout != null) {
-                            if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
-                            else filterList("Registradas");
+                        @Override
+                        public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> callAct, Throwable t) {
+                             android.util.Log.e("OrganizationsFragment", "Error fetching activities for counts: " + t.getMessage());
+                             // Proceed with 0 counts if fails
+                             masterList.clear();
+                             for (cuatrovientos.voluntariado.network.model.ApiOrganization apiOrg : apiOrgs) {
+                                String status = mapStatus(apiOrg.getStatus());
+                                String avatarPath = apiOrg.getAvatar();
+                                String avatarUrl = null;
+                                if (avatarPath != null) {
+                                    if (avatarPath.startsWith("http")) avatarUrl = avatarPath;
+                                    else avatarUrl = "http://10.0.2.2:8000" + avatarPath;
+                                }
+
+                                masterList.add(new Organization(
+                                    apiOrg.getId(),
+                                    apiOrg.getName(),
+                                    apiOrg.getEmail(),
+                                    apiOrg.getDescription(),
+                                    apiOrg.getType(),
+                                    apiOrg.getPhone() != null ? apiOrg.getPhone() : "",
+                                    apiOrg.getSector(),
+                                    apiOrg.getScope(),
+                                    apiOrg.getContactPerson(),
+                                    "2023-01-01",
+                                    "0",
+                                    status,
+                                    avatarUrl,
+                                    new java.util.HashSet<>()
+                                ));
+                            }
+                            if (getView() != null) filterList("Solicitudes");
                         }
-                    }
+                    });
+
                 } else {
-                    android.util.Log.e("OrganizationsFragment", "Error fetching organizations: " + response.code());
+                    android.util.Log.e("OrganizationsFragment", "Error fetching organizations: " + responseOrg.code());
                 }
             }
 
@@ -207,24 +298,43 @@ public class OrganizationsFragment extends Fragment {
             if (tabName.equals("Solicitudes")) {
                 if (org.getStatus().equals("Pending")) matchesTab = true;
             } else {
-                // Modificado: Incluir "Suspended" en la lista de Registradas
                 if (org.getStatus().equals("Active") || org.getStatus().equals("Suspended")) matchesTab = true;
             }
             
-            // 2. Type Filter
-            boolean matchesType = true;
-            if (!currentTypeFilter.equals("Todos")) {
-                if (org.getType() == null || !org.getType().equalsIgnoreCase(currentTypeFilter)) matchesType = false;
-            }
-
             // 3. Status Filter
             boolean matchesStatus = true;
             if (!tabName.equals("Solicitudes") && !currentStatusFilter.equals("Todos")) {
                  if (!org.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
             }
 
-            // 4. Search Query
-            if (matchesTab && matchesType && matchesStatus) {
+            // 4. Scope Filter
+            boolean matchesScope = true;
+            if (!currentScopeFilter.equals("Todos")) {
+                if (org.getScope() == null || !org.getScope().equalsIgnoreCase(currentScopeFilter)) matchesScope = false;
+            }
+
+            // 5. Activity Status Filter
+            boolean matchesActivityStatus = true;
+            if (!currentActivityStatusFilter.equals("Todos")) {
+                matchesActivityStatus = false;
+                java.util.Set<String> statuses = org.getActivityStatuses();
+                if (statuses != null) {
+                    if (currentActivityStatusFilter.equals("Con actividades pendientes")) {
+                        if (statuses.contains("PENDIENTE") || statuses.contains("PENDING")) matchesActivityStatus = true;
+                    } else if (currentActivityStatusFilter.equals("Con actividades activas")) {
+                        if (statuses.contains("ACTIVA") || statuses.contains("ACTIVO") || statuses.contains("ABIERTA") || statuses.contains("ACTIVE")) matchesActivityStatus = true;
+                    } else if (currentActivityStatusFilter.equals("Con actividades en progreso")) {
+                        if (statuses.contains("ENPROGRESO") || statuses.contains("EN_PROGRESO") || statuses.contains("INPROGRESS") || statuses.contains("IN_PROGRESS") || statuses.contains("EN CURSO")) matchesActivityStatus = true;
+                    } else if (currentActivityStatusFilter.equals("Con actividades finalizadas")) {
+                        if (statuses.contains("FINALIZADA") || statuses.contains("FINALIZADO") || statuses.contains("FINISHED")) matchesActivityStatus = true;
+                    } else if (currentActivityStatusFilter.equals("Con actividades suspendidas")) {
+                        if (statuses.contains("SUSPENDIDA") || statuses.contains("SUSPENDIDO") || statuses.contains("SUSPENDED")) matchesActivityStatus = true;
+                    }
+                }
+            }
+
+            // 6. Search Query
+            if (matchesTab && matchesStatus && matchesScope && matchesActivityStatus) {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(org);
                 } else {
@@ -249,15 +359,17 @@ public class OrganizationsFragment extends Fragment {
 
         if (adapter != null) adapter.updateList(filteredList);
 
-        RecyclerView recyclerView = getView().findViewById(R.id.recyclerOrganizations);
-        android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyOrganizations);
+        if (getView() != null) {
+            RecyclerView recyclerView = getView().findViewById(R.id.recyclerOrganizations);
+            android.widget.LinearLayout emptyView = getView().findViewById(R.id.emptyOrganizations);
 
-        if (filteredList.isEmpty()) {
-            recyclerView.setVisibility(View.GONE);
-            emptyView.setVisibility(View.VISIBLE);
-        } else {
-            recyclerView.setVisibility(View.VISIBLE);
-            emptyView.setVisibility(View.GONE);
+            if (filteredList.isEmpty()) {
+                recyclerView.setVisibility(View.GONE);
+                emptyView.setVisibility(View.VISIBLE);
+            } else {
+                recyclerView.setVisibility(View.VISIBLE);
+                emptyView.setVisibility(View.GONE);
+            }
         }
     }
 }

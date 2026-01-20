@@ -43,11 +43,13 @@
             app:layout_constraintTop_toTopOf="@+id/imgLogo" />
 
         <TextView
-            android:id="@+id/tvOrgEmail"
+            android:id="@+id/tvOrgDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="contact@future.org"
+            android:text="Description of the organization goes here..."
             android:textSize="14sp"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:textColor="@color/text_secondary"
             app:layout_constraintStart_toStartOf="@+id/tvOrgName"
             app:layout_constraintEnd_toEndOf="@+id/tvOrgName"
@@ -100,12 +102,43 @@
                 android:layout_marginBottom="8dp"/>
 
             <TextView
-                android:id="@+id/tvOrgInfo"
+                android:id="@+id/tvOrgEmailInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fecha solicitud: 2025-11-20"
+                android:text="email@example.com"
                 android:textSize="13sp"
+                android:gravity="center_vertical"
+                android:drawablePadding="8dp"
+                app:drawableStartCompat="@drawable/ic_email" 
+                app:drawableTint="@color/text_secondary"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/tvOrgPhone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="+34 666 777 888"
+                android:textSize="13sp"
+                android:gravity="center_vertical"
+                android:drawablePadding="8dp"
+                app:drawableStartCompat="@drawable/ic_phone" 
+                app:drawableTint="@color/text_secondary"
                 android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvOrgVolunteersCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="5 Voluntariados"
+                android:textSize="13sp"
+                android:gravity="center_vertical"
+                android:drawablePadding="8dp"
+                app:drawableStartCompat="@drawable/ic_event_note" 
+                app:drawableTint="@color/text_secondary"
+                android:textColor="@color/text_secondary"
+                android:visibility="gone"/>
         </LinearLayout>
 
         <LinearLayout

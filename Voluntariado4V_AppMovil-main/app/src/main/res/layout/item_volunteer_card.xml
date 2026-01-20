@@ -106,7 +106,8 @@
                 android:text="jane.doe@example.com"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
-                android:drawableStart="@drawable/ic_email"
+                app:drawableStartCompat="@drawable/ic_email"
+                app:drawableTint="@color/text_secondary"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical"/>
 
@@ -118,7 +119,8 @@
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
                 android:layout_marginTop="4dp"
-                android:drawableStart="@drawable/ic_phone"
+                app:drawableStartCompat="@drawable/ic_phone"
+                app:drawableTint="@color/text_secondary"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical"/>
 
@@ -130,7 +132,8 @@
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/text_secondary"
-                android:drawableStart="@drawable/ic_badge"
+                app:drawableStartCompat="@drawable/ic_badge"
+                app:drawableTint="@color/text_secondary"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical"/>
         </LinearLayout>

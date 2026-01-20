@@ -43,7 +43,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
         if (volunteer.getSurname2() != null) fullName += " " + volunteer.getSurname2();
         
         holder.tvName.setText(fullName);
-        holder.tvRole.setText(volunteer.getRole());
+        holder.tvRole.setText(volunteer.getCourse() != null && !volunteer.getCourse().isEmpty() ? volunteer.getCourse() : "Sin curso");
         holder.tvEmail.setText(volunteer.getEmail());
         holder.tvPhone.setText(volunteer.getPhone());
         holder.tvDni.setText(volunteer.getDni());

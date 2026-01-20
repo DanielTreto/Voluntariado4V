@@ -112,15 +112,19 @@ public class OrganizationDetailDialog extends DialogFragment {
 
         // Status Check
         tvStatus.setText(organization.getStatus());
-        if ("Active".equalsIgnoreCase(organization.getStatus()) || "Activo".equalsIgnoreCase(organization.getStatus())) {
-             tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
-             tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-             tvStatus.setText("Activo");
-        } else {
-             tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
-             tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
-             tvStatus.setText("Pendiente");
-        }
+         if ("Active".equalsIgnoreCase(organization.getStatus()) || "Activo".equalsIgnoreCase(organization.getStatus())) {
+              tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
+              tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+              tvStatus.setText("Activa");
+         } else if ("Suspended".equalsIgnoreCase(organization.getStatus()) || "Suspendido".equalsIgnoreCase(organization.getStatus()) || "Suspendida".equalsIgnoreCase(organization.getStatus())) {
+              tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE"));
+              tvStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+              tvStatus.setText("Suspendida");
+         } else {
+              tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
+              tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
+              tvStatus.setText("Pendiente");
+         }
 
         // Bind New Fields
         TextView tvPhone = view.findViewById(R.id.tvDetailPhone);
@@ -247,15 +251,19 @@ public class OrganizationDetailDialog extends DialogFragment {
         tvEmail.setText(organization.getEmail() != null ? organization.getEmail() : "Correo no disponible");
         
         tvStatus.setText(organization.getStatus() != null ? organization.getStatus() : "Desconocido");
-        if ("Active".equalsIgnoreCase(organization.getStatus()) || "Activo".equalsIgnoreCase(organization.getStatus())) {
-             tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
-             tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
-             tvStatus.setText("Activo");
-        } else {
-             tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
-             tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
-             tvStatus.setText("Pendiente");
-        }
+         if ("Active".equalsIgnoreCase(organization.getStatus()) || "Activo".equalsIgnoreCase(organization.getStatus())) {
+              tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
+              tvStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"));
+              tvStatus.setText("Activa");
+         } else if ("Suspended".equalsIgnoreCase(organization.getStatus()) || "Suspendido".equalsIgnoreCase(organization.getStatus()) || "Suspendida".equalsIgnoreCase(organization.getStatus())) {
+              tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFEBEE"));
+              tvStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+              tvStatus.setText("Suspendida");
+         } else {
+              tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#FFF8E1"));
+              tvStatus.setTextColor(android.graphics.Color.parseColor("#FFA000"));
+              tvStatus.setText("Pendiente");
+         }
 
         tvPhone.setText(organization.getPhone() != null ? organization.getPhone() : "");
         tvType.setText(organization.getType() != null ? organization.getType() : "");
