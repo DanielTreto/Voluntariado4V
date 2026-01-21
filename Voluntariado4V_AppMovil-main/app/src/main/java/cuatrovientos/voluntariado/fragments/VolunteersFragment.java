@@ -327,12 +327,14 @@ public class VolunteersFragment extends Fragment {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(v);
                 } else {
-                    String query = currentSearchQuery.toLowerCase();
+                    String query = currentSearchQuery;
                     boolean matchesSearch = false;
-                    String fullName = (v.getName() + " " + (v.getSurname1() != null ? v.getSurname1() : "") + " " + (v.getSurname2() != null ? v.getSurname2() : "")).toLowerCase();
-                    if (fullName.contains(query)) matchesSearch = true;
-                    if (v.getEmail().toLowerCase().contains(query)) matchesSearch = true;
-                    if (v.getDni() != null && v.getDni().toLowerCase().contains(query)) matchesSearch = true;
+                    String fullName = v.getName() + " " + (v.getSurname1() != null ? v.getSurname1() : "") + " " + (v.getSurname2() != null ? v.getSurname2() : "");
+                    
+                    if (cuatrovientos.voluntariado.utils.SearchUtils.matches(fullName, query)) matchesSearch = true;
+                    if (cuatrovientos.voluntariado.utils.SearchUtils.matches(v.getEmail(), query)) matchesSearch = true;
+                    if (v.getDni() != null && cuatrovientos.voluntariado.utils.SearchUtils.matches(v.getDni(), query)) matchesSearch = true;
+                    
                     if (matchesSearch) filteredList.add(v);
                 }
             }

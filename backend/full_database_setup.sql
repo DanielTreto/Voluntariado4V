@@ -12,6 +12,8 @@ GO
 
 USE VOLUNTARIADOBD;
 GO
+SET DATEFORMAT ymd;
+GO
 
 -- =============================================
 -- 1. ELIMINACIÓN DE TABLAS SI EXISTEN (Orden inverso por FKS)
@@ -286,17 +288,17 @@ VALUES ('ADMINISTRADOR', 'admin@voluntariado.com', 'admin123', 'adm001');
 INSERT INTO ORGANIZACION (codorg, nombre, tipo_org, correo, telefono, sector, ambito, password, persona_contacto, descripcion, estado, avatar)
 VALUES 
 ('org001', 'Cruz Roja', 'ONG', 'cruzroja@email.com', '948111111', 'Social', 'NACIONAL', 'admin123', 'Maria Garcia', 'Ayuda humanitaria internacional.', 'ACTIVO', 'https://images.unsplash.com/photo-1584515933487-779824d29609'),
-('org002', 'Banco de Alimentos', 'ONG', 'banco@email.com', '948222222', 'Social', 'REGIONAL', 'admin123', 'Juan Perez', 'Recogida y distribucion de alimentos.', 'ACTIVO', 'https://images.unsplash.com/photo-1593113598332-cd288d649433'),
+('org002', 'Banco de Alimentos', 'ONG', 'banco@email.com', '948222222', 'Social', 'REGIONAL', 'admin123', 'Juan Perez', 'Recogida y distribución de alimentos.', 'ACTIVO', 'https://images.unsplash.com/photo-1593113598332-cd288d649433'),
 ('org003', 'Greenpeace', 'ONG', 'greenpeace@email.com', '948333333', 'Ambiental', 'INTERNACIONAL', 'admin123', 'Laura Sanz', 'Defensa del medio ambiente.', 'PENDIENTE', 'https://images.unsplash.com/photo-1500485035595-cbe6f645feb1'),
 ('org004', 'Asoc. San Juan', 'ASOCIACIÓN', 'sanjuan@email.com', '948444444', 'Salud', 'LOCAL', 'admin123', 'Carlos Ruiz', 'Apoyo a pacientes.', 'SUSPENDIDO', 'https://images.unsplash.com/photo-1538108149393-fbbd81895907'),
-('org005', 'Fundacion Ilusion', 'FUNDACIÓN', 'ilusion@email.com', '948555555', 'Educativo', 'NACIONAL', 'admin123', 'Elena Muro', 'Educacion para todos.', 'ACTIVO', 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6');
+('org005', 'Fundacion Ilusion', 'FUNDACIÓN', 'ilusion@email.com', '948555555', 'Educativo', 'NACIONAL', 'admin123', 'Elena Muro', 'Educación para todos.', 'ACTIVO', 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6');
 
 -- VOLUNTARIO
 INSERT INTO VOLUNTARIO (codvol, nombre, apellido1, apellido2, correo, telefono, fecha_nacimiento, descripcion, dni, password, estado, CODCICLO, avatar)
 VALUES
 ('vol001', 'Pedro', 'Gomez', 'Sanz', 'pedro@email.com', '600111111', '2000-01-15', 'Estudiante motivado.', '11111111A', 'admin123', 'ACTIVO', '1DAM', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d'),
 ('vol002', 'Lucia', 'Martin', 'Perez', 'lucia@email.com', '600222222', '1999-05-20', 'Me gusta ayudar.', '22222222B', 'admin123', 'ACTIVO', '2DAM', 'https://images.unsplash.com/photo-1544005313-94ddf0286df2'),
-('vol003', 'Jorge', 'Ruiz', 'Lopez', 'jorge@email.com', '600333333', '2001-12-10', 'Busco practicas.', '33333333C', 'admin123', 'PENDIENTE', '1SMR', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'),
+('vol003', 'Jorge', 'Ruiz', 'Lopez', 'jorge@email.com', '600333333', '2001-12-10', 'Busco prácticas.', '33333333C', 'admin123', 'PENDIENTE', '1SMR', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'),
 ('vol004', 'Ana', 'Blanco', 'Gil', 'ana@email.com', '600444444', '1998-07-30', NULL, '44444444D', 'admin123', 'SUSPENDIDO', '1AC', 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80'),
 ('vol005', 'Miguel', 'Soto', 'Diaz', 'miguel@email.com', '600555555', '2002-03-25', 'Apasionado del deporte.', '55555555E', 'admin123', 'ACTIVO', '1ASIR', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e');
 
@@ -305,10 +307,10 @@ INSERT INTO ACTIVIDAD (nombre, duracion_sesion, fecha_inicio, fecha_fin, n_max_v
 VALUES
 ('Recogida Alimentos Navidad', '04:00:00', '2025-12-20', '2025-12-22', 50, 'Campaña anual de navidad.', 'FINALIZADA', 'org002', 'Centro Comercial La Morea', 'https://images.unsplash.com/photo-1512406981147-3844a4962c4a'),
 ('Apoyo Escolar Primaria', '01:30:00', '2026-01-10', '2026-06-20', 10, 'Clases de refuerzo.', 'ACTIVO', 'org005', 'Colegio Publico San Jorge', 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b'),
-('Maraton Solidaria', '05:00:00', '2026-03-15', '2026-03-15', 100, 'Evento deportivo benefico.', 'PENDIENTE', 'org001', 'Vuelta del Castillo', 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3'),
-('Limpieza Rio Arga', '03:00:00', '2026-04-22', '2026-04-22', 30, 'Dia de la tierra.', 'EN_PROGRESO', 'org003', 'Paseo del Arga', 'https://images.unsplash.com/photo-1618477461853-5f8dd1219df0'),
-('Charla Salud Mental', '02:00:00', '2025-11-15', '2025-11-15', 20, 'Charla concienciacion.', 'FINALIZADA', 'org004', 'Civivox Iturrama', 'https://images.unsplash.com/photo-1544367563-12123d8965cd'),
-('Torneo Futbol Sala', '02:00:00', '2026-05-10', '2026-05-12', 40, 'Torneo inter-escolar.', 'ACTIVO', 'org005', 'Polideportivo Arrosadia', 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6'),
+('Maraton Solidaria', '05:00:00', '2026-03-15', '2026-03-15', 100, 'Evento deportivo benéfico.', 'PENDIENTE', 'org001', 'Vuelta del Castillo', 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3'),
+('Limpieza Rio Arga', '03:00:00', '2026-04-22', '2026-04-22', 30, 'Día de la tierra.', 'EN_PROGRESO', 'org003', 'Paseo del Arga', 'https://images.unsplash.com/photo-1618477461853-5f8dd1219df0'),
+('Charla Salud Mental', '02:00:00', '2025-11-15', '2025-11-15', 20, 'Charla concienciación.', 'FINALIZADA', 'org004', 'Civivox Iturrama', 'https://images.unsplash.com/photo-1544367563-12123d8965cd'),
+('Torneo Fútbol Sala', '02:00:00', '2026-05-10', '2026-05-12', 40, 'Torneo inter-escolar.', 'ACTIVO', 'org005', 'Polideportivo Arrosadia', 'https://images.unsplash.com/photo-1518091043644-c1d4457512c6'),
 ('Visita Residencia', '01:30:00', '2026-02-14', '2026-02-14', 15, 'Acompañamiento mayores.', 'SUSPENDIDA', 'org001', 'Residencia La Vaguada', 'https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4');
 
 -- CREDENCIALES (Mapping Users)
@@ -385,9 +387,9 @@ INSERT INTO VOLUNTARIO (codvol, nombre, apellido1, apellido2, correo, telefono, 
 ('vol014', 'Nuria', 'Vazquez', 'Rey', 'nuria@email.com', '600151515', '1998-10-10', 'Administrativa.', '15151515N', 'admin123', 'ACTIVO', '1GA', 'https://images.unsplash.com/photo-1542206395-9feb3edaa68d'),
 ('vol015', 'Alberto', 'Serrano', 'Mar', 'alberto@email.com', '600161616', '2002-11-11', 'Marketing digital.', '16161616O', 'admin123', 'ACTIVO', '1AC', 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79'),
 ('vol016', 'Sara', 'Crespo', 'Rio', 'sara@email.com', '600171717', '2001-12-12', 'Ventas.', '17171717P', 'admin123', 'ACTIVO', '2GV', 'https://images.unsplash.com/photo-1580489944761-15a19d654956'),
-('vol017', 'Javier', 'Ibañez', 'Ola', 'javier@email.com', '600181818', '2000-01-01', 'Tecnologia.', '18181818Q', 'admin123', 'PENDIENTE', '1ASIR', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d'),
+('vol017', 'Javier', 'Ibañez', 'Ola', 'javier@email.com', '600181818', '2000-01-01', 'Tecnología.', '18181818Q', 'admin123', 'PENDIENTE', '1ASIR', 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d'),
 ('vol018', 'Marina', 'Pascual', 'Flor', 'marina@email.com', '600191919', '1999-02-02', NULL, '19191919R', 'admin123', 'ACTIVO', '2TL', 'https://images.unsplash.com/photo-1599566150163-29194dcaad36'),
-('vol019', 'Roberto', 'Leon', 'Sol', 'roberto@email.com', '600202020', '1998-03-03', 'Logistica.', '20202020S', 'admin123', 'SUSPENDIDO', '1TL', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7'),
+('vol019', 'Roberto', 'Leon', 'Sol', 'roberto@email.com', '600202020', '1998-03-03', 'Logística.', '20202020S', 'admin123', 'SUSPENDIDO', '1TL', 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7'),
 ('vol020', 'Cristina', 'Garrido', 'Luz', 'cristina@email.com', '600212121', '2002-04-04', 'Comercio.', '21212121T', 'admin123', 'ACTIVO', '1CI', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb');
 
 INSERT INTO CREDENCIALES (user_type, correo, password, CODVOL) VALUES
@@ -409,20 +411,20 @@ INSERT INTO CREDENCIALES (user_type, correo, password, CODVOL) VALUES
 
 -- NEW ACTIVITIES
 INSERT INTO ACTIVIDAD (nombre, duracion_sesion, fecha_inicio, fecha_fin, n_max_voluntarios, descripcion, estado, CODORG, ubicacion, imagen) VALUES
-('Campaña Vacunación', '08:00:00', '2026-06-01', '2026-06-15', 20, 'Apoyo logistico.', 'PENDIENTE', 'org006', 'Pamplona', 'https://images.unsplash.com/photo-1632053000632-4d2c478a0448'),
-('Reforestación Bosque', '05:00:00', '2026-03-21', '2026-03-21', 100, 'Plantar arboles.', 'ACTIVO', 'org007', 'Sierra de Urbasa', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09'),
+('Campaña Vacunación', '08:00:00', '2026-06-01', '2026-06-15', 20, 'Apoyo logístico.', 'PENDIENTE', 'org006', 'Pamplona', 'https://images.unsplash.com/photo-1632053000632-4d2c478a0448'),
+('Reforestación Bosque', '05:00:00', '2026-03-21', '2026-03-21', 100, 'Plantar árboles.', 'ACTIVO', 'org007', 'Sierra de Urbasa', 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09'),
 ('Comedor Social Fin de Semana', '03:00:00', '2026-01-01', '2026-12-31', 5, 'Servir comidas.', 'ACTIVO', 'org008', 'Pamplona', 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c'),
-('Fiesta del Barrio', '06:00:00', '2026-07-10', '2026-07-12', 30, 'Organizacion eventos.', 'PENDIENTE', 'org009', 'Rochapea', 'https://images.unsplash.com/photo-1530103862676-de3c9da59af7'),
+('Fiesta del Barrio', '06:00:00', '2026-07-10', '2026-07-12', 30, 'Organización eventos.', 'PENDIENTE', 'org009', 'Rochapea', 'https://images.unsplash.com/photo-1530103862676-de3c9da59af7'),
 ('Entrenamiento Inclusivo', '01:30:00', '2026-02-01', '2026-05-30', 4, 'Ayuda entrenadores.', 'ACTIVO', 'org010', 'Polideportivo Arrosadia', 'https://images.unsplash.com/photo-1518611012118-696072aa579a'),
 ('Paseo Perros Refugio', '02:00:00', '2026-01-20', '2026-12-20', 10, 'Pasear perros.', 'ACTIVO', 'org011', 'Mutilva', 'https://images.unsplash.com/photo-1625316708582-7c38734be31d'),
-('Taller Robotica Niños', '02:00:00', '2025-10-01', '2025-10-30', 8, 'Enseñar robotica basica.', 'FINALIZADA', 'org012', 'Civivox', 'https://images.unsplash.com/photo-1589254065878-42c9da9e2ab2'),
+('Taller Robótica Niños', '02:00:00', '2025-10-01', '2025-10-30', 8, 'Enseñar robótica básica.', 'FINALIZADA', 'org012', 'Civivox', 'https://images.unsplash.com/photo-1589254065878-42c9da9e2ab2'),
 ('Montaje Escenario', '04:00:00', '2026-04-10', '2026-04-10', 10, 'Montar escenario obra.', 'SUSPENDIDA', 'org013', 'Barañain', 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30'),
 ('Revisión Médica Rural', '05:00:00', '2026-08-05', '2026-08-07', 6, 'Acompañamiento rutas.', 'PENDIENTE', 'org014', 'Zona Norte', 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528'),
-('Auditoria Seguridad', '03:00:00', '2026-09-01', '2026-09-30', 5, 'Analisis redes ONGs.', 'ACTIVO', 'org015', 'Online', 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b'),
+('Auditoria Seguridad', '03:00:00', '2026-09-01', '2026-09-30', 5, 'Análisis redes ONGs.', 'ACTIVO', 'org015', 'Online', 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b'),
 ('Recogida Juguetes', '03:00:00', '2025-12-01', '2025-12-15', 20, 'Navidad para todos.', 'FINALIZADA', 'org001', 'Pamplona', 'https://images.unsplash.com/photo-1512353087810-25dfcd100962'),
-('Apoyo Digital Mayores', '01:30:00', '2026-01-15', '2026-06-15', 5, 'Enseñar uso movil.', 'ACTIVO', 'org015', 'Residencia', 'https://images.unsplash.com/photo-1485981133625-f1a0918f3075'),
+('Apoyo Digital Mayores', '01:30:00', '2026-01-15', '2026-06-15', 5, 'Enseñar uso móvil.', 'ACTIVO', 'org015', 'Residencia', 'https://images.unsplash.com/photo-1485981133625-f1a0918f3075'),
 ('Torneo Baloncesto', '04:00:00', '2026-05-20', '2026-05-22', 15, 'Arbitraje y mesa.', 'PENDIENTE', 'org010', 'Pamplona', 'https://images.unsplash.com/photo-1505666287802-931dc83948e9'),
-('Limpieza Playa', '04:00:00', '2026-06-05', '2026-06-05', 50, 'Dia oceanos.', 'PENDIENTE', 'org003', 'San Sebastian', 'https://images.unsplash.com/photo-1621451537084-482c73073a0f'),
+('Limpieza Playa', '04:00:00', '2026-06-05', '2026-06-05', 50, 'Día océanos.', 'PENDIENTE', 'org003', 'San Sebastián', 'https://images.unsplash.com/photo-1621451537084-482c73073a0f'),
 ('Clases Español', '01:30:00', '2026-02-01', '2026-06-30', 3, 'Para inmigrantes.', 'ACTIVO', 'org001', 'Pamplona', 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40');
 
 -- NEW REQUESTS (SOLICITUDES)
@@ -522,16 +524,16 @@ INSERT INTO SOLICITUD (CODVOL, CODACT, status, fecha_solicitud, mensaje) VALUES
 ('vol003', 4, 'PENDIENTE', '2026-02-01 10:00:00', 'Quiero participar'),
 ('vol004', 4, 'ACEPTADA', '2026-01-25 09:30:00', 'Soy vecino'),
 ('vol005', 4, 'RECHAZADA', '2026-01-26 11:00:00', 'No cumples perfil'),
-('vol001', 7, 'ACEPTADA', '2026-01-20 15:00:00', 'Me gusta la robotica'),
+('vol001', 7, 'ACEPTADA', '2026-01-20 15:00:00', 'Me gusta la robótica'),
 ('vol002', 7, 'PENDIENTE', '2026-01-21 16:30:00', 'Tengo experiencia'),
 ('vol008', 9, 'PENDIENTE', '2026-03-01 09:00:00', 'Soy enfermera'),
-('vol009', 9, 'ACEPTADA', '2026-03-02 10:00:00', 'Ayudo en logistica'),
+('vol009', 9, 'ACEPTADA', '2026-03-02 10:00:00', 'Ayudo en logística'),
 ('vol011', 11, 'PENDIENTE', '2026-05-10 12:00:00', 'Tengo coche'),
 ('vol012', 11, 'RECHAZADA', '2026-05-11 13:00:00', 'Ya esta lleno'),
-('vol015', 13, 'ACEPTADA', '2026-04-01 17:00:00', 'Soy arbitro'),
+('vol015', 13, 'ACEPTADA', '2026-04-01 17:00:00', 'Soy árbitro'),
 ('vol016', 13, 'PENDIENTE', '2026-04-02 18:00:00', 'Puedo llevar agua'),
 ('vol018', 14, 'PENDIENTE', '2026-05-20 08:00:00', 'Me gusta el mar'),
 ('vol019', 14, 'ACEPTADA', '2026-05-21 09:00:00', 'Voy con amigos'),
-('vol020', 15, 'PENDIENTE', '2026-01-25 19:00:00', 'Hablo ingles tambien');
+('vol020', 15, 'PENDIENTE', '2026-01-25 19:00:00', 'Hablo inglés también');
 
 GO

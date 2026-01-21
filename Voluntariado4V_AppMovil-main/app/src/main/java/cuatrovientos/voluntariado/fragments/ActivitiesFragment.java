@@ -279,10 +279,10 @@ public class ActivitiesFragment extends Fragment {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(act);
                 } else {
-                    String query = currentSearchQuery.toLowerCase();
+                    String query = currentSearchQuery;
                     boolean matchesSearch = false;
-                    if (act.getTitle().toLowerCase().contains(query)) matchesSearch = true;
-                    if (act.getCategory().toLowerCase().contains(query)) matchesSearch = true;
+                    if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getTitle(), query)) matchesSearch = true;
+                    if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getCategory(), query)) matchesSearch = true;
                     if (matchesSearch) filteredList.add(act);
                 }
             }

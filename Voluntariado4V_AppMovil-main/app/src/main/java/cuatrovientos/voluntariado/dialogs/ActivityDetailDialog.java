@@ -159,7 +159,7 @@ public class ActivityDetailDialog extends DialogFragment {
             Glide.with(this)
                  .load(imageUrl)
                  .centerCrop()
-                 .error(R.drawable.ic_launcher_background) // Fallback if URL fails
+                 .error(Glide.with(this).load("https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png")) // Fallback URL
                  .placeholder(R.drawable.ic_launcher_background)
                  .into(imgHeader);
 
@@ -223,17 +223,27 @@ public class ActivityDetailDialog extends DialogFragment {
                 // Configure layout for horizontal scrolling or just horizontal linear layout if few
                 layoutOdsList.setOrientation(android.widget.LinearLayout.HORIZONTAL);
                 
+                // Convert 50dp to pixels
+                int sizeInDp = 50;
+                int sizeInPx = (int) android.util.TypedValue.applyDimension(
+                        android.util.TypedValue.COMPLEX_UNIT_DIP, sizeInDp, 
+                        getResources().getDisplayMetrics());
+
                 for (cuatrovientos.voluntariado.model.Ods ods : odsList) {
                     ImageView imgOds = new ImageView(getContext());
-                    android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(150, 150); // 50dp roughly
-                    params.setMargins(8, 0, 8, 0);
+                    android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(sizeInPx, sizeInPx);
+                    
+                    // Margin also in dp? Let's keep it simple or convert 4dp
+                    int marginPx = (int) android.util.TypedValue.applyDimension(
+                            android.util.TypedValue.COMPLEX_UNIT_DIP, 4, 
+                            getResources().getDisplayMetrics());
+                    params.setMargins(marginPx, 0, marginPx, 0);
+
                     imgOds.setLayoutParams(params);
                     imgOds.setScaleType(ImageView.ScaleType.FIT_CENTER);
                     
-                    String formattedId = (ods.getId() < 10) ? "0" + ods.getId() : String.valueOf(ods.getId());
-                    String resourceName = "ods_" + formattedId;
-                    int resId = getResources().getIdentifier(resourceName, "drawable", getContext().getPackageName());
-
+                    int resId = getOdsDrawable(ods.getId());
+                    
                     if (resId != 0) {
                         Glide.with(this)
                              .load(resId)
@@ -241,7 +251,7 @@ public class ActivityDetailDialog extends DialogFragment {
                              .error(R.drawable.ic_launcher_background)
                              .into(imgOds);
                     } else {
-                        // Fallback if resource missing for some reason
+                         // Fallback
                          Glide.with(this)
                              .load(R.drawable.ic_launcher_background)
                              .into(imgOds);
@@ -285,5 +295,26 @@ public class ActivityDetailDialog extends DialogFragment {
         return view;
     }
 
-    // Removed getOdsImageUrl method as it is no longer needed
+    private int getOdsDrawable(int odsId) {
+        switch (odsId) {
+            case 1: return R.drawable.ods_01;
+            case 2: return R.drawable.ods_02;
+            case 3: return R.drawable.ods_03;
+            case 4: return R.drawable.ods_04;
+            case 5: return R.drawable.ods_05;
+            case 6: return R.drawable.ods_06;
+            case 7: return R.drawable.ods_07;
+            case 8: return R.drawable.ods_08;
+            case 9: return R.drawable.ods_09;
+            case 10: return R.drawable.ods_10;
+            case 11: return R.drawable.ods_11;
+            case 12: return R.drawable.ods_12;
+            case 13: return R.drawable.ods_13;
+            case 14: return R.drawable.ods_14;
+            case 15: return R.drawable.ods_15;
+            case 16: return R.drawable.ods_16;
+            case 17: return R.drawable.ods_17;
+            default: return 0;
+        }
+    }
 }

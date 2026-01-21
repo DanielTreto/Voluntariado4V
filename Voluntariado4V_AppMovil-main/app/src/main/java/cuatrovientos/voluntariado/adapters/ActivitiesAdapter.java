@@ -106,7 +106,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         Glide.with(holder.itemView.getContext())
                 .load(imageUrl)
                 .centerCrop()
-                .placeholder(R.drawable.ic_launcher_foreground) 
+                .placeholder(R.drawable.ic_launcher_background) 
                 .error(Glide.with(holder.itemView.getContext()).load(fallbackUrl))
                 .into(holder.imgHeader);
         

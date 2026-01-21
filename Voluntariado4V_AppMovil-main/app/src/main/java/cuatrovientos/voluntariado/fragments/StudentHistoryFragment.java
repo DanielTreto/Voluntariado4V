@@ -211,9 +211,9 @@ public class StudentHistoryFragment extends Fragment {
             boolean matchesSearch = true;
             if (!q.isEmpty()) {
                 matchesSearch = false;
-                if (act.getTitle().toLowerCase().contains(q)) matchesSearch = true;
-                if (act.getCategory().toLowerCase().contains(q)) matchesSearch = true;
-                if (act.getLocation() != null && act.getLocation().toLowerCase().contains(q)) matchesSearch = true;
+                if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getTitle(), q)) matchesSearch = true;
+                if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getCategory(), q)) matchesSearch = true;
+                if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getLocation(), q)) matchesSearch = true;
             }
 
             if (matchesType && matchesOds && matchesStatus && matchesCapacity && matchesSearch) {

@@ -338,12 +338,12 @@ public class OrganizationsFragment extends Fragment {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(org);
                 } else {
-                    String query = currentSearchQuery.toLowerCase();
+                    String query = currentSearchQuery;
                     boolean matchesSearch = false;
                     
-                    if (org.getName().toLowerCase().contains(query)) matchesSearch = true;
-                    if (org.getEmail().toLowerCase().contains(query)) matchesSearch = true;
-                    if (org.getContactPerson() != null && org.getContactPerson().toLowerCase().contains(query)) matchesSearch = true;
+                    if (cuatrovientos.voluntariado.utils.SearchUtils.matches(org.getName(), query)) matchesSearch = true;
+                    if (cuatrovientos.voluntariado.utils.SearchUtils.matches(org.getEmail(), query)) matchesSearch = true;
+                    if (cuatrovientos.voluntariado.utils.SearchUtils.matches(org.getContactPerson(), query)) matchesSearch = true;
                     
                     if (matchesSearch) filteredList.add(org);
                 }
