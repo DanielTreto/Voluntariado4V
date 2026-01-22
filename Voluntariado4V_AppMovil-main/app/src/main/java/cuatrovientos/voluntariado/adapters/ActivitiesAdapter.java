@@ -56,17 +56,14 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         holder.tvDate.setText(dateText);
         
 
-
         holder.tvCategory.setText(act.getCategory());
         holder.tvCategory.setBackgroundColor(act.getImageColor());
 
-        // Lógica de Etiqueta de Estado
         String status = act.getStatus();
         holder.tvStatusTag.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(status));
         holder.tvStatusTag.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(status));
         holder.tvStatusTag.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(status));
 
-        // Lógica de Avatares de Voluntarios
         List<String> avatars = act.getParticipantAvatars();
         int count = avatars != null ? avatars.size() : 0;
         
@@ -78,24 +75,20 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         if (count == 0) {
             holder.tvNoVolunteers.setVisibility(View.VISIBLE);
         } else {
-            // Voluntario 1
             if (count >= 1) {
                 holder.imgVol1.setVisibility(View.VISIBLE);
                 Glide.with(holder.itemView.getContext()).load(avatars.get(0)).circleCrop().placeholder(R.drawable.ic_profile_placeholder).into(holder.imgVol1);
             }
-            // Voluntario 2
             if (count >= 2) {
                 holder.imgVol2.setVisibility(View.VISIBLE);
                  Glide.with(holder.itemView.getContext()).load(avatars.get(1)).circleCrop().placeholder(R.drawable.ic_profile_placeholder).into(holder.imgVol2);
             }
-            // Contador Extra
             if (count > 2) {
                 holder.tvVolCount.setVisibility(View.VISIBLE);
                 holder.tvVolCount.setText("+" + (count - 2));
             }
         }
         
-        // Cabecera de Imagen
         String imageUrl = act.getImageUrl();
         if (imageUrl == null || imageUrl.isEmpty()) {
             imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
@@ -110,7 +103,6 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
                 .error(Glide.with(holder.itemView.getContext()).load(fallbackUrl))
                 .into(holder.imgHeader);
         
-        // Lógica de Botones
         holder.layoutButtonsActive.setVisibility(View.VISIBLE);
         holder.layoutButtonsPending.setVisibility(View.GONE);
         
@@ -134,7 +126,7 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         TextView tvNoVolunteers, tvVolCount;
         ImageView imgHeader, imgVol1, imgVol2;
         LinearLayout layoutButtonsActive, layoutButtonsPending;
-        android.widget.Button btnViewDetails; // Or TextView/View dependent on XML
+        android.widget.Button btnViewDetails;
 
         public ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -147,7 +139,6 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
             
             imgHeader = itemView.findViewById(R.id.imgActivityHeader);
             
-            // Voluntarios
             tvNoVolunteers = itemView.findViewById(R.id.tvNoVolunteers);
             imgVol1 = itemView.findViewById(R.id.imgVol1);
             imgVol2 = itemView.findViewById(R.id.imgVol2);
@@ -156,7 +147,6 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
             layoutButtonsActive = itemView.findViewById(R.id.layoutButtonsActive);
             layoutButtonsPending = itemView.findViewById(R.id.layoutButtonsPending);
             
-            // Botón de detalles
             btnViewDetails = itemView.findViewById(R.id.btnViewDetails); 
         }
     }

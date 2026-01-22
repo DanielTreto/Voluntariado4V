@@ -12,11 +12,10 @@ public class ApiVolunteer {
     private String description;
     private String course;
     private String status;
-    private String avatar; // Restored
+    private String avatar;
     private java.util.List<String> preferences; 
     private java.util.List<ApiAvailability> availability;
 
-    // Getters
     public String getId() { return id; }
     public String getName() { return name; }
     public String getSurname1() { return surname1; }

@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.LinearLayout; // Añadir este import
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +18,6 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.ActivitiesAdapter;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
 
-/**
- * Fragmento que muestra el historial de actividades finalizadas del estudiante.
- */
 public class StudentHistoryFragment extends Fragment {
 
     private RecyclerView rvHistory;
@@ -47,7 +44,6 @@ public class StudentHistoryFragment extends Fragment {
         
         rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        // Botones de Filtro
         android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
         btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
 
@@ -55,7 +51,7 @@ public class StudentHistoryFragment extends Fragment {
         btnFilterOds.setOnClickListener(v -> showOdsFilterDialog());
 
         android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
-        if (btnFilterStatus != null) btnFilterStatus.setVisibility(View.GONE); // Ocultar Filtro de Estado
+        if (btnFilterStatus != null) btnFilterStatus.setVisibility(View.GONE);
 
         android.widget.Button btnFilterCapacity = view.findViewById(R.id.btnFilterCapacity);
         btnFilterCapacity.setOnClickListener(v -> showCapacityFilterDialog());
@@ -63,7 +59,6 @@ public class StudentHistoryFragment extends Fragment {
         android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
         btnSortActivities.setOnClickListener(v -> toggleSort());
 
-        // Configurar Búsqueda
         android.widget.EditText etSearchHistory = view.findViewById(R.id.etSearchHistory);
         etSearchHistory.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -77,14 +72,13 @@ public class StudentHistoryFragment extends Fragment {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // Adaptador vacío por defecto
         adapter = new ActivitiesAdapter(new ArrayList<>(), true);
         rvHistory.setAdapter(adapter);
 
         if (getArguments() != null) {
             loadData(getArguments().getString("USER_ID"));
         } else {
-             loadData("1"); // Respaldo
+             loadData("1");
         }
 
         return view;
@@ -118,7 +112,6 @@ public class StudentHistoryFragment extends Fragment {
     }
     
     private void showStatusFilterDialog() {
-        // Excluir SUSPENDIDA (solo Finalizadas terminan aquí normalmente)
         String[] statuses = {"Todos", "Finished"};
         String[] displayStatuses = {"Todos", "Finalizada"};
         
@@ -194,7 +187,7 @@ public class StudentHistoryFragment extends Fragment {
                             if (ods.getId() == filterId) { hasOds = true; break; }
                         }
                     }
-                } catch (NumberFormatException e) { /* Handle error or ignore if ODS is not a number */ }
+                } catch (NumberFormatException e) { }
                 if (!hasOds) matchesOds = false;
             }
 
@@ -272,10 +265,6 @@ public class StudentHistoryFragment extends Fragment {
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         VolunteerActivity va = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
                         
-
-                        
-                        // Filtro: Solo actividades FINALIZADAS
-                        // Usando estado normalizado de ActivityMapper ("Active", "Pending", "Finished", etc.)
                         if ("Finished".equalsIgnoreCase(va.getStatus())) {
                              historyList.add(va);
                         }

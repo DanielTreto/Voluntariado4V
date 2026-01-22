@@ -12,27 +12,23 @@ public class ActivityMapper {
     public static VolunteerActivity mapApiToModel(ApiActivity apiAct) {
         if (apiAct == null) return null;
 
-        // 1. Mapeo de Estado
         String rawStatus = apiAct.getStatus() != null ? apiAct.getStatus() : "ACTIVO";
-        String status = "Active"; // Por defecto
+        String status = "Active";
 
         if (rawStatus.equalsIgnoreCase("ACTIVO")) status = "Active";
         else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
         else if (rawStatus.equalsIgnoreCase("SUSPENDIDO") || rawStatus.equalsIgnoreCase("SUSPENDIDA")) status = "Suspended";
         else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
         else if (rawStatus.equalsIgnoreCase("EN_PROGRESO")) status = "InProgress";
-        else status = rawStatus; // Caso por defecto
+        else status = rawStatus;
 
-        // 2. Mapeo de Color
         int color = getColorForType(apiAct.getType());
 
-        // 3. Normalización de URL de Imagen
         String imageUrl = apiAct.getImagen();
         if (imageUrl != null && !imageUrl.startsWith("http")) {
             imageUrl = "http://10.0.2.2:8000" + imageUrl;
         }
 
-        // 4. Mapeo de Participantes
         List<cuatrovientos.voluntariado.model.Volunteer> participants = new ArrayList<>();
         if (apiAct.getVolunteers() != null) {
             for (ApiVolunteer apiVol : apiAct.getVolunteers()) {
@@ -47,21 +43,20 @@ public class ActivityMapper {
                         apiVol.getSurname2(), 
                         apiVol.getEmail(),
                         apiVol.getPhone(),
-                        null, // DNI
-                        null, // FechaNac
-                        null, // Descripción
-                        "Voluntario", // Rol
-                        null, // Preferencias
-                        "Active", // Estado (Asumido)
+                        null,
+                        null,
+                        null,
+                        "Voluntario",
+                        null,
+                        "Active",
                         avatarUrl,
-                        apiVol.getCourse(), // Curso
-                        null // Disponibilidad (No necesaria para lista de participantes)
+                        apiVol.getCourse(),
+                        null
                 ));
             }
         }
 
-        // 5. Mapeo de Organización
-        String orgName = "Cuatrovientos"; // Por defecto
+        String orgName = "Cuatrovientos";
         String orgAvatar = null;
         String orgId = null;
         if (apiAct.getOrganization() != null) {
@@ -75,7 +70,6 @@ public class ActivityMapper {
             }
         }
 
-        // 6. Mapeo de ODS
         List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
         if (apiAct.getOds() != null) {
             for (cuatrovientos.voluntariado.network.model.ApiOds apiOds : apiAct.getOds()) {
@@ -83,7 +77,6 @@ public class ActivityMapper {
             }
         }
 
-        // 7. Construir Objeto
         VolunteerActivity volAct = new VolunteerActivity(
                 apiAct.getTitle(),
                 apiAct.getDescription() != null ? apiAct.getDescription() : "",
@@ -108,32 +101,32 @@ public class ActivityMapper {
     }
 
     public static int getColorForType(String type) {
-        if (type == null) return 0xFF616161; // Gris Oscuro por defecto
+        if (type == null) return 0xFF616161;
         switch (type) {
-            case "Ambiental": return 0xFF2E7D32; // Verde
-            case "Social": return 0xFF1976D2; // Azul
-            case "Digital": return 0xFFFFC107; // Ámbar
-            case "Educativo": return 0xFF512DA8; // Púrpura Profundo
-            case "Deportivo": return 0xFFFF9800; // Naranja
-            case "Salud": return 0xFFF44336; // Rojo
-            case "Cultural": return 0xFFF44336; // Rojo
-            case "Tecnico": return 0xFF455A64; // Azul Oscuro
-            case "General": return 0xFF616161; // Gris Oscuro
-            default: return 0xFF616161; // Gris Oscuro por defecto
+            case "Ambiental": return 0xFF2E7D32;
+            case "Social": return 0xFF1976D2;
+            case "Digital": return 0xFFFFC107;
+            case "Educativo": return 0xFF512DA8;
+            case "Deportivo": return 0xFFFF9800;
+            case "Salud": return 0xFFF44336;
+            case "Cultural": return 0xFFF44336;
+            case "Tecnico": return 0xFF455A64;
+            case "General": return 0xFF616161;
+            default: return 0xFF616161;
         }
     }
 
     public static int getStatusBackgroundColor(String status) {
         if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#E8F5E9"); // Light Green
+            return android.graphics.Color.parseColor("#E8F5E9");
         } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#FFF8E1"); // Light Orange
+            return android.graphics.Color.parseColor("#FFF8E1");
         } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#EEEEEE"); // Light Gray
+            return android.graphics.Color.parseColor("#EEEEEE");
         } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#E3F2FD"); // Light Blue
+            return android.graphics.Color.parseColor("#E3F2FD");
         } else if ("Suspended".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#FFEBEE"); // Light Red
+            return android.graphics.Color.parseColor("#FFEBEE");
         } else {
             return android.graphics.Color.LTGRAY;
         }
@@ -141,15 +134,15 @@ public class ActivityMapper {
 
     public static int getStatusTextColor(String status) {
         if ("Active".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#4CAF50"); // Green
+            return android.graphics.Color.parseColor("#4CAF50");
         } else if ("Pending".equalsIgnoreCase(status) || "PENDIENTE".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#FFA000"); // Orange
+            return android.graphics.Color.parseColor("#FFA000");
         } else if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#757575"); // Grey
+            return android.graphics.Color.parseColor("#757575");
         } else if ("InProgress".equalsIgnoreCase(status) || "EN_PROGRESO".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#2196F3"); // Blue
+            return android.graphics.Color.parseColor("#2196F3");
         } else if ("Suspended".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status)) {
-            return android.graphics.Color.parseColor("#D32F2F"); // Darker Red
+            return android.graphics.Color.parseColor("#D32F2F");
         } else {
             return android.graphics.Color.DKGRAY;
         }

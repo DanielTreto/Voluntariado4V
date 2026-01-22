@@ -8,7 +8,7 @@ public class LoginResponse {
     private String email;
     private String firebaseUid;
     private String avatar;
-    private String error; // For error cases
+    private String error;
 
     public boolean isSuccess() {
         return success;
@@ -46,5 +46,5 @@ public class LoginResponse {
         return status;
     }
 
-    private String status; // Added status field
+    private String status;
 }

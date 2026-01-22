@@ -20,10 +20,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import android.view.View;
 
-/**
- * Actividad principal para el Administrador.
- * Gestiona el menú lateral (Drawer) y la navegación entre fragmentos de gestión.
- */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
@@ -32,41 +28,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 1. CAMBIO IMPORTANTE: Cargar el layout del Dashboard que contiene el Drawer
         setContentView(R.layout.activity_dashboard);
 
-        // 2. Configurar la Barra de Herramientas
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // Ocultar el título por defecto ya que tienes un TextView personalizado en el XML
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
         
-        // Referencia al título personalizado
         toolbarTitle = findViewById(R.id.toolbar_title);
 
-        // 3. Configurar el DrawerLayout y el Toggle (botón hamburguesa)
-        drawerLayout = findViewById(R.id.main); // ID definido en activity_dashboard.xml
+        drawerLayout = findViewById(R.id.main);
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Cargar Avatar y Datos del Admin (Cabecera del Drawer)
         View headerView = navigationView.getHeaderView(0);
         ImageView navImage = headerView.findViewById(R.id.imageView);
         TextView navName = headerView.findViewById(R.id.tvNavHeaderName);
         TextView navRole = headerView.findViewById(R.id.tvNavHeaderRole);
         
-        // Cargar desde SharedPreferences
         android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
         String savedName = prefs.getString("USER_NAME", "Administrador");
         String savedAvatar = prefs.getString("USER_AVATAR", null);
         
-        // Establecer Datos
         navName.setText(savedName);
-        navRole.setText("Administrador"); // Según requerimiento
+        navRole.setText("Administrador");
 
-        // Cargar Avatar si existe, sino placeholder
         if (savedAvatar != null && !savedAvatar.isEmpty()) {
             Glide.with(this)
                 .load(savedAvatar)
@@ -84,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // 4. Cargar el fragmento por defecto (Reports) al iniciar
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.nav_host_fragment, new cuatrovientos.voluntariado.fragments.ReportsFragment())
@@ -92,14 +78,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(R.id.nav_reports);
             toolbarTitle.setText("Informes");
         }
-        // 5. Configurar Back Dispatcher (Reemplazo de onBackPressed)
         getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
                 if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                 } else {
-                    setEnabled(false); // Desactivar este callback para permitir comportamiento por defecto
+                    setEnabled(false);
                     getOnBackPressedDispatcher().onBackPressed();
                 }
             }
@@ -131,7 +116,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new cuatrovientos.voluntariado.fragments.SettingsFragment();
             title = "Ajustes";
         } else if (id == R.id.nav_logout) {
-            // Lógica de Cierre de Sesión con Confirmación
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Cerrar Sesión")
                 .setMessage("¿Estás seguro de que deseas cerrar sesión?")

@@ -17,11 +17,6 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.ActivitiesAdapter;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
 
-/**
- * Fragmento de Inicio para Estudiantes/Voluntarios.
- * Muestra las actividades "Mis Actividades" y "Actividades Disponibles".
- * Incluye filtros y búsqueda.
- */
 public class StudentHomeFragment extends Fragment {
 
     private RecyclerView rvAvailableActivities;
@@ -59,7 +54,6 @@ public class StudentHomeFragment extends Fragment {
         rvAvailableActivities.setLayoutManager(new LinearLayoutManager(getContext()));
         rvMyActivities.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Botones de Filtro
         android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
         btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
 
@@ -75,7 +69,6 @@ public class StudentHomeFragment extends Fragment {
         android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
         btnSortActivities.setOnClickListener(v -> toggleSort());
 
-        // Configurar Búsqueda
         android.widget.EditText etSearchStudentDash = view.findViewById(R.id.etSearchStudentDash);
         etSearchStudentDash.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -89,7 +82,6 @@ public class StudentHomeFragment extends Fragment {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // Inicializar adaptadores
         adapterAvailable = new ActivitiesAdapter(availableActivitiesList, true);
         rvAvailableActivities.setAdapter(adapterAvailable);
         
@@ -129,7 +121,6 @@ public class StudentHomeFragment extends Fragment {
     }
     
     private void showStatusFilterDialog() {
-        // Excluir SUSPENDIDA
         String[] statuses = {"Todos", "Active", "Pending", "InProgress", "Finished"};
         String[] displayStatuses = {"Todos", "Activa", "Pendiente", "En Progreso", "Finalizada"};
         
@@ -188,9 +179,6 @@ public class StudentHomeFragment extends Fragment {
     private void filterList(String query) {
         String q = query.toLowerCase();
 
-
-
-        // Función auxiliar de filtrado
         java.util.function.Predicate<VolunteerActivity> matchesFilters = act -> {
             boolean matchesType = true;
             if (!currentTypeFilter.equals("Todos")) {
@@ -237,7 +225,6 @@ public class StudentHomeFragment extends Fragment {
             return matchesType && matchesOds && matchesStatus && matchesCapacity && matchesSearch;
         };
 
-        // 1. Filtrar Mis Actividades
         myActivitiesList.clear();
         for (VolunteerActivity act : masterMyList) {
             if (matchesFilters.test(act)) {
@@ -254,7 +241,6 @@ public class StudentHomeFragment extends Fragment {
             emptyMyActivities.setVisibility(View.GONE);
         }
 
-        // 2. Filtrar Actividades Disponibles
         availableActivitiesList.clear();
         for (VolunteerActivity act : masterAvailableList) {
             if (matchesFilters.test(act)) {
@@ -311,7 +297,6 @@ public class StudentHomeFragment extends Fragment {
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         VolunteerActivity va = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
                         if ("Finished".equalsIgnoreCase(va.getStatus())) continue;
-                        // SUSPENDIDA está oculto implícitamente por el backend, pero mantenemos lógica robusta
                         if ("Suspended".equalsIgnoreCase(va.getStatus()) || "SUSPENDIDA".equalsIgnoreCase(va.getStatus())) continue;
 
                         masterMyList.add(va);
@@ -338,7 +323,6 @@ public class StudentHomeFragment extends Fragment {
                         if (excludeIds.contains(apiAct.getId())) continue;
 
                         String status = apiAct.getStatus();
-                        // El backend puede enviar SUSPENDIDA, pero verificamos restricciones
                         if ("Suspended".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status)) continue;
                         
                         if (status == null || 
@@ -355,4 +339,3 @@ public class StudentHomeFragment extends Fragment {
         });
     }
 }
-

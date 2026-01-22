@@ -21,7 +21,6 @@ public class ActivityDetailDialog extends DialogFragment {
     private boolean isStudent = false;
 
     public static ActivityDetailDialog newInstance(VolunteerActivity activity) {
-        // Por defecto no es modo estudiante (sin navegación a organización)
         return newInstance(activity, false);
     }
     
@@ -35,7 +34,6 @@ public class ActivityDetailDialog extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Usar un estilo de pantalla completa
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_DeviceDefault_NoActionBar_Fullscreen);
     }
 
@@ -65,18 +63,15 @@ public class ActivityDetailDialog extends DialogFragment {
             tvDesc.setText(activity.getDescription());
             tvLocation.setText("Ubicación: " + activity.getLocation());
             
-            // Etiqueta de Categoría
             tvType.setText(activity.getCategory());
             tvType.setBackgroundColor(activity.getImageColor());
             
-            // Traducir Estado
             String rawStatus = activity.getStatus();
             
             tvStatus.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(rawStatus));
             tvStatus.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(rawStatus));
             tvStatus.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(rawStatus));
 
-            // Lógica de Organización
             tvOrgName.setText(activity.getOrganizationName() != null ? activity.getOrganizationName() : "Cuatrovientos");
             if (activity.getOrganizationAvatar() != null) {
                 Glide.with(this)
@@ -98,7 +93,7 @@ public class ActivityDetailDialog extends DialogFragment {
                     String orgId = activity.getOrganizationId();
                      if (orgId != null && !orgId.isEmpty()) {
                          cuatrovientos.voluntariado.model.Organization tempOrg = new cuatrovientos.voluntariado.model.Organization();
-                         tempOrg.setId(orgId); // Solo ID necesario para lógica de loadActivities
+                         tempOrg.setId(orgId); 
                          tempOrg.setName(activity.getOrganizationName());
                          tempOrg.setAvatarUrl(activity.getOrganizationAvatar());
                          
@@ -117,7 +112,6 @@ public class ActivityDetailDialog extends DialogFragment {
             }
 
 
-            // Formatear fechas a dd/mm/yyyy
             String startDate = activity.getDate();
             if (startDate != null && startDate.contains(" ")) {
                 startDate = startDate.split(" ")[0];
@@ -144,30 +138,27 @@ public class ActivityDetailDialog extends DialogFragment {
 
             String imageUrl = activity.getImageUrl();
             if (imageUrl == null || imageUrl.isEmpty()) {
-                imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png"; // URL de respaldo
+                imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png"; 
             }
             Glide.with(this)
                  .load(imageUrl)
                  .centerCrop()
-                 .error(Glide.with(this).load("https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png")) // Fallback URL
+                 .error(Glide.with(this).load("https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png")) 
                  .placeholder(R.drawable.ic_launcher_background)
                  .into(imgHeader);
 
-            // Lista de Voluntarios
             List<cuatrovientos.voluntariado.model.Volunteer> volunteers = activity.getParticipants();
 
             
-            // Comprobar Rol de Admin para navegación de voluntarios
             android.content.SharedPreferences prefs = requireContext().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
             String role = prefs.getString("USER_ROLE", "");
             boolean isAdmin = "admin".equalsIgnoreCase(role) || "administrator".equalsIgnoreCase(role) 
                               || "organization".equalsIgnoreCase(role) || "organizacion".equalsIgnoreCase(role);
 
-            // Renderizado de Lista de Voluntarios con lógica de Admin
             if (volunteers != null && !volunteers.isEmpty()) {
                 tvVolunteersTitle.setVisibility(View.VISIBLE);
                 layoutVolunteers.setVisibility(View.VISIBLE);
-                layoutVolunteers.removeAllViews(); // Clear previous
+                layoutVolunteers.removeAllViews(); 
                 
                 for (cuatrovientos.voluntariado.model.Volunteer v : volunteers) {
                      View volView = inflater.inflate(R.layout.item_volunteer_avatar, layoutVolunteers, false);
@@ -182,7 +173,6 @@ public class ActivityDetailDialog extends DialogFragment {
                          btnArrow.setVisibility(View.VISIBLE);
                          volView.setClickable(true);
                          volView.setFocusable(true);
-                         // Add ripple background programmatically if needed, or rely on parent
                          
                          volView.setOnClickListener(clickedView -> {
                              cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog volDialog = 
@@ -200,7 +190,6 @@ public class ActivityDetailDialog extends DialogFragment {
                 layoutVolunteers.setVisibility(View.GONE);
             }
 
-            // ODS List
             TextView tvOdsTitle = view.findViewById(R.id.tvOdsTitle);
             android.widget.LinearLayout layoutOdsList = view.findViewById(R.id.layoutOdsList);
             List<cuatrovientos.voluntariado.model.Ods> odsList = activity.getOds();
@@ -210,10 +199,8 @@ public class ActivityDetailDialog extends DialogFragment {
             layoutOdsList.removeAllViews();
 
             if (odsList != null && !odsList.isEmpty()) {
-                // Configurar layout para scroll horizontal o linear layout horizontal si son pocos
                 layoutOdsList.setOrientation(android.widget.LinearLayout.HORIZONTAL);
                 
-                // Convert 50dp to pixels
                 int sizeInDp = 50;
                 int sizeInPx = (int) android.util.TypedValue.applyDimension(
                         android.util.TypedValue.COMPLEX_UNIT_DIP, sizeInDp, 
@@ -223,7 +210,6 @@ public class ActivityDetailDialog extends DialogFragment {
                     ImageView imgOds = new ImageView(getContext());
                     android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(sizeInPx, sizeInPx);
                     
-                    // ¿Margen también en dp? Mantenemos simple o convertimos 4dp
                     int marginPx = (int) android.util.TypedValue.applyDimension(
                             android.util.TypedValue.COMPLEX_UNIT_DIP, 4, 
                             getResources().getDisplayMetrics());
@@ -241,7 +227,6 @@ public class ActivityDetailDialog extends DialogFragment {
                              .error(R.drawable.ic_launcher_background)
                              .into(imgOds);
                     } else {
-                         // Fallback
                          Glide.with(this)
                              .load(R.drawable.ic_launcher_background)
                              .into(imgOds);
@@ -258,7 +243,6 @@ public class ActivityDetailDialog extends DialogFragment {
             }
         }
 
-        // Contar DialogFragments
         List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
         List<DialogFragment> dialogs = new java.util.ArrayList<>();
         for (androidx.fragment.app.Fragment f : fragments) {
@@ -267,14 +251,12 @@ public class ActivityDetailDialog extends DialogFragment {
             }
         }
 
-        // BTN CERRAR (X) -> Cierra la pila completa de diálogos
         btnClose.setOnClickListener(v -> {
              for (DialogFragment d : dialogs) {
                  d.dismiss();
              }
         });
 
-        // BTN ATRAS (Flecha) -> Cierra solo el actual
         ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
 
         if (dialogs.size() > 1) {

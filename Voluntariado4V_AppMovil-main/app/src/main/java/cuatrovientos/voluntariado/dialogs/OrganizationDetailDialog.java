@@ -38,7 +38,6 @@ public class OrganizationDetailDialog extends DialogFragment {
     public static OrganizationDetailDialog newInstance(Organization org) {
          OrganizationDetailDialog fragment = new OrganizationDetailDialog();
          Bundle args = new Bundle();
-         // Serializar objeto a JSON para pasar argumentos
          com.google.gson.Gson gson = new com.google.gson.Gson();
          String json = gson.toJson(org);
          args.putString(ARG_ORG, json);
@@ -70,14 +69,12 @@ public class OrganizationDetailDialog extends DialogFragment {
             }
         }
 
-        // BTN CERRAR (X) -> Cierra la Pila
         btnClose.setOnClickListener(v -> {
              for (DialogFragment d : dialogs) {
                  d.dismiss();
              }
         });
 
-        // BTN ATRAS (Flecha) -> Cierra Actual
         ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
         if (dialogs.size() > 1) {
             btnCloseStack.setVisibility(View.VISIBLE);
@@ -95,9 +92,6 @@ public class OrganizationDetailDialog extends DialogFragment {
         tvName.setText(organization.getName());
         tvEmail.setText(organization.getEmail());
         
-        // Fecha eliminada del layout
-
-        // Comprobación de Estado
         tvStatus.setText(organization.getStatus());
          if ("Active".equalsIgnoreCase(organization.getStatus()) || "Activo".equalsIgnoreCase(organization.getStatus())) {
               tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
@@ -113,7 +107,6 @@ public class OrganizationDetailDialog extends DialogFragment {
               tvStatus.setText("Pendiente");
          }
 
-        // Vincular Nuevos Campos
         TextView tvPhone = view.findViewById(R.id.tvDetailPhone);
         TextView tvType = view.findViewById(R.id.tvDetailType);
         TextView tvSector = view.findViewById(R.id.tvDetailSector);
@@ -149,17 +142,14 @@ public class OrganizationDetailDialog extends DialogFragment {
              imgHeader.setImageResource(R.drawable.ic_business);
         }
         
-        // Poblado Inicial
         updateUI(view);
 
-        // Obtener detalles completos si es probable que estén incompletos (ej. falta descripción)
         if (organization.getDescription() == null || organization.getDescription().isEmpty() || organization.getType() == null) {
             fetchOrganizationDetails(view);
         } else {
              view.findViewById(R.id.layoutDetailContent).setVisibility(View.VISIBLE);
         }
 
-        // Setup RecyclerView
         recyclerActivities = view.findViewById(R.id.recyclerOrgActivities);
         recyclerActivities.setLayoutManager(new LinearLayoutManager(getContext()));
         activitiesAdapter = new cuatrovientos.voluntariado.adapters.SimpleActivityAdapter(new ArrayList<>());
@@ -180,14 +170,8 @@ public class OrganizationDetailDialog extends DialogFragment {
                 if (response.isSuccessful() && response.body() != null) {
                     List<VolunteerActivity> mappedList = new ArrayList<>();
                     for (ApiActivity apiAct : response.body()) {
-                        // Image URL handled by Mapper
                         
-                        // Mapeo de ApiActivity a VolunteerActivity usando el Mapper estándar
-                        // Esto asegura que ODS y Voluntarios se pueblen correctamente
                         VolunteerActivity volAct = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
-                        
-                        // Sobrescribir info de Organización ya que estamos en el contexto de la Organización
-                        // (El endpoint de actividades de organización no siempre devuelve el objeto organización anidado)
                         
                         if (volAct != null) {
                             volAct.setOrganizationName(organization.getName());
@@ -270,7 +254,6 @@ public class OrganizationDetailDialog extends DialogFragment {
              @Override
              public void onResponse(Call<Organization> call, Response<Organization> response) {
                  if (response.isSuccessful() && response.body() != null) {
-                     // Update current organization object with fetched details
                      Organization fetched = response.body();
                      organization.setEmail(fetched.getEmail());
                      organization.setDescription(fetched.getDescription());
@@ -280,16 +263,14 @@ public class OrganizationDetailDialog extends DialogFragment {
                      organization.setScope(fetched.getScope());
                      organization.setContactPerson(fetched.getContactPerson());
                      organization.setStatus(fetched.getStatus());
-                     // Avoid overwriting Name/Avatar if they are visually correct, but safe to overwrite usually.
                      organization.setName(fetched.getName());
                      organization.setAvatarUrl(fetched.getAvatarUrl());
                      
                      if (getContext() != null) {
                          updateUI(view);
-                         // Also refresh avatar if URL changed/loaded
                          ImageView imgHeader = view.findViewById(R.id.imgDetailHeader);
                          if (organization.getAvatarUrl() != null && !organization.getAvatarUrl().isEmpty()) {
-                              Glide.with(getContext()) // Use getContext() safely inside callback
+                              Glide.with(getContext()) 
                                   .load(organization.getAvatarUrl())
                                   .placeholder(R.drawable.ic_business)
                                   .error(R.drawable.ic_business)

@@ -17,9 +17,6 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.ActivitiesAdapter;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
 
-/**
- * Fragmento que muestra el historial de actividades finalizadas/suspendidas de la organización.
- */
 public class OrganizationHistoryFragment extends Fragment {
 
     private RecyclerView rvHistory;
@@ -37,16 +34,13 @@ public class OrganizationHistoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // Reutilizamos el layout de historial de estudiantes ya que es solo un Título + RecyclerView
         View view = inflater.inflate(R.layout.fragment_student_history, container, false);
 
         rvHistory = view.findViewById(R.id.rvHistory);
-        emptyStateView = view.findViewById(R.id.emptyHistory); // ID de fragment_student_history.xml
+        emptyStateView = view.findViewById(R.id.emptyHistory); 
         rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // Botones de Filtro
         android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
         btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
 
@@ -62,7 +56,6 @@ public class OrganizationHistoryFragment extends Fragment {
         android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
         btnSortActivities.setOnClickListener(v -> toggleSort());
 
-        // Configurar Búsqueda
         android.widget.EditText etSearchHistory = view.findViewById(R.id.etSearchHistory);
         etSearchHistory.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -76,12 +69,10 @@ public class OrganizationHistoryFragment extends Fragment {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // Recuperar ID de Usuario de SharedPreferences
         android.content.SharedPreferences prefs = getActivity().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
         String userId = prefs.getString("USER_ID", null);
 
-        // Inicializar adaptador vacío
-        adapter = new ActivitiesAdapter(new ArrayList<>(), true); // true = permitir detalles
+        adapter = new ActivitiesAdapter(new ArrayList<>(), true); 
         rvHistory.setAdapter(adapter);
 
         if (userId != null) {
@@ -122,7 +113,6 @@ public class OrganizationHistoryFragment extends Fragment {
     }
 
     private void showStatusFilterDialog() {
-        // Solo "Finalizada", "Suspendida"
         String[] statuses = {"Todos", "Finished", "Suspended"};
         String[] displayStatuses = {"Todos", "Finalizada", "Suspendida"};
         
@@ -274,7 +264,6 @@ public class OrganizationHistoryFragment extends Fragment {
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         
                         String status = apiAct.getStatus();
-                        // Filtrar Finalizadas, Suspendidas
                         if (!("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status) || "Suspended".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status))) {
                             continue;
                         }

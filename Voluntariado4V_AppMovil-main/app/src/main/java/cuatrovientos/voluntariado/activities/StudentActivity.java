@@ -12,10 +12,6 @@ import cuatrovientos.voluntariado.fragments.SettingsFragment;
 import cuatrovientos.voluntariado.fragments.StudentHistoryFragment;
 import cuatrovientos.voluntariado.fragments.StudentHomeFragment;
 
-/**
- * Actividad principal para el perfil de Estudiante / Voluntario.
- * Gestiona la navegación inferior y mantiene el ID del usuario activo.
- */
 public class StudentActivity extends AppCompatActivity {
 
     private String userId;
@@ -25,7 +21,7 @@ public class StudentActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_student_main); 
         
-        userId = getIntent().getStringExtra("USER_ID"); // Capturar ID pasado desde LoginActivity
+        userId = getIntent().getStringExtra("USER_ID");
         
         if (userId == null) {
             android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);

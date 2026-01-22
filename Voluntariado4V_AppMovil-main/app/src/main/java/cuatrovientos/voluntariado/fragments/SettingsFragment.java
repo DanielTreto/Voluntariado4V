@@ -32,14 +32,12 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        // Inicializar Vistas
         MaterialButton btnLogout = view.findViewById(R.id.btnLogout);
 
         tvProfileName = view.findViewById(R.id.tvProfileName);
         tvProfileEmail = view.findViewById(R.id.tvProfileEmail);
         imgProfile = view.findViewById(R.id.imgProfile);
 
-        // Cargar Datos de Usuario de la Sesión
         android.content.Context context = getContext();
         if (context != null) {
             android.content.SharedPreferences prefs = context.getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
@@ -63,16 +61,9 @@ public class SettingsFragment extends Fragment {
                  imgProfile.setImageResource(R.drawable.ic_profile_placeholder);
             }
 
-
-
-
-            // Lógica de Modo Oscuro
             SwitchMaterial switchDarkMode = view.findViewById(R.id.switchDarkMode);
-            // Comprobar modo noche actual en prefs (o por defecto del sistema)
-            // Idealmente guardamos esto en pref. Usamos "AppSettings" para config de app.
             android.content.SharedPreferences appPrefs = context.getSharedPreferences("AppSettings", android.content.Context.MODE_PRIVATE);
             boolean isDarkMode = appPrefs.getBoolean("DARK_MODE", false);
-            // También comprobar si el sistema ya está en oscuro para establecer estado inicial si no está guardado
             int nightModeFlags = context.getResources().getConfiguration().uiMode & android.content.res.Configuration.UI_MODE_NIGHT_MASK;
             if (!appPrefs.contains("DARK_MODE")) {
                  isDarkMode = (nightModeFlags == android.content.res.Configuration.UI_MODE_NIGHT_YES);
@@ -81,9 +72,7 @@ public class SettingsFragment extends Fragment {
             if(switchDarkMode != null) {
                 switchDarkMode.setChecked(isDarkMode);
                 switchDarkMode.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    // Actualizar Prefs
                     appPrefs.edit().putBoolean("DARK_MODE", isChecked).apply();
-                    // Aplicar Modo
                     if (isChecked) {
                         androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES);
                         Toast.makeText(getContext(), "Modo oscuro activado", Toast.LENGTH_SHORT).show();
@@ -95,7 +84,6 @@ public class SettingsFragment extends Fragment {
             }
         }
 
-        // Lógica de Cerrar Sesión
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,15 +91,12 @@ public class SettingsFragment extends Fragment {
                     .setTitle("Cerrar Sesión")
                     .setMessage("¿Estás seguro de que deseas cerrar sesión?")
                     .setPositiveButton("Sí", (dialog, which) -> {
-                        // Limpiar Sesión
                         if (getContext() != null) {
                             android.content.SharedPreferences prefs = getContext().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
                             prefs.edit().clear().apply();
                         }
 
-                        // Ir a LoginActivity
                         Intent intent = new Intent(getActivity(), cuatrovientos.voluntariado.activities.LoginActivity.class);
-                        // Limpiar back stack para que no se pueda volver atrás
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                     })

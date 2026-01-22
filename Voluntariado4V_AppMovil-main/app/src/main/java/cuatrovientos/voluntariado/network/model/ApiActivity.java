@@ -1,7 +1,7 @@
 package cuatrovientos.voluntariado.network.model;
 
 public class ApiActivity {
-    private int id; // Backend likely returns int for Activity ID
+    private int id;
     private String title;
     private String description;
     private String location;
@@ -11,13 +11,12 @@ public class ApiActivity {
     private String type;
     private String duration;
     private int maxVolunteers;
-    private String imagen; // Matches backend field 'imagen'
+    private String imagen;
     private ApiOrganization organization;
     
     private java.util.List<ApiVolunteer> volunteers;
     private java.util.List<ApiOds> ods;
 
-    // Getters
     public int getId() { return id; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }

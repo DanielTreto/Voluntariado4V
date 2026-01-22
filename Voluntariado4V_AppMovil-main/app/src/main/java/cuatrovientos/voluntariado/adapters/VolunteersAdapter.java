@@ -72,21 +72,19 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
                  }
             });
 
-            // Colores para Active/Suspended
             if (volunteer.getStatus().equals("Active")) {
-                holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9")); // Verde claro
-                holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")); // Verde texto
+                holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9")); 
+                holder.tvStatus.setTextColor(Color.parseColor("#4CAF50")); 
                 holder.tvStatus.setText("Activo");
             } else if (volunteer.getStatus().equals("Suspended")) {
-                holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE")); // Rojo claro
-                holder.tvStatus.setTextColor(Color.parseColor("#D32F2F")); // Rojo oscuro texto
+                holder.tvStatus.setBackgroundColor(Color.parseColor("#FFEBEE")); 
+                holder.tvStatus.setTextColor(Color.parseColor("#D32F2F")); 
                 holder.tvStatus.setText("Suspendido");
             }
 
         } else {
-            // Es una solicitud pendiente ("Pending")
-            holder.actionsLayout.setVisibility(View.GONE); // Mostrar botones Check/Cruz -> AHORA OCULTO
-            holder.btnMoreOptions.setVisibility(View.VISIBLE); // Mostrar +
+            holder.actionsLayout.setVisibility(View.GONE); 
+            holder.btnMoreOptions.setVisibility(View.VISIBLE); 
             
             holder.btnMoreOptions.setOnClickListener(v -> {
                  if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
@@ -96,8 +94,8 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
                  }
             });
 
-            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1")); // Naranja claro
-            holder.tvStatus.setTextColor(Color.parseColor("#FFA000")); // Naranja Texto
+            holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1")); 
+            holder.tvStatus.setTextColor(Color.parseColor("#FFA000")); 
             holder.tvStatus.setText("Pendiente");
         }
     }
@@ -123,7 +121,6 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             tvPhone = itemView.findViewById(R.id.tvPhone);
             tvDni = itemView.findViewById(R.id.tvDni);
 
-            // Controles de acción
             actionsLayout = itemView.findViewById(R.id.actionsLayout);
             btnMoreOptions = itemView.findViewById(R.id.btnMoreOptions);
         }

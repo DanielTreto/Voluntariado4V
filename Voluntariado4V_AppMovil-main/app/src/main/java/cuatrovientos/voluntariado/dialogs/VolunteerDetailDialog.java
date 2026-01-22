@@ -46,7 +46,6 @@ public class VolunteerDetailDialog extends DialogFragment {
 
         ImageView btnClose = view.findViewById(R.id.btnClose);
         
-        // Contar DialogFragments
         java.util.List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
         java.util.List<DialogFragment> dialogs = new java.util.ArrayList<>();
         for (androidx.fragment.app.Fragment f : fragments) {
@@ -55,14 +54,12 @@ public class VolunteerDetailDialog extends DialogFragment {
             }
         }
 
-        // BTN CERRAR (X) -> Cierra la Pila
         btnClose.setOnClickListener(v -> {
              for (DialogFragment d : dialogs) {
                  d.dismiss();
              }
         });
 
-        // BTN ATRAS (Flecha) -> Cierra Actual
         ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
         if (dialogs.size() > 1) {
             btnCloseStack.setVisibility(View.VISIBLE);
@@ -74,12 +71,10 @@ public class VolunteerDetailDialog extends DialogFragment {
         android.widget.ProgressBar progressBar = view.findViewById(R.id.progressBar);
         android.widget.LinearLayout layoutContent = view.findViewById(R.id.layoutDetailContent);
         
-        // Estado de Carga Inicial
         if (volunteer.getId() != null) {
             progressBar.setVisibility(View.VISIBLE);
             layoutContent.setVisibility(View.GONE);
         } else {
-             // Si no hay ID, no podemos obtener datos, mostrar lo que tenemos
              progressBar.setVisibility(View.GONE);
              layoutContent.setVisibility(View.VISIBLE);
         }
@@ -92,7 +87,6 @@ public class VolunteerDetailDialog extends DialogFragment {
         TextView tvRole = view.findViewById(R.id.tvDetailRole);
         TextView tvDesc = view.findViewById(R.id.tvDetailDesc);
 
-        // Construir Nombre Completo
         String fullName = volunteer.getName();
         if (volunteer.getSurname1() != null) fullName += " " + volunteer.getSurname1();
         if (volunteer.getSurname2() != null) fullName += " " + volunteer.getSurname2();
@@ -100,24 +94,19 @@ public class VolunteerDetailDialog extends DialogFragment {
         tvName.setText(fullName);
         tvEmail.setText(volunteer.getEmail());
         tvPhone.setText(volunteer.getPhone());
-        // Mostrar Curso en lugar de Rol
         tvRole.setText(volunteer.getCourse() != null && !volunteer.getCourse().isEmpty() ? volunteer.getCourse() : "Sin curso");
 
-        // Vincular nuevos campos
         TextView tvDni = view.findViewById(R.id.tvDetailDni);
         TextView tvBirthDate = view.findViewById(R.id.tvDetailBirthDate);
-        TextView tvAvailability = view.findViewById(R.id.tvDetailAvailability); // New
+        TextView tvAvailability = view.findViewById(R.id.tvDetailAvailability); 
         
         tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
         tvBirthDate.setText("Fecha Nac.: " + formatDate(volunteer.getBirthDate()));
-        // Marcador de posición para Disponibilidad (falta en modelo API)
         tvAvailability.setText("Disponibilidad: Lunes a Viernes, 16:00 - 20:00");
 
-        // Preferencias
         com.google.android.material.chip.ChipGroup chipGroup = view.findViewById(R.id.chipGroupPreferences);
         TextView tvNoPreferences = view.findViewById(R.id.tvDetailNoPreferences);
         
-        // Ayudante para actualizar UI desde caché o datos obtenidos
         Runnable updateUI = () -> {
             if (volunteer.getPreferences() != null && !volunteer.getPreferences().isEmpty()) {
                 chipGroup.setVisibility(View.VISIBLE);
@@ -128,7 +117,7 @@ public class VolunteerDetailDialog extends DialogFragment {
                     com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(getContext());
                     chip.setText(pref);
                     chip.setTextColor(android.graphics.Color.WHITE);
-                    chip.setChipCornerRadius(0f); // Hacer rectangular como tarjetas de actividad
+                    chip.setChipCornerRadius(0f); 
                     
                     int color = cuatrovientos.voluntariado.utils.ActivityMapper.getColorForType(pref);
                     chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(color));
@@ -140,7 +129,6 @@ public class VolunteerDetailDialog extends DialogFragment {
                 tvNoPreferences.setVisibility(View.VISIBLE);
             }
     
-            // Comprobación de Estado
             tvStatus.setText(volunteer.getStatus());
             if ("Active".equalsIgnoreCase(volunteer.getStatus()) || "ACTIVO".equalsIgnoreCase(volunteer.getStatus())) {
                 tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
@@ -163,7 +151,7 @@ public class VolunteerDetailDialog extends DialogFragment {
             }
         };
         
-        updateUI.run(); // Ejecutar inicialmente con datos recibidos
+        updateUI.run(); 
 
         if (volunteer.getAvatarUrl() != null && !volunteer.getAvatarUrl().isEmpty()) {
              Glide.with(this)
@@ -176,17 +164,14 @@ public class VolunteerDetailDialog extends DialogFragment {
              imgHeader.setImageResource(R.drawable.ic_profile_placeholder);
         }
 
-        // Configurar RecyclerView
         androidx.recyclerview.widget.RecyclerView recyclerActivities = view.findViewById(R.id.recyclerVolunteerActivities);
         recyclerActivities.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
         cuatrovientos.voluntariado.adapters.SimpleActivityAdapter activitiesAdapter = new cuatrovientos.voluntariado.adapters.SimpleActivityAdapter(new java.util.ArrayList<>());
         recyclerActivities.setAdapter(activitiesAdapter);
 
-        // Obtener Detalles Completos y Actividades
         if (volunteer.getId() != null) {
             cuatrovientos.voluntariado.network.ApiService apiService = cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
             
-            // 1. Obtener Perfil Completo
             apiService.getVolunteer(volunteer.getId()).enqueue(new retrofit2.Callback<cuatrovientos.voluntariado.network.model.ApiVolunteer>() {
                 @Override
                 public void onResponse(retrofit2.Call<cuatrovientos.voluntariado.network.model.ApiVolunteer> call, retrofit2.Response<cuatrovientos.voluntariado.network.model.ApiVolunteer> response) {
@@ -202,7 +187,6 @@ public class VolunteerDetailDialog extends DialogFragment {
                             }
                          }
 
-                         // Actualizar objeto voluntario local
                          volunteer = new Volunteer(
                              apiVol.getId(),
                              apiVol.getName(),
@@ -213,17 +197,15 @@ public class VolunteerDetailDialog extends DialogFragment {
                              apiVol.getDni(),
                              apiVol.getDateOfBirth(),
                              apiVol.getDescription(),
-                             "Voluntario", // Rol
+                             "Voluntario", 
                              apiVol.getPreferences(),
                              apiVol.getStatus(),
                              apiVol.getAvatar(),
-                             apiVol.getCourse(), // Curso
+                             apiVol.getCourse(), 
                              availability
                          );
                          
-                         // Refrescar UI
                          if (getContext() != null) {
-                             // Actualizar Textos
                              String fullN = volunteer.getName();
                              if (volunteer.getSurname1() != null) fullN += " " + volunteer.getSurname1();
                              if (volunteer.getSurname2() != null) fullN += " " + volunteer.getSurname2();
@@ -231,13 +213,11 @@ public class VolunteerDetailDialog extends DialogFragment {
                              
                              tvEmail.setText(volunteer.getEmail());
                              tvPhone.setText(volunteer.getPhone());
-                             // Fix: Mostrar Curso
                              tvRole.setText(volunteer.getCourse() != null && !volunteer.getCourse().isEmpty() ? volunteer.getCourse() : "Sin curso");
                              
                              tvDni.setText("DNI: " + (volunteer.getDni() != null ? volunteer.getDni() : ""));
                              tvBirthDate.setText("Fecha Nac.: " + formatDate(volunteer.getBirthDate()));
                              
-                             // Lógica de Disponibilidad
                              if (volunteer.getAvailability() != null && !volunteer.getAvailability().isEmpty()) {
                                  StringBuilder sb = new StringBuilder();
                                  sb.append("Disponibilidad:\n");
@@ -249,7 +229,7 @@ public class VolunteerDetailDialog extends DialogFragment {
                                  tvAvailability.setText("Sin disponibilidad especificada.");
                              }
                              
-                             updateUI.run(); // Re-ejecutar helper para actualizar campos estándar
+                             updateUI.run(); 
                          }
                     }
                 }
@@ -260,14 +240,12 @@ public class VolunteerDetailDialog extends DialogFragment {
                 }
             });
 
-            // 2. Obtener Actividades
             apiService.getVolunteerActivities(volunteer.getId()).enqueue(new retrofit2.Callback<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
                 @Override
                 public void onResponse(retrofit2.Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         java.util.List<cuatrovientos.voluntariado.model.VolunteerActivity> mappedList = new java.util.ArrayList<>();
                         for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
-                            // Lógica de filtro: Excluir Finalizadas
                             String status = apiAct.getStatus();
                             if (status != null && (status.equalsIgnoreCase("Finished") || status.equalsIgnoreCase("FINALIZADA"))) {
                                 continue;
@@ -284,7 +262,6 @@ public class VolunteerDetailDialog extends DialogFragment {
 
                 @Override
                 public void onFailure(retrofit2.Call<java.util.List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, Throwable t) {
-                    // Fallar silenciosamente o loguear
                 }
             });
         }
@@ -305,15 +282,13 @@ public class VolunteerDetailDialog extends DialogFragment {
     private String formatDate(String dateStr) {
         if (dateStr == null || dateStr.isEmpty()) return "";
         try {
-            // Asumir que entrada es yyyy-MM-dd
             String cleanDate = dateStr.contains("T") ? dateStr.split("T")[0] : dateStr;
-            // Manejo estándar de ISO
             java.text.SimpleDateFormat inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
             java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
             java.util.Date date = inputFormat.parse(cleanDate);
             return outputFormat.format(date);
         } catch (Exception e) {
-            return dateStr; // Fallback
+            return dateStr;
         }
     }
 }

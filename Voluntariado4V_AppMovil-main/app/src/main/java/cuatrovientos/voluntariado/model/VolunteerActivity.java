@@ -1,9 +1,5 @@
 package cuatrovientos.voluntariado.model;
 
-/**
- * Modelo que representa una actividad de voluntariado.
- * Contiene información sobre título, descripción, ubicación, fechas y participantes.
- */
 public class VolunteerActivity {
     private String title;
     private String description;
@@ -12,14 +8,14 @@ public class VolunteerActivity {
     private String duration;
     private String endDate;
     private int maxVolunteers;
-    private String category; // "Medio Ambiente", "Tecnológico", "Social", "Educativo"
-    private String status;   // "Active" (Pestaña 1) o "Pending" (Pestaña 2)
+    private String category; 
+    private String status;   
     private String organizationName;
     private String organizationAvatar;
 
-    private int id; // Added ID field
-    private int imageColor; // Background color for category chip
-    private String imageUrl; // Header image
+    private int id; 
+    private int imageColor; 
+    private String imageUrl; 
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -76,7 +72,6 @@ public class VolunteerActivity {
     public java.util.List<Volunteer> getParticipants() { return participants; }
     public java.util.List<Ods> getOds() { return ods; }
 
-    // Recoger avatar para la vista de la card
     public java.util.List<String> getParticipantAvatars() {
         java.util.List<String> avatars = new java.util.ArrayList<>();
         if (participants != null) {

@@ -45,7 +45,6 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
         
         holder.tvEmailInfo.setText(org.getEmail());
 
-        // Teléfono (Común)
         String phone = org.getPhone();
         if (phone == null || phone.isEmpty()) holder.tvPhone.setText("Sin teléfono");
         else holder.tvPhone.setText(phone);
@@ -63,7 +62,6 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
         }
 
         if (org.getStatus().equals("Pending")) {
-            // --- MODO SOLICITUD ---
             holder.actionsLayout.setVisibility(View.GONE);
             holder.btnMoreOptions.setVisibility(View.VISIBLE);
             holder.btnMoreOptions.setOnClickListener(v -> {
@@ -75,16 +73,13 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
                  }
             });
 
-            // Ocultar contador de voluntarios
             holder.tvVolunteersCount.setVisibility(View.GONE);
 
-            // Color Pendiente
             holder.tvStatus.setBackgroundColor(Color.parseColor("#FFF8E1"));
             holder.tvStatus.setTextColor(Color.parseColor("#FFA000"));
             holder.tvStatus.setText("Pendiente");
 
         } else {
-            // --- MODO REGISTRADA ---
             holder.actionsLayout.setVisibility(View.GONE);
             holder.btnMoreOptions.setVisibility(View.VISIBLE);
             holder.btnMoreOptions.setOnClickListener(v -> {
@@ -96,11 +91,9 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
                  }
             });
 
-            // Mostrar contador de voluntarios
             holder.tvVolunteersCount.setVisibility(View.VISIBLE);
             holder.tvVolunteersCount.setText(org.getVolunteersCount() + " Voluntariados creados");
 
-            // Color Activo/Suspendido
             if (org.getStatus().equals("Active")) {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9"));
                 holder.tvStatus.setTextColor(Color.parseColor("#4CAF50"));

@@ -12,21 +12,16 @@ import cuatrovientos.voluntariado.fragments.OrganizationHistoryFragment;
 import cuatrovientos.voluntariado.fragments.OrganizationHomeFragment;
 import cuatrovientos.voluntariado.fragments.SettingsFragment;
 
-/**
- * Actividad principal para el perfil de Organización.
- * Gestiona la navegación inferior entre inicio, historial, calendario y ajustes.
- */
 public class OrganizationActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_organization_main); // Nuevo layout con navegación
+        setContentView(R.layout.activity_organization_main);
 
         BottomNavigationView bottomNav = findViewById(R.id.org_bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        // Cargar fragmento inicial
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.org_fragment_container, new OrganizationHomeFragment())

@@ -46,20 +46,17 @@ public class SimpleActivityAdapter extends RecyclerView.Adapter<SimpleActivityAd
         }
         holder.tvDate.setText(dateText);
 
-        // Lógica de Estado
         String status = act.getStatus();
         holder.tvStatus.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(status));
         holder.tvStatus.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(status));
         holder.tvStatus.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(status));
 
-        // Color por tipo (Etiqueta rectangular)
         holder.tvType.setBackgroundColor(act.getImageColor());
         holder.tvType.setTextColor(android.graphics.Color.WHITE);
 
         View.OnClickListener listener = v -> {
             androidx.fragment.app.FragmentActivity activity = getActivity(v.getContext());
             if (activity != null) {
-                // Comprobar si el usuario es estudiante/voluntario para habilitar navegación recursiva
                 android.content.SharedPreferences prefs = activity.getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
                 String userRole = prefs.getString("USER_ROLE", "");
                 boolean isStudent = "volunteer".equalsIgnoreCase(userRole) || "admin".equalsIgnoreCase(userRole) || "administrator".equalsIgnoreCase(userRole) 

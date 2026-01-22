@@ -1,24 +1,20 @@
 package cuatrovientos.voluntariado.model;
 
-/**
- * Modelo que representa una organización.
- * Contiene información de contacto, sector, ámbito y estado.
- */
 public class Organization {
     private String id;             
     private String name;
     private String email;
     private String description;
-    private String type;           // <--- NEW
-    private String phone;          // <--- NEW
-    private String sector;         // <--- NEW
-    private String scope;          // <--- NEW
-    private String contactPerson;  // <--- NEW
+    private String type;           
+    private String phone;          
+    private String sector;         
+    private String scope;          
+    private String contactPerson;  
     private String date;           
     private String volunteersCount;
     private String status;         
     private String avatarUrl;      
-    private java.util.Set<String> activityStatuses; // <--- NEW
+    private java.util.Set<String> activityStatuses; 
 
     public Organization() {}
 
@@ -48,7 +44,6 @@ public class Organization {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    // Getters for new fields
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 

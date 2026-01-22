@@ -18,18 +18,12 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.OrganizationsAdapter;
 import cuatrovientos.voluntariado.model.Organization;
 
-/**
- * Fragmento que gestiona la lista de Organizaciones.
- * Permite filtrar por estado, ámbito, y estado de sus actividades.
- * Muestra solicitudes pendientes y organizaciones registradas.
- */
 public class OrganizationsFragment extends Fragment {
 
     private List<Organization> masterList;
     private OrganizationsAdapter adapter;
 
     public OrganizationsFragment() {
-        // Constructor vacío
     }
 
     @Override
@@ -162,18 +156,15 @@ public class OrganizationsFragment extends Fragment {
         cuatrovientos.voluntariado.network.ApiService apiService = 
             cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
 
-        // Llamada Anidada: 1. Obtener Organizaciones
         apiService.getOrganizations().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiOrganization>>() {
             @Override
             public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> callOrg, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiOrganization>> responseOrg) {
                 if (responseOrg.isSuccessful() && responseOrg.body() != null) {
                     List<cuatrovientos.voluntariado.network.model.ApiOrganization> apiOrgs = responseOrg.body();
                     
-                    // Llamada Anidada: 2. Obtener Actividades para Conteos
                     apiService.getActivities().enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
                         @Override
                         public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> callAct, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> responseAct) {
-                             // Calcular conteos y estados
                              java.util.Map<String, Integer> orgCounts = new java.util.HashMap<>();
                              java.util.Map<String, java.util.Set<String>> orgActivityStatuses = new java.util.HashMap<>();
 
@@ -194,7 +185,6 @@ public class OrganizationsFragment extends Fragment {
                                   }
                              }
 
-                             // Construir Lista Maestra
                              masterList.clear();
                              for (cuatrovientos.voluntariado.network.model.ApiOrganization apiOrg : apiOrgs) {
                                 String status = mapStatus(apiOrg.getStatus());
@@ -219,7 +209,7 @@ public class OrganizationsFragment extends Fragment {
                                     apiOrg.getScope(),
                                     apiOrg.getContactPerson(),
                                     "2023-01-01",
-                                    String.valueOf(count), // Pasar conteo calculado
+                                    String.valueOf(count), 
                                     status,
                                     avatarUrl,
                                     activityStatuses
@@ -238,7 +228,6 @@ public class OrganizationsFragment extends Fragment {
                         @Override
                         public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> callAct, Throwable t) {
                              android.util.Log.e("OrganizationsFragment", "Error fetching activities for counts: " + t.getMessage());
-                             // Continuar con 0 conteos si falla
                              masterList.clear();
                              for (cuatrovientos.voluntariado.network.model.ApiOrganization apiOrg : apiOrgs) {
                                 String status = mapStatus(apiOrg.getStatus());
@@ -299,26 +288,22 @@ public class OrganizationsFragment extends Fragment {
 
         for (Organization org : masterList) {
             boolean matchesTab = false;
-            // 1. Estado de Pestaña
             if (tabName.equals("Solicitudes")) {
                 if (org.getStatus().equals("Pending")) matchesTab = true;
             } else {
                 if (org.getStatus().equals("Active") || org.getStatus().equals("Suspended")) matchesTab = true;
             }
             
-            // 3. Filtro de Estado
             boolean matchesStatus = true;
             if (!tabName.equals("Solicitudes") && !currentStatusFilter.equals("Todos")) {
                  if (!org.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
             }
 
-            // 4. Filtro de Ámbito
             boolean matchesScope = true;
             if (!currentScopeFilter.equals("Todos")) {
                 if (org.getScope() == null || !org.getScope().equalsIgnoreCase(currentScopeFilter)) matchesScope = false;
             }
 
-            // 5. Filtro de Estado de Actividad
             boolean matchesActivityStatus = true;
             if (!currentActivityStatusFilter.equals("Todos")) {
                 matchesActivityStatus = false;
@@ -338,7 +323,6 @@ public class OrganizationsFragment extends Fragment {
                 }
             }
 
-            // 6. Búsqueda de Texto
             if (matchesTab && matchesStatus && matchesScope && matchesActivityStatus) {
                 if (currentSearchQuery.isEmpty()) {
                     filteredList.add(org);

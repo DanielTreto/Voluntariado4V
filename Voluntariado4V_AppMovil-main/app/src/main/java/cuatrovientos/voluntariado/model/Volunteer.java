@@ -1,25 +1,21 @@
 package cuatrovientos.voluntariado.model;
 
-/**
- * Modelo que representa un voluntario (Estudiante).
- * Contiene datos personales, preferencias, curso y disponibilidad.
- */
 public class Volunteer {
     private String id;
     private String name;
-    private String surname1; // Added based on new constructor
-    private String surname2; // New
+    private String surname1; 
+    private String surname2; 
     private String email;
     private String phone;
-    private String dni;      // New
-    private String birthDate;// New
-    private String description; // New
+    private String dni;      
+    private String birthDate;
+    private String description; 
     private String role;     
-    private java.util.List<String> preferences; // New
+    private java.util.List<String> preferences; 
     private String status;
     private String avatarUrl;
-    private String course; // New field
-    private java.util.List<String> availability; // New
+    private String course; 
+    private java.util.List<String> availability; 
 
     public Volunteer(String id, String name, String surname1, String surname2, String email, String phone, String dni, String birthDate, String description, String role, java.util.List<String> preferences, String status, String avatarUrl, String course, java.util.List<String> availability) {
         this.id = id;

@@ -29,13 +29,11 @@ import cuatrovientos.voluntariado.dialogs.ActivityDetailDialog;
 public class EventsFragment extends Fragment {
 
     private Calendar currentMonth;
-    // (TextView Título eliminado, controlado por Spinners)
     private RecyclerView recyclerView;
     private CalendarAdapter adapter;
     private List<VolunteerActivity> activities;
 
     public EventsFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -54,20 +52,17 @@ public class EventsFragment extends Fragment {
         android.widget.Spinner spinnerMonth = view.findViewById(R.id.spinnerMonth);
         android.widget.Spinner spinnerYear = view.findViewById(R.id.spinnerYear);
 
-        // Inicializar calendario al mes actual
         currentMonth = Calendar.getInstance();
         
         activities = new ArrayList<>();
         fetchActivities();
 
-        // Configurar Spinner de Meses
         String[] months = new String[]{"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
         android.widget.ArrayAdapter<String> monthAdapter = new android.widget.ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, months);
         monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMonth.setAdapter(monthAdapter);
         spinnerMonth.setSelection(currentMonth.get(Calendar.MONTH));
 
-        // Configurar Spinner de Años
         List<String> years = new ArrayList<>();
         int currentYear = currentMonth.get(Calendar.YEAR);
         for (int i = currentYear - 2; i <= currentYear + 5; i++) {
@@ -76,10 +71,8 @@ public class EventsFragment extends Fragment {
         android.widget.ArrayAdapter<String> yearAdapter = new android.widget.ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, years);
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerYear.setAdapter(yearAdapter);
-        // Select current year (index 2 because we started -2)
-        spinnerYear.setSelection(2); // Seleccionar año actual (index 2 porque empezamos en -2) 
+        spinnerYear.setSelection(2); 
 
-        // Listeners
         android.widget.AdapterView.OnItemSelectedListener listener = new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
@@ -134,80 +127,65 @@ public class EventsFragment extends Fragment {
     }
 
     private int getColorForStatus(String status) {
-        if (status == null) return 0xFF9E9E9E; // Gray default
+        if (status == null) return 0xFF9E9E9E; 
         switch (status) {
-            case "Active": return 0xFF4CAF50; // Green
-            case "Pending": return 0xFFFFC107; // Amber
-            case "Finished": return 0xFF9E9E9E; // Grey
-            case "Suspended": return 0xFFF44336; // Red
-            case "InProgress": return 0xFF2196F3; // Blue
-            default: return 0xFF2196F3; // Blue default
+            case "Active": return 0xFF4CAF50; 
+            case "Pending": return 0xFFFFC107; 
+            case "Finished": return 0xFF9E9E9E; 
+            case "Suspended": return 0xFFF44336; 
+            case "InProgress": return 0xFF2196F3; 
+            default: return 0xFF2196F3; 
         }
     }
 
     private void updateCalendar() {
-        // 1. (Titulo eliminado, controlado por Spinners)
 
         List<EventDay> days = new ArrayList<>();
 
-        // 2. Calcular días del mes
         Calendar calendar = (Calendar) currentMonth.clone();
         calendar.set(Calendar.DAY_OF_MONTH, 1);
         
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-        int firstDayOffset = dayOfWeek - 2; // Lunes(2) -> 0. Domingo(1) -> -1 (será 6)
+        int firstDayOffset = dayOfWeek - 2; 
         if (firstDayOffset < 0) firstDayOffset = 6; 
 
-        // Rellenar espacios vacios antes del día 1
         for (int i = 0; i < firstDayOffset; i++) {
             days.add(new EventDay("", null, null, null));
         }
 
-        // Rellenar días del mes
         int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         
-        // Formateador para parsear la fecha de la actividad
-        // Se intenta cubrir varios formatos posibles recibidos del backend.
-        // VolunteerController envía formato: 'd/m/y H:i'
         SimpleDateFormat activitySdf = new SimpleDateFormat("dd/MM/yy HH:mm", Locale.getDefault());
 
         for (int i = 1; i <= maxDays; i++) {
             calendar.set(Calendar.DAY_OF_MONTH, i);
             String currentDateString = dateSdf.format(calendar.getTime());
             
-            // Buscar evento para esta fecha
             String eventTitle = null;
             String eventColor = null;
             VolunteerActivity matchedActivity = null;
             
             for (VolunteerActivity activity : activities) {
-                String actDateStr = activity.getDate(); // ej., "18/01/26 15:47" o "2026-01-18" o "Fecha por definir"
+                String actDateStr = activity.getDate(); 
                 if (actDateStr == null || actDateStr.contains("difinir")) continue;
 
                 try {
                     Date actDate = null;
-                    // Intentar parsear
                     if (actDateStr.contains("/")) {
-                         // Probablemente d/m/y o dd/MM/yyyy
                          try {
-                              // Intentar formato completo con hora primero (VolunteerController)
                               actDate = activitySdf.parse(actDateStr);
                          } catch(Exception e) {
                               try {
-                                  // Intentar dd/MM/yy (ActivityController usa esto, ej. 18/01/26)
                                   actDate = new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).parse(actDateStr);
                               } catch (Exception e2) {
                                   try {
-                                      // Intentar dd/MM/yyyy
                                       actDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(actDateStr);
                                   } catch (Exception e3) {
-                                      // Fallo
                                   }
                               }
                          }
                     } else if (actDateStr.contains("-")) {
-                         // Probablemente yyyy-MM-dd
                          actDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(actDateStr);
                     }
                     
@@ -215,15 +193,13 @@ public class EventsFragment extends Fragment {
                          String actDateFormatted = dateSdf.format(actDate);
                          if (actDateFormatted.equals(currentDateString)) {
                              eventTitle = activity.getTitle();
-                             // Color por estado según solicitado
                              int color = getColorForStatus(activity.getStatus());
                              eventColor = String.format("#%06X", (0xFFFFFF & color));
                              matchedActivity = activity;
-                             break; // Encontrar y detener
+                             break; 
                          }
                     }
                 } catch (Exception e) {
-                    // Ignorar errores de parseo
                 }
             }
 
@@ -233,7 +209,6 @@ public class EventsFragment extends Fragment {
         adapter = new CalendarAdapter(days, new CalendarAdapter.OnEventClickListener() {
             @Override
             public void onEventClick(List<VolunteerActivity> activities) {
-                // No usado en esta implementación simplificada
             }
 
             @Override

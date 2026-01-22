@@ -1,10 +1,10 @@
 package cuatrovientos.voluntariado.model;
 
 public class EventDay {
-    private String dayNumber;   // "1", "2", etc.
-    private String eventTitle;  // "Limpieza de playa", o null si no hay evento
-    private String colorHex;    // "#1B5E20" (Verde), etc.
-    private VolunteerActivity activity; // La actividad asociada
+    private String dayNumber;   
+    private String eventTitle;  
+    private String colorHex;    
+    private VolunteerActivity activity; 
 
     public EventDay(String dayNumber, String eventTitle, String colorHex, VolunteerActivity activity) {
         this.dayNumber = dayNumber;

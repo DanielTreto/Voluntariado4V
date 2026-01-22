@@ -38,19 +38,16 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.Calend
     public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
         EventDay day = days.get(position);
 
-        // Poner el número
         holder.tvDayNumber.setText(day.getDayNumber());
 
-        // Configurar el evento
         if (day.getEventTitle() != null && !day.getEventTitle().isEmpty()) {
             holder.tvEventTag.setVisibility(View.VISIBLE);
             holder.tvEventTag.setText(day.getEventTitle());
 
-            // Parsear el color hexadecimal
             try {
                 holder.tvEventTag.setBackgroundColor(Color.parseColor(day.getColorHex()));
             } catch (Exception e) {
-                holder.tvEventTag.setBackgroundColor(Color.GRAY); // Color por defecto si falla
+                holder.tvEventTag.setBackgroundColor(Color.GRAY);
             }
             
             holder.itemView.setOnClickListener(v -> {

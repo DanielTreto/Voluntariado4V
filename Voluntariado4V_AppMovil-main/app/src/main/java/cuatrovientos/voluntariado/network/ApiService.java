@@ -4,9 +4,6 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 
-/**
- * Interfaz de Retrofit para definir los endpoints de la API.
- */
 public interface ApiService {
     @POST("login")
     Call<LoginResponse> login(@Body LoginRequest loginRequest);
