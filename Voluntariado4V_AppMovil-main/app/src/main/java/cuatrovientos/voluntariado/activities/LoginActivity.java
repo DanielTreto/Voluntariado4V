@@ -8,7 +8,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import cuatrovientos.voluntariado.R;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+/**
+ * Actividad que gestiona el inicio de sesión de los usuarios.
+ * Permite el acceso a voluntarios, organizaciones y administradores.
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etUsername;
@@ -35,21 +42,21 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Temporary Admin backdoor until backend supports it
+                // Puerta trasera temporal para administrador (Solo para pruebas)
                 if (username.equalsIgnoreCase("admin") && password.equalsIgnoreCase("admin")) {
-                     // 1. SAVE SESSION
+                     // 1. Guardar Sesión
                      android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
                      android.content.SharedPreferences.Editor editor = prefs.edit();
-                     editor.putString("USER_ID", "1"); // Mock ID
+                     editor.putString("USER_ID", "1"); // ID Simulado
                      editor.putString("USER_NAME", "Administrador");
                      editor.putString("USER_EMAIL", "admin@4vientos.org");
                      editor.putString("USER_ROLE", "admin");
                      editor.putString("USER_AVATAR", null);
                      editor.apply();
 
-                     // 2. Launch Activity
+                     // 2. Iniciar Actividad
                      Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                     // Setup Intent with flag to clear task (optional but good practice)
+                     // Configurar Intent para limpiar la pila de actividades (buena práctica)
                      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                      startActivity(intent);
                      finish();
@@ -61,6 +68,11 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Realiza la petición de login al servidor mediante Retrofit.
+     * @param email Correo electrónico del usuario.
+     * @param password Contraseña del usuario.
+     */
     private void performLogin(String email, String password) {
         cuatrovientos.voluntariado.network.ApiService apiService = 
             cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
@@ -76,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                     
                     if (loginResponse.isSuccess()) {
                         
-                        // Check Status FIRST
+                        // Verificar Estado PRIMERO
                         String status = loginResponse.getStatus();
                         if (status != null && (
                             "SUSPENDED".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) ||
@@ -88,7 +100,7 @@ public class LoginActivity extends AppCompatActivity {
 
                         String role = loginResponse.getRole();
                         
-                        // Save Session
+                        // Guardar Sesión
                         android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
                         android.content.SharedPreferences.Editor editor = prefs.edit();
                         editor.putString("USER_ID", loginResponse.getId());
@@ -133,11 +145,17 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showErrorDialog(String title, String message) {
+        android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat.getDrawable(this, android.R.drawable.ic_dialog_alert);
+        if (icon != null) {
+            icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon);
+            androidx.core.graphics.drawable.DrawableCompat.setTint(icon, androidx.core.content.ContextCompat.getColor(this, R.color.text_primary));
+        }
+
         new androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton("Aceptar", null)
-            .setIcon(android.R.drawable.ic_dialog_alert)
+            .setIcon(icon)
             .show();
     }
 }

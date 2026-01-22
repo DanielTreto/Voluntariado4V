@@ -1,5 +1,9 @@
 package cuatrovientos.voluntariado.model;
 
+/**
+ * Modelo que representa una organización.
+ * Contiene información de contacto, sector, ámbito y estado.
+ */
 public class Organization {
     private String id;             
     private String name;

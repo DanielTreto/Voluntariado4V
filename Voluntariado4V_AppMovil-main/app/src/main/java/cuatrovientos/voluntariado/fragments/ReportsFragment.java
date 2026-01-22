@@ -40,6 +40,10 @@ import java.util.List;
 
 import cuatrovientos.voluntariado.R;
 
+/**
+ * Fragmento que muestra informes y estadísticas.
+ * Utiliza gráficos (LineChart y PieChart) para visualizar datos.
+ */
 public class ReportsFragment extends Fragment {
 
     private LineChart lineChart;
@@ -74,16 +78,16 @@ public class ReportsFragment extends Fragment {
         setupYearSpinner();
         setupLineChart();
         setupPieChart();
-        // loadStats() removed from here, called by spinner listener
+        // loadStats() eliminado de aquí, se llama desde el listener del spinner
     }
 
     private void setupYearSpinner() {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         List<String> years = new ArrayList<>();
-        for (int i = currentYear; i >= 2023; i--) { // Show from 2023 up to current
+        for (int i = currentYear; i >= 2023; i--) { // Mostrar desde 2023 hasta actual
             years.add(String.valueOf(i));
         }
-        // Add next year just in case
+        // Añadir año siguiente por si acaso
         years.add(0, String.valueOf(currentYear + 1));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, years);
@@ -92,25 +96,19 @@ public class ReportsFragment extends Fragment {
         
         spinnerYear.setAdapter(adapter);
         
-        // Select current year by default
+        // Seleccionar año actual por defecto
         int defaultPos = adapter.getPosition(String.valueOf(currentYear));
-        spinnerYear.setSelection(defaultPos, false); // false to prevent immediate trigger if possible, though listener unset helps
+        spinnerYear.setSelection(defaultPos, false); // false para prevenir disparo inmediato si es posible
         
-        // Initial load of ALL data (True) - Done manually once
+        // Carga inicial de TODOS los datos (True) - Hecho manualmente una vez
         loadStats(currentYear, true);
 
-        // Set listener for future user interactions
+        // Establecer listener para futuras interacciones del usuario
         spinnerYear.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // Ensure we handle cases where this might be triggered by initialization
-                // But since we manually loaded above, redundant calls are acceptable vs missing logic.
-                // Crucially, subsequent calls should be partial updates (false).
                 String selectedYear = (String) parent.getItemAtPosition(position);
-                
-                // We assume any event from this listener from now on intends to update the filter
-                // causing a Line Chart refresh. If it fires for the initial selection again, 
-                // it just refreshes Line Chart, which is fine.
+
                 loadStats(Integer.parseInt(selectedYear), false);
             }
 
@@ -124,7 +122,7 @@ public class ReportsFragment extends Fragment {
     private void setupLineChart() {
         int textColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary);
 
-        // Initial empty data
+        // Datos vacíos iniciales
         List<Entry> entries = new ArrayList<>();
         
         LineDataSet dataSet = new LineDataSet(entries, "Actividades realizadas");
@@ -152,23 +150,21 @@ public class ReportsFragment extends Fragment {
         lineChart.getAxisRight().setEnabled(false);
         lineChart.getDescription().setEnabled(false);
         lineChart.getLegend().setTextColor(textColor);
-        lineChart.setExtraBottomOffset(10f); // Margin for Legend
+        lineChart.setExtraBottomOffset(10f); // Margen para Leyenda
 
         LineData lineData = new LineData(dataSet);
         lineChart.setData(lineData);
         lineChart.invalidate();
     }
 
-    // --- CONFIGURACIÓN DEL GRÁFICO DE LÍNEAS ---
-    // ... kept as is ...
 
     // --- CONFIGURACIÓN DEL GRÁFICO DE PASTEL ---
     private void setupPieChart() {
         int textColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_primary);
 
-        // Initial empty data
+        // Datos vacíos iniciales
         List<PieEntry> entries = new ArrayList<>();
-        // entries.add(new PieEntry(1f, "No Data")); // Optional placeholder
+        // entries.add(new PieEntry(1f, "Sin Datos")); // Placeholder opcional
 
         PieDataSet dataSet = new PieDataSet(entries, "");
         dataSet.setSliceSpace(3f);
@@ -182,7 +178,7 @@ public class ReportsFragment extends Fragment {
             }
         });
 
-        // Colors will be set dynamically, but default set here
+        // Los colores se establecerán dinámicamente, pero aquí el por defecto
         ArrayList<Integer> colors = new ArrayList<>();
         colors.add(Color.parseColor("#BDBDBD")); 
         dataSet.setColors(colors);
@@ -227,7 +223,7 @@ public class ReportsFragment extends Fragment {
                           if (tvTotalVolunteers != null) tvTotalVolunteers.setText(String.valueOf(stats.getTotalVolunteers()));
                           if (tvTotalOrgs != null) tvTotalOrgs.setText(String.valueOf(stats.getTotalOrganizations()));
     
-                          // Update Pie Chart
+                          // Actualizar Gráfico de Pastel
                           if (stats.getStatusDistribution() != null && pieChart != null) {
                               List<PieEntry> entries = new ArrayList<>();
                               ArrayList<Integer> colors = new ArrayList<>();
@@ -242,22 +238,22 @@ public class ReportsFragment extends Fragment {
     
                                   if ("PENDIENTE".equals(status)) {
                                       label = "Pendientes";
-                                      color = Color.parseColor("#FFA000"); // Orange
+                                      color = Color.parseColor("#FFA000"); // Naranja
                                   } else if ("EN_PROGRESO".equals(status)) {
                                       label = "En Progreso";
-                                      color = Color.parseColor("#2196F3"); // Blue
+                                      color = Color.parseColor("#2196F3"); // Azul
                                   } else if ("FINALIZADA".equals(status)) {
                                       label = "Finalizadas";
-                                      color = Color.parseColor("#757575"); // Gray
+                                      color = Color.parseColor("#757575"); // Gris
                                   } else if ("DENEGADA".equals(status)) {
                                       label = "Denegadas";
-                                      color = Color.parseColor("#616161"); // Dark Gray
+                                      color = Color.parseColor("#616161"); // Gris Oscuro
                                   } else if ("SUSPENDIDA".equals(status)) {
                                       label = "Suspendidas";
-                                      color = Color.parseColor("#D32F2F"); // Dark Red
+                                      color = Color.parseColor("#D32F2F"); // Rojo Oscuro
                                   } else if ("ACTIVE".equalsIgnoreCase(status) || "ACTIVO".equalsIgnoreCase(status)) {
                                       label = "Activas";
-                                      color = Color.parseColor("#4CAF50"); // Green
+                                      color = Color.parseColor("#4CAF50"); // Verde
                                   }
     
                                   entries.add(new PieEntry((float)count, label));
@@ -276,7 +272,7 @@ public class ReportsFragment extends Fragment {
                           }
                       }
 
-                      // Update Line Chart
+                      // Actualizar Gráfico de Líneas
                       if (stats.getMonthlyActivities() != null && lineChart != null) {
                           List<Entry> entries = new ArrayList<>();
                           for (int i = 0; i < stats.getMonthlyActivities().size(); i++) {
@@ -296,7 +292,7 @@ public class ReportsFragment extends Fragment {
              }
              @Override
              public void onFailure(Call<AdminStats> call, Throwable t) {
-                 // Ignore or log
+                 // Ignorar o loguear
              }
         });
     }

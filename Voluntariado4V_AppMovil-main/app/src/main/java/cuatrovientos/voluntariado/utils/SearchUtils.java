@@ -6,7 +6,7 @@ import java.util.Locale;
 public class SearchUtils {
 
     /**
-     * Normalizes a string by removing accents and converting to lowercase.
+     * Normaliza una cadena eliminando acentos y convirtiéndola a minúsculas.
      */
     public static String normalize(String input) {
         if (input == null) return "";
@@ -17,10 +17,10 @@ public class SearchUtils {
     }
 
     /**
-     * Checks if the normalized target string starts with the normalized query string.
-     * @param target The full string to check (e.g., an activity title).
-     * @param query The search query entered by the user.
-     * @return true if target starts with query (ignoring case and accents), false otherwise.
+     * Comprueba si la cadena objetivo normalizada comienza con la cadena de consulta normalizada.
+     * @param target La cadena completa a comprobar (ej. título de actividad).
+     * @param query La consulta de búsqueda introducida por el usuario.
+     * @return true si el objetivo comienza con la consulta (ignorando mayúsculas y acentos), false en caso contrario.
      */
     public static boolean matches(String target, String query) {
         if (target == null || query == null) return false;

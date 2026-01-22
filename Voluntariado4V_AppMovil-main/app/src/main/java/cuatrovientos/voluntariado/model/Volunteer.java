@@ -1,5 +1,9 @@
 package cuatrovientos.voluntariado.model;
 
+/**
+ * Modelo que representa un voluntario (Estudiante).
+ * Contiene datos personales, preferencias, curso y disponibilidad.
+ */
 public class Volunteer {
     private String id;
     private String name;
@@ -50,6 +54,5 @@ public class Volunteer {
     public String getAvatarUrl() { return avatarUrl; }
     public String getCourse() { return course; }
     public java.util.List<String> getAvailability() { return availability; }
-    // The 'getDate()' method was in the provided new getters, but the 'date' field was removed.
-    // This method is removed to maintain consistency with the fields.
+
 }

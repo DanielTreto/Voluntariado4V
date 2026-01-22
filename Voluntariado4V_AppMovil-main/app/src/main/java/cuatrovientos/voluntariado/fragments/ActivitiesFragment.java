@@ -19,12 +19,19 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.ActivitiesAdapter;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
 
+/**
+ * Fragmento que gestiona la lista de Actividades.
+ * Permite filtrar por tipo, ODS, estado, plazas y búsqueda por texto.
+ * Muestra solicitudes pendientes y actividades registradas en pestañas separadas.
+ */
 public class ActivitiesFragment extends Fragment {
 
     private List<VolunteerActivity> masterList;
     private ActivitiesAdapter adapter;
 
-    public ActivitiesFragment() { }
+    public ActivitiesFragment() { 
+        // Constructor vacío requerido por Android
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,6 +59,7 @@ public class ActivitiesFragment extends Fragment {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 currentSearchQuery = s.toString();
+                // Actualizar lista según la pestaña activa
                 if (tabLayout.getSelectedTabPosition() == 0) filterList("Solicitudes");
                 else filterList("Registradas");
             }
@@ -169,7 +177,7 @@ public class ActivitiesFragment extends Fragment {
     }
 
     private void showOdsFilterDialog() {
-        // Hardcoded ODS 1-17
+        // Generar lista simple de ODS (1-17)
         String[] odsArray = new String[18];
         odsArray[0] = "Todos";
         for (int i = 1; i <= 17; i++) {
@@ -227,7 +235,7 @@ public class ActivitiesFragment extends Fragment {
 
         for (VolunteerActivity act : masterList) {
             boolean matchesTab = false;
-            // 1. Tab Logic
+            // 1. Lógica de Pestañas
             if (tabName.equals("Solicitudes")) {
                 if (act.getStatus().equals("Pending")) matchesTab = true;
             } else {
@@ -258,13 +266,13 @@ public class ActivitiesFragment extends Fragment {
                 if (!hasOds) matchesOds = false;
             }
 
-            // 4. Status Filter
+            // 4. Filtro de Estado
             boolean matchesStatus = true;
             if (!tabName.equals("Solicitudes") && !currentStatusFilter.equals("Todos")) {
                  if (!act.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
             }
 
-            // 5. Capacity Filter
+            // 5. Filtro de Capacidad (Plazas)
             boolean matchesCapacity = true;
             if (!currentCapacityFilter.equals("Todos")) {
                  int currentParticipants = act.getParticipants() != null ? act.getParticipants().size() : 0;

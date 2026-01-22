@@ -33,4 +33,6 @@
     
     <color name="modal_text_primary">#FFFFFF</color>
     <color name="modal_text_secondary">#B0BEC5</color>
+    
+    <color name="dashboard_header_bg">#15202B</color> <!-- Dark Slate -->
 </resources>

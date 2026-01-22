@@ -12,27 +12,27 @@ public class ActivityMapper {
     public static VolunteerActivity mapApiToModel(ApiActivity apiAct) {
         if (apiAct == null) return null;
 
-        // 1. Status Mapping
+        // 1. Mapeo de Estado
         String rawStatus = apiAct.getStatus() != null ? apiAct.getStatus() : "ACTIVO";
-        String status = "Active"; // Default
+        String status = "Active"; // Por defecto
 
         if (rawStatus.equalsIgnoreCase("ACTIVO")) status = "Active";
         else if (rawStatus.equalsIgnoreCase("PENDIENTE")) status = "Pending";
         else if (rawStatus.equalsIgnoreCase("SUSPENDIDO") || rawStatus.equalsIgnoreCase("SUSPENDIDA")) status = "Suspended";
         else if (rawStatus.equalsIgnoreCase("FINALIZADA")) status = "Finished";
         else if (rawStatus.equalsIgnoreCase("EN_PROGRESO")) status = "InProgress";
-        else status = rawStatus; // Fallback
+        else status = rawStatus; // Caso por defecto
 
-        // 2. Color Mapping
+        // 2. Mapeo de Color
         int color = getColorForType(apiAct.getType());
 
-        // 3. Image URL Normalization
+        // 3. Normalización de URL de Imagen
         String imageUrl = apiAct.getImagen();
         if (imageUrl != null && !imageUrl.startsWith("http")) {
             imageUrl = "http://10.0.2.2:8000" + imageUrl;
         }
 
-        // 4. Participants Mapping
+        // 4. Mapeo de Participantes
         List<cuatrovientos.voluntariado.model.Volunteer> participants = new ArrayList<>();
         if (apiAct.getVolunteers() != null) {
             for (ApiVolunteer apiVol : apiAct.getVolunteers()) {
@@ -48,20 +48,20 @@ public class ActivityMapper {
                         apiVol.getEmail(),
                         apiVol.getPhone(),
                         null, // DNI
-                        null, // BirthDate
-                        null, // Description
-                        "Voluntario", // Role
-                        null, // Preferences
-                        "Active", // Status (Assumed)
+                        null, // FechaNac
+                        null, // Descripción
+                        "Voluntario", // Rol
+                        null, // Preferencias
+                        "Active", // Estado (Asumido)
                         avatarUrl,
-                        apiVol.getCourse(), // Course
-                        null // Availability (Not needed for participants list)
+                        apiVol.getCourse(), // Curso
+                        null // Disponibilidad (No necesaria para lista de participantes)
                 ));
             }
         }
 
-        // 5. Organization Mapping
-        String orgName = "Cuatrovientos"; // Default
+        // 5. Mapeo de Organización
+        String orgName = "Cuatrovientos"; // Por defecto
         String orgAvatar = null;
         String orgId = null;
         if (apiAct.getOrganization() != null) {
@@ -75,7 +75,7 @@ public class ActivityMapper {
             }
         }
 
-        // 6. ODS Mapping
+        // 6. Mapeo de ODS
         List<cuatrovientos.voluntariado.model.Ods> odsList = new ArrayList<>();
         if (apiAct.getOds() != null) {
             for (cuatrovientos.voluntariado.network.model.ApiOds apiOds : apiAct.getOds()) {
@@ -83,7 +83,7 @@ public class ActivityMapper {
             }
         }
 
-        // 7. Build Object
+        // 7. Construir Objeto
         VolunteerActivity volAct = new VolunteerActivity(
                 apiAct.getTitle(),
                 apiAct.getDescription() != null ? apiAct.getDescription() : "",
@@ -108,18 +108,18 @@ public class ActivityMapper {
     }
 
     public static int getColorForType(String type) {
-        if (type == null) return 0xFF616161; // Darker Gray default
+        if (type == null) return 0xFF616161; // Gris Oscuro por defecto
         switch (type) {
-            case "Ambiental": return 0xFF2E7D32; // Green
-            case "Social": return 0xFF1976D2; // Blue
-            case "Digital": return 0xFFFFC107; // Amber
-            case "Educativo": return 0xFF512DA8; // Deep Purple
-            case "Deportivo": return 0xFFFF9800; // Orange
-            case "Salud": return 0xFFF44336; // Red
-            case "Cultural": return 0xFFF44336; // Red
-            case "Tecnico": return 0xFF455A64; // Dark Blue
-            case "General": return 0xFF616161; // Darker Gray
-            default: return 0xFF616161; // Darker Gray default
+            case "Ambiental": return 0xFF2E7D32; // Verde
+            case "Social": return 0xFF1976D2; // Azul
+            case "Digital": return 0xFFFFC107; // Ámbar
+            case "Educativo": return 0xFF512DA8; // Púrpura Profundo
+            case "Deportivo": return 0xFFFF9800; // Naranja
+            case "Salud": return 0xFFF44336; // Rojo
+            case "Cultural": return 0xFFF44336; // Rojo
+            case "Tecnico": return 0xFF455A64; // Azul Oscuro
+            case "General": return 0xFF616161; // Gris Oscuro
+            default: return 0xFF616161; // Gris Oscuro por defecto
         }
     }
 

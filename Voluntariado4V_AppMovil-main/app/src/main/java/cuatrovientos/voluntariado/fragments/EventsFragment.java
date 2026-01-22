@@ -29,7 +29,7 @@ import cuatrovientos.voluntariado.dialogs.ActivityDetailDialog;
 public class EventsFragment extends Fragment {
 
     private Calendar currentMonth;
-    // private TextView tvMonthTitle; (Removed)
+    // (TextView Título eliminado, controlado por Spinners)
     private RecyclerView recyclerView;
     private CalendarAdapter adapter;
     private List<VolunteerActivity> activities;
@@ -60,14 +60,14 @@ public class EventsFragment extends Fragment {
         activities = new ArrayList<>();
         fetchActivities();
 
-        // Setup Month Spinner
+        // Configurar Spinner de Meses
         String[] months = new String[]{"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
         android.widget.ArrayAdapter<String> monthAdapter = new android.widget.ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, months);
         monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerMonth.setAdapter(monthAdapter);
         spinnerMonth.setSelection(currentMonth.get(Calendar.MONTH));
 
-        // Setup Year Spinner
+        // Configurar Spinner de Años
         List<String> years = new ArrayList<>();
         int currentYear = currentMonth.get(Calendar.YEAR);
         for (int i = currentYear - 2; i <= currentYear + 5; i++) {
@@ -77,7 +77,7 @@ public class EventsFragment extends Fragment {
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerYear.setAdapter(yearAdapter);
         // Select current year (index 2 because we started -2)
-        spinnerYear.setSelection(2); 
+        spinnerYear.setSelection(2); // Seleccionar año actual (index 2 porque empezamos en -2) 
 
         // Listeners
         android.widget.AdapterView.OnItemSelectedListener listener = new android.widget.AdapterView.OnItemSelectedListener() {
@@ -167,13 +167,10 @@ public class EventsFragment extends Fragment {
         int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         SimpleDateFormat dateSdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         
-        // Formatter for parsing the Activity Date (d/m/y H:i) or (dd/mm/yyyy)
-        // Adjust based on observation of backend data. "d/m/y H:i" -> "18/01/26 15:47"
-        // But let's be safe and try multiple or assume ActivityMapper passes strings.
-        // Wait, VolunteerController sends "d/m/y H:i". y is 2 digit year? 
-        // VolunteerController: format('d/m/y H:i'). Php 'y' is 2 digit year.
+        // Formateador para parsear la fecha de la actividad
+        // Se intenta cubrir varios formatos posibles recibidos del backend.
+        // VolunteerController envía formato: 'd/m/y H:i'
         SimpleDateFormat activitySdf = new SimpleDateFormat("dd/MM/yy HH:mm", Locale.getDefault());
-        // Sometimes it might receive full year? Let's try 2 digit year first as per controller.
 
         for (int i = 1; i <= maxDays; i++) {
             calendar.set(Calendar.DAY_OF_MONTH, i);
@@ -185,32 +182,32 @@ public class EventsFragment extends Fragment {
             VolunteerActivity matchedActivity = null;
             
             for (VolunteerActivity activity : activities) {
-                String actDateStr = activity.getDate(); // e.g., "18/01/26 15:47" or "2026-01-18" or "Fecha por definir"
+                String actDateStr = activity.getDate(); // ej., "18/01/26 15:47" o "2026-01-18" o "Fecha por definir"
                 if (actDateStr == null || actDateStr.contains("difinir")) continue;
 
                 try {
                     Date actDate = null;
-                    // Try parsing
+                    // Intentar parsear
                     if (actDateStr.contains("/")) {
-                         // Likely d/m/y or dd/MM/yyyy
+                         // Probablemente d/m/y o dd/MM/yyyy
                          try {
-                              // Try full format with time first (VolunteerController)
+                              // Intentar formato completo con hora primero (VolunteerController)
                               actDate = activitySdf.parse(actDateStr);
                          } catch(Exception e) {
                               try {
-                                  // Try dd/MM/yy (ActivityController uses this, e.g. 18/01/26)
+                                  // Intentar dd/MM/yy (ActivityController usa esto, ej. 18/01/26)
                                   actDate = new SimpleDateFormat("dd/MM/yy", Locale.getDefault()).parse(actDateStr);
                               } catch (Exception e2) {
                                   try {
-                                      // Try dd/MM/yyyy
+                                      // Intentar dd/MM/yyyy
                                       actDate = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(actDateStr);
                                   } catch (Exception e3) {
-                                      // Fail
+                                      // Fallo
                                   }
                               }
                          }
                     } else if (actDateStr.contains("-")) {
-                         // Likely yyyy-MM-dd
+                         // Probablemente yyyy-MM-dd
                          actDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(actDateStr);
                     }
                     
@@ -218,15 +215,15 @@ public class EventsFragment extends Fragment {
                          String actDateFormatted = dateSdf.format(actDate);
                          if (actDateFormatted.equals(currentDateString)) {
                              eventTitle = activity.getTitle();
-                             // Color per status as requested
+                             // Color por estado según solicitado
                              int color = getColorForStatus(activity.getStatus());
                              eventColor = String.format("#%06X", (0xFFFFFF & color));
                              matchedActivity = activity;
-                             break; // Find match and stop
+                             break; // Encontrar y detener
                          }
                     }
                 } catch (Exception e) {
-                    // Ignore parsing errors
+                    // Ignorar errores de parseo
                 }
             }
 
@@ -236,7 +233,7 @@ public class EventsFragment extends Fragment {
         adapter = new CalendarAdapter(days, new CalendarAdapter.OnEventClickListener() {
             @Override
             public void onEventClick(List<VolunteerActivity> activities) {
-                // Not used in this simplified implementation
+                // No usado en esta implementación simplificada
             }
 
             @Override

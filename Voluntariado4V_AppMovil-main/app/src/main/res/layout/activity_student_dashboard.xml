@@ -106,13 +106,16 @@
 
         <!-- SECCIÓN 1: Mis Actividades -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Mis Actividades"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_blue_border"
+            android:padding="8dp"
+            android:gravity="center_vertical"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMyActivities"
@@ -147,13 +150,16 @@
 
         <!-- SECCIÓN 2: Actividades Disponibles -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Actividades Disponibles"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_blue_border"
+            android:padding="8dp"
+            android:gravity="center_vertical"/>
 
 
 

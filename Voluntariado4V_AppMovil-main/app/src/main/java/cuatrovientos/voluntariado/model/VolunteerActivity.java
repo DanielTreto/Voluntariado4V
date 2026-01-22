@@ -1,5 +1,9 @@
 package cuatrovientos.voluntariado.model;
 
+/**
+ * Modelo que representa una actividad de voluntariado.
+ * Contiene información sobre título, descripción, ubicación, fechas y participantes.
+ */
 public class VolunteerActivity {
     private String title;
     private String description;
@@ -72,7 +76,7 @@ public class VolunteerActivity {
     public java.util.List<Volunteer> getParticipants() { return participants; }
     public java.util.List<Ods> getOds() { return ods; }
 
-    // Helper to get just avatars for the card view
+    // Recoger avatar para la vista de la card
     public java.util.List<String> getParticipantAvatars() {
         java.util.List<String> avatars = new java.util.ArrayList<>();
         if (participants != null) {

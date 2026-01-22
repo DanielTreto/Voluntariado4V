@@ -21,12 +21,7 @@ public class ActivityDetailDialog extends DialogFragment {
     private boolean isStudent = false;
 
     public static ActivityDetailDialog newInstance(VolunteerActivity activity) {
-        // Default to false or maybe consider overloading
-        // For compatibility with other calls (though I should update them)
-        // Let's overload or default. 
-        // User requested "Only for volunteer dashboard".
-        // If called without arg, safe assumption? Or better to explicit?
-        // Let's update calls.
+        // Por defecto no es modo estudiante (sin navegación a organización)
         return newInstance(activity, false);
     }
     
@@ -40,11 +35,7 @@ public class ActivityDetailDialog extends DialogFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Use a theme that supports DayNight (Light/Dark mode)
-        setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_Material_Light_NoActionBar_Fullscreen); 
-        // Wait, Theme_Material_Light is also fixed light. 
-        // Better to use a style that inherits parent or app theme. 
-        // Or Theme_DeviceDefault_NoActionBar_Fullscreen which usually adapts.
+        // Usar un estilo de pantalla completa
         setStyle(DialogFragment.STYLE_NORMAL, android.R.style.Theme_DeviceDefault_NoActionBar_Fullscreen);
     }
 
@@ -74,19 +65,18 @@ public class ActivityDetailDialog extends DialogFragment {
             tvDesc.setText(activity.getDescription());
             tvLocation.setText("Ubicación: " + activity.getLocation());
             
-            // Category Tag
+            // Etiqueta de Categoría
             tvType.setText(activity.getCategory());
             tvType.setBackgroundColor(activity.getImageColor());
             
-            // Translate Status
-            // Translate Status using ActivityMapper for consistency
+            // Traducir Estado
             String rawStatus = activity.getStatus();
             
             tvStatus.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(rawStatus));
             tvStatus.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(rawStatus));
             tvStatus.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(rawStatus));
 
-            // Organization Logic
+            // Lógica de Organización
             tvOrgName.setText(activity.getOrganizationName() != null ? activity.getOrganizationName() : "Cuatrovientos");
             if (activity.getOrganizationAvatar() != null) {
                 Glide.with(this)
@@ -108,7 +98,7 @@ public class ActivityDetailDialog extends DialogFragment {
                     String orgId = activity.getOrganizationId();
                      if (orgId != null && !orgId.isEmpty()) {
                          cuatrovientos.voluntariado.model.Organization tempOrg = new cuatrovientos.voluntariado.model.Organization();
-                         tempOrg.setId(orgId); // Only ID needed for loadActivities logic
+                         tempOrg.setId(orgId); // Solo ID necesario para lógica de loadActivities
                          tempOrg.setName(activity.getOrganizationName());
                          tempOrg.setAvatarUrl(activity.getOrganizationAvatar());
                          
@@ -127,7 +117,7 @@ public class ActivityDetailDialog extends DialogFragment {
             }
 
 
-            // Format dates to dd/mm/yyyy (remove time if present)
+            // Formatear fechas a dd/mm/yyyy
             String startDate = activity.getDate();
             if (startDate != null && startDate.contains(" ")) {
                 startDate = startDate.split(" ")[0];
@@ -154,7 +144,7 @@ public class ActivityDetailDialog extends DialogFragment {
 
             String imageUrl = activity.getImageUrl();
             if (imageUrl == null || imageUrl.isEmpty()) {
-                imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png"; // Fallback URL
+                imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png"; // URL de respaldo
             }
             Glide.with(this)
                  .load(imageUrl)
@@ -163,17 +153,17 @@ public class ActivityDetailDialog extends DialogFragment {
                  .placeholder(R.drawable.ic_launcher_background)
                  .into(imgHeader);
 
-            // Volunteers List
+            // Lista de Voluntarios
             List<cuatrovientos.voluntariado.model.Volunteer> volunteers = activity.getParticipants();
 
             
-            // Check Admin Role for Volunteer Navigation
+            // Comprobar Rol de Admin para navegación de voluntarios
             android.content.SharedPreferences prefs = requireContext().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
             String role = prefs.getString("USER_ROLE", "");
             boolean isAdmin = "admin".equalsIgnoreCase(role) || "administrator".equalsIgnoreCase(role) 
                               || "organization".equalsIgnoreCase(role) || "organizacion".equalsIgnoreCase(role);
 
-            // Volunteers List Rendering with Admin Logic
+            // Renderizado de Lista de Voluntarios con lógica de Admin
             if (volunteers != null && !volunteers.isEmpty()) {
                 tvVolunteersTitle.setVisibility(View.VISIBLE);
                 layoutVolunteers.setVisibility(View.VISIBLE);
@@ -220,7 +210,7 @@ public class ActivityDetailDialog extends DialogFragment {
             layoutOdsList.removeAllViews();
 
             if (odsList != null && !odsList.isEmpty()) {
-                // Configure layout for horizontal scrolling or just horizontal linear layout if few
+                // Configurar layout para scroll horizontal o linear layout horizontal si son pocos
                 layoutOdsList.setOrientation(android.widget.LinearLayout.HORIZONTAL);
                 
                 // Convert 50dp to pixels
@@ -233,7 +223,7 @@ public class ActivityDetailDialog extends DialogFragment {
                     ImageView imgOds = new ImageView(getContext());
                     android.widget.LinearLayout.LayoutParams params = new android.widget.LinearLayout.LayoutParams(sizeInPx, sizeInPx);
                     
-                    // Margin also in dp? Let's keep it simple or convert 4dp
+                    // ¿Margen también en dp? Mantenemos simple o convertimos 4dp
                     int marginPx = (int) android.util.TypedValue.applyDimension(
                             android.util.TypedValue.COMPLEX_UNIT_DIP, 4, 
                             getResources().getDisplayMetrics());
@@ -268,7 +258,7 @@ public class ActivityDetailDialog extends DialogFragment {
             }
         }
 
-        // Count DialogFragments
+        // Contar DialogFragments
         List<androidx.fragment.app.Fragment> fragments = getParentFragmentManager().getFragments();
         List<DialogFragment> dialogs = new java.util.ArrayList<>();
         for (androidx.fragment.app.Fragment f : fragments) {
@@ -277,14 +267,14 @@ public class ActivityDetailDialog extends DialogFragment {
             }
         }
 
-        // BTN CLOSE (X) -> Now closes ALL (Close Stack)
+        // BTN CERRAR (X) -> Cierra la pila completa de diálogos
         btnClose.setOnClickListener(v -> {
              for (DialogFragment d : dialogs) {
                  d.dismiss();
              }
         });
 
-        // BTN BACK (Arrow) -> Now closes ONLY CURRENT (Dismiss)
+        // BTN ATRAS (Flecha) -> Cierra solo el actual
         ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
 
         if (dialogs.size() > 1) {

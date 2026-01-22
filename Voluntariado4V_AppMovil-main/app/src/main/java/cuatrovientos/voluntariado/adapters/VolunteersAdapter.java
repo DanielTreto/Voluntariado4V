@@ -13,6 +13,7 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.model.Volunteer;
 import com.bumptech.glide.Glide;
 import android.widget.ImageView;
+import cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog;
 
 public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.VolunteerViewHolder> {
 
@@ -66,13 +67,11 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             holder.btnMoreOptions.setOnClickListener(v -> {
                  if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
                       androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
-                      cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog dialog = 
-                          cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog.newInstance(volunteer);
+                      VolunteerDetailDialog dialog = VolunteerDetailDialog.newInstance(volunteer);
                       dialog.show(activity.getSupportFragmentManager(), "VolunteerDetailDialog");
                  }
             });
 
-            // Colores para Active/Suspended
             // Colores para Active/Suspended
             if (volunteer.getStatus().equals("Active")) {
                 holder.tvStatus.setBackgroundColor(Color.parseColor("#E8F5E9")); // Verde claro
@@ -92,8 +91,7 @@ public class VolunteersAdapter extends RecyclerView.Adapter<VolunteersAdapter.Vo
             holder.btnMoreOptions.setOnClickListener(v -> {
                  if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
                       androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
-                      cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog dialog = 
-                          cuatrovientos.voluntariado.dialogs.VolunteerDetailDialog.newInstance(volunteer);
+                      VolunteerDetailDialog dialog = VolunteerDetailDialog.newInstance(volunteer);
                       dialog.show(activity.getSupportFragmentManager(), "VolunteerDetailDialog");
                  }
             });

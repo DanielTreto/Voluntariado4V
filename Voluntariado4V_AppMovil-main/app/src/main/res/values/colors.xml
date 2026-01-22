@@ -32,4 +32,6 @@
     
     <color name="modal_text_primary">#000000</color> <!-- Pure Black for requested darker text -->
     <color name="modal_text_secondary">#424242</color> <!-- Darker Grey -->
+    
+    <color name="dashboard_header_bg">#E3F2FD</color> <!-- Light Blue -->
 </resources>

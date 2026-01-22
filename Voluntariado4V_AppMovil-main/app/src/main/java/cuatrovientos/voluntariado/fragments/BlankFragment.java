@@ -11,6 +11,10 @@ import android.view.Gravity;
 
 // No necesitamos layout XML para este ejemplo rápido, lo crearemos por código
 // para asegurarnos de que ves los cambios.
+/**
+ * Fragmento en blanco de ejemplo.
+ * No requiere layout XML, se genera programáticamente.
+ */
 public class BlankFragment extends Fragment {
 
     private static final String ARG_TITLE = "title";
@@ -20,7 +24,7 @@ public class BlankFragment extends Fragment {
     private String mSubtitle;
 
     public BlankFragment() {
-        // Required empty public constructor
+        // Constructor vacío requerido
     }
 
     public static BlankFragment newInstance(String title, String subtitle) {

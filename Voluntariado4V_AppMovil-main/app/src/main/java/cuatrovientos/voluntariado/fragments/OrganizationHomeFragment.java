@@ -17,6 +17,10 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.ActivitiesAdapter;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
 
+/**
+ * Fragmento de Inicio para Organizaciones.
+ * Muestra las actividades propias de la organización (Activas, Pendientes, En Progreso).
+ */
 public class OrganizationHomeFragment extends Fragment {
 
     private RecyclerView rvMyActivities;
@@ -36,13 +40,15 @@ public class OrganizationHomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_organization_dashboard, container, false); // Reusing layout
+        View view = inflater.inflate(R.layout.activity_organization_dashboard, container, false); // Reutilizando layout
 
         rvMyActivities = view.findViewById(R.id.rvMyActivities);
         emptyStateView = view.findViewById(R.id.emptyStateView);
         rvMyActivities.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        // Filter Buttons
+        rvMyActivities.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // Botones de Filtro
         android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
         btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
 
@@ -58,7 +64,7 @@ public class OrganizationHomeFragment extends Fragment {
         android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
         btnSortActivities.setOnClickListener(v -> toggleSort());
 
-        // Setup Search
+        // Configurar Búsqueda
         android.widget.EditText etSearchOrgDash = view.findViewById(R.id.etSearchOrgDash);
         etSearchOrgDash.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -72,7 +78,7 @@ public class OrganizationHomeFragment extends Fragment {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // Retrieve User ID from SharedPreferences
+        // Recuperar ID de Usuario de SharedPreferences
         android.content.SharedPreferences prefs = getActivity().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
         String userId = prefs.getString("USER_ID", null);
 
@@ -83,7 +89,7 @@ public class OrganizationHomeFragment extends Fragment {
              showEmptyState(true);
         }
 
-        // Initialize empty adapter
+        // Inicializar adaptador vacío
         adapter = new ActivitiesAdapter(new ArrayList<>(), true);
         rvMyActivities.setAdapter(adapter);
 
@@ -118,7 +124,7 @@ public class OrganizationHomeFragment extends Fragment {
     }
 
     private void showStatusFilterDialog() {
-        // Only "En Progreso", "Activa", "Pendiente"
+        // Solo "En Progreso", "Activa", "Pendiente"
         String[] statuses = {"Todos", "InProgress", "Active", "Pending"};
         String[] displayStatuses = {"Todos", "En Progreso", "Activa", "Pendiente"};
         
@@ -270,7 +276,7 @@ public class OrganizationHomeFragment extends Fragment {
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         
                         String status = apiAct.getStatus();
-                        // Filter for Active, Pending, InProgress
+                        // Filtrar Activas, Pendientes, En Progreso
                         if ("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status) || "Suspended".equalsIgnoreCase(status) || "SUSPENDIDOS".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status)) {
                             continue;
                         }

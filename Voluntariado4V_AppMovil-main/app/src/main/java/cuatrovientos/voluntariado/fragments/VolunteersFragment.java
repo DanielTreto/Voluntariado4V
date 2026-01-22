@@ -17,6 +17,10 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.VolunteersAdapter;
 import cuatrovientos.voluntariado.model.Volunteer;
 
+/**
+ * Fragmento que gestiona la lista de Voluntarios.
+ * Permite filtrar por curso, estado, preferencias y disponibilidad.
+ */
 public class VolunteersFragment extends Fragment {
 
     private List<Volunteer> masterList;
@@ -81,7 +85,7 @@ public class VolunteersFragment extends Fragment {
 
         adapter = new VolunteersAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
-        // Initial filter
+        // Filtro inicial
         filterList("Solicitudes");
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -172,7 +176,7 @@ public class VolunteersFragment extends Fragment {
         for (Volunteer v : masterList) {
             if (v.getAvailability() != null) {
                 for (String avString : v.getAvailability()) {
-                    // String format is "DAY: TIME"
+                    // El formato de String es "DÍA: HORA"
                     if (avString.contains(":")) {
                         String day = avString.split(":")[0].trim().toUpperCase();
                         availSet.add(day);
@@ -276,26 +280,26 @@ public class VolunteersFragment extends Fragment {
 
         for (Volunteer v : masterList) {
             boolean matchesTab = false;
-            // 1. Tab Logic: Solicitudes (Pending) vs Registrados (Active/Suspended)
+            // 1. Lógica de Pestañas: Solicitudes (Pendientes) vs Registrados (Activos/Suspendidos)
             if (tabName.equals("Solicitudes")) {
                  if (v.getStatus().equals("Pending")) matchesTab = true;
             } else {
                  if (v.getStatus().equals("Active") || v.getStatus().equals("Suspended")) matchesTab = true;
             }
             
-            // 2. Course Filter
+            // 2. Filtro de Curso
             boolean matchesCourse = true;
             if (!currentCourseFilter.equals("Todos")) {
                  if (v.getCourse() == null || !v.getCourse().equalsIgnoreCase(currentCourseFilter)) matchesCourse = false;
             }
 
-            // 3. Status Filter
+            // 3. Filtro de Estado
             boolean matchesStatus = true;
             if (!tabName.equals("Solicitudes") && !currentStatusFilter.equals("Todos")) {
                  if (!v.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
             }
 
-            // 4. Preference Filter
+            // 4. Filtro de Preferencias
             boolean matchesPreference = true;
             if (!currentPreferenceFilter.equals("Todos")) {
                 matchesPreference = false;
@@ -309,7 +313,7 @@ public class VolunteersFragment extends Fragment {
                 }
             }
 
-            // 5. Availability Filter
+            // 5. Filtro de Disponibilidad
             boolean matchesAvailability = true;
             if (!currentAvailabilityFilter.equals("Todos")) {
                 matchesAvailability = false;

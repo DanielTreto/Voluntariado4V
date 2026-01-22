@@ -20,6 +20,10 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import android.view.View;
 
+/**
+ * Actividad principal para el Administrador.
+ * Gestiona el menú lateral (Drawer) y la navegación entre fragmentos de gestión.
+ */
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
@@ -31,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // 1. CAMBIO IMPORTANTE: Cargar el layout del Dashboard que contiene el Drawer
         setContentView(R.layout.activity_dashboard);
 
-        // 2. Configurar la Toolbar
+        // 2. Configurar la Barra de Herramientas
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Ocultar el título por defecto ya que tienes un TextView personalizado en el XML
@@ -58,9 +62,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String savedName = prefs.getString("USER_NAME", "Administrador");
         String savedAvatar = prefs.getString("USER_AVATAR", null);
         
-        // Set Data
+        // Establecer Datos
         navName.setText(savedName);
-        navRole.setText("Administrador"); // As requested
+        navRole.setText("Administrador"); // Según requerimiento
 
         // Cargar Avatar si existe, sino placeholder
         if (savedAvatar != null && !savedAvatar.isEmpty()) {
@@ -88,15 +92,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setCheckedItem(R.id.nav_reports);
             toolbarTitle.setText("Informes");
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+        // 5. Configurar Back Dispatcher (Reemplazo de onBackPressed)
+        getOnBackPressedDispatcher().addCallback(this, new androidx.activity.OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    setEnabled(false); // Desactivar este callback para permitir comportamiento por defecto
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
+            }
+        });
     }
 
     @Override
@@ -124,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             selectedFragment = new cuatrovientos.voluntariado.fragments.SettingsFragment();
             title = "Ajustes";
         } else if (id == R.id.nav_logout) {
-            // Logout Logic with Confirmation
+            // Lógica de Cierre de Sesión con Confirmación
             new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Cerrar Sesión")
                 .setMessage("¿Estás seguro de que deseas cerrar sesión?")

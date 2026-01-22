@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.widget.LinearLayout; // Add this import
+import android.widget.LinearLayout; // Añadir este import
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +18,9 @@ import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.adapters.ActivitiesAdapter;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
 
+/**
+ * Fragmento que muestra el historial de actividades finalizadas del estudiante.
+ */
 public class StudentHistoryFragment extends Fragment {
 
     private RecyclerView rvHistory;
@@ -42,7 +45,9 @@ public class StudentHistoryFragment extends Fragment {
         emptyHistory = view.findViewById(R.id.emptyHistory);
         rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
         
-        // Filter Buttons
+        rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
+        
+        // Botones de Filtro
         android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
         btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
 
@@ -50,7 +55,7 @@ public class StudentHistoryFragment extends Fragment {
         btnFilterOds.setOnClickListener(v -> showOdsFilterDialog());
 
         android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
-        if (btnFilterStatus != null) btnFilterStatus.setVisibility(View.GONE); // Hide Status Filter
+        if (btnFilterStatus != null) btnFilterStatus.setVisibility(View.GONE); // Ocultar Filtro de Estado
 
         android.widget.Button btnFilterCapacity = view.findViewById(R.id.btnFilterCapacity);
         btnFilterCapacity.setOnClickListener(v -> showCapacityFilterDialog());
@@ -58,7 +63,7 @@ public class StudentHistoryFragment extends Fragment {
         android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
         btnSortActivities.setOnClickListener(v -> toggleSort());
 
-        // Setup Search
+        // Configurar Búsqueda
         android.widget.EditText etSearchHistory = view.findViewById(R.id.etSearchHistory);
         etSearchHistory.addTextChangedListener(new android.text.TextWatcher() {
             @Override
@@ -72,14 +77,14 @@ public class StudentHistoryFragment extends Fragment {
             public void afterTextChanged(android.text.Editable s) {}
         });
 
-        // Default empty adapter
+        // Adaptador vacío por defecto
         adapter = new ActivitiesAdapter(new ArrayList<>(), true);
         rvHistory.setAdapter(adapter);
 
         if (getArguments() != null) {
             loadData(getArguments().getString("USER_ID"));
         } else {
-             loadData("1"); // Fallback
+             loadData("1"); // Respaldo
         }
 
         return view;
@@ -113,7 +118,7 @@ public class StudentHistoryFragment extends Fragment {
     }
     
     private void showStatusFilterDialog() {
-        // Exclude SUSPENDIDA (only Finished actually ends up here usually)
+        // Excluir SUSPENDIDA (solo Finalizadas terminan aquí normalmente)
         String[] statuses = {"Todos", "Finished"};
         String[] displayStatuses = {"Todos", "Finalizada"};
         
@@ -267,8 +272,10 @@ public class StudentHistoryFragment extends Fragment {
                     for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
                         VolunteerActivity va = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
                         
-                        // Filter: Only FINISHED activities
-                        // Using normalized status from ActivityMapper ("Active", "Pending", "Finished", etc.)
+
+                        
+                        // Filtro: Solo actividades FINALIZADAS
+                        // Usando estado normalizado de ActivityMapper ("Active", "Pending", "Finished", etc.)
                         if ("Finished".equalsIgnoreCase(va.getStatus())) {
                              historyList.add(va);
                         }

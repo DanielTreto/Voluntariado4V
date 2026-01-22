@@ -38,20 +38,7 @@ public class OrganizationDetailDialog extends DialogFragment {
     public static OrganizationDetailDialog newInstance(Organization org) {
          OrganizationDetailDialog fragment = new OrganizationDetailDialog();
          Bundle args = new Bundle();
-         // Assuming Organization could be properly serialized, 
-         // but since we modified it and didn't implement Serializable explicitly but it's simple POJO,
-         // GSON or passing fields might be safer if not implementing Serializable. 
-         // But for simplicity let's assume we can pass it or use JSON.
-         // Wait, Organization is not Serializable unless I implemented it.
-         // I checked Organization.java and I did NOT add `implements Serializable`.
-         // I should probably fix that or pass fields. 
-         // Let's rely on Gson to serialize/deserialize to string for safety if I don't want to modify Model again?
-         // No, cleanest is to modify Organization to implement Serializable.
-         // I'll do that in a separate step or just rely on passing fields. 
-         // Actually, I'll assume I can fix Organization.java quickly after this.
-         // Let's implement Serializable in Organization.java in next step.
-         // For now, I'll write this code assuming it is Serializable or I handle it.
-         // I will switch to passing complex object via JSON string to avoid Serializable issues fast.
+         // Serializar objeto a JSON para pasar argumentos
          com.google.gson.Gson gson = new com.google.gson.Gson();
          String json = gson.toJson(org);
          args.putString(ARG_ORG, json);
@@ -83,14 +70,14 @@ public class OrganizationDetailDialog extends DialogFragment {
             }
         }
 
-        // BTN CLOSE (X) -> Close All (Stack)
+        // BTN CERRAR (X) -> Cierra la Pila
         btnClose.setOnClickListener(v -> {
              for (DialogFragment d : dialogs) {
                  d.dismiss();
              }
         });
 
-        // BTN BACK (Arrow) -> Close Current
+        // BTN ATRAS (Flecha) -> Cierra Actual
         ImageView btnCloseStack = view.findViewById(R.id.btnCloseStack);
         if (dialogs.size() > 1) {
             btnCloseStack.setVisibility(View.VISIBLE);
@@ -108,9 +95,9 @@ public class OrganizationDetailDialog extends DialogFragment {
         tvName.setText(organization.getName());
         tvEmail.setText(organization.getEmail());
         
-        // Date removed from layout
+        // Fecha eliminada del layout
 
-        // Status Check
+        // Comprobación de Estado
         tvStatus.setText(organization.getStatus());
          if ("Active".equalsIgnoreCase(organization.getStatus()) || "Activo".equalsIgnoreCase(organization.getStatus())) {
               tvStatus.setBackgroundColor(android.graphics.Color.parseColor("#E8F5E9"));
@@ -126,7 +113,7 @@ public class OrganizationDetailDialog extends DialogFragment {
               tvStatus.setText("Pendiente");
          }
 
-        // Bind New Fields
+        // Vincular Nuevos Campos
         TextView tvPhone = view.findViewById(R.id.tvDetailPhone);
         TextView tvType = view.findViewById(R.id.tvDetailType);
         TextView tvSector = view.findViewById(R.id.tvDetailSector);
@@ -162,11 +149,10 @@ public class OrganizationDetailDialog extends DialogFragment {
              imgHeader.setImageResource(R.drawable.ic_business);
         }
         
-        // Initial Population
+        // Poblado Inicial
         updateUI(view);
 
-        // Fetch full details if likely incomplete (e.g. missing description or type)
-        // Only show loader if we are actually fetching
+        // Obtener detalles completos si es probable que estén incompletos (ej. falta descripción)
         if (organization.getDescription() == null || organization.getDescription().isEmpty() || organization.getType() == null) {
             fetchOrganizationDetails(view);
         } else {
@@ -196,25 +182,12 @@ public class OrganizationDetailDialog extends DialogFragment {
                     for (ApiActivity apiAct : response.body()) {
                         // Image URL handled by Mapper
                         
-                        // Mapping ApiActivity to VolunteerActivity
-                        // Note: VolunteerActivity constructor likely needs updating or careful usage.
-                        // Checking VolunteerActivity again would be wise, but assuming standard format from previous knowledge.
-                        // title, date, location, category, status, imageUrl, id
-                        // Mapping ApiActivity to VolunteerActivity using standard Mapper
-                        // This ensures ODS and Volunteers are correctly populated
+                        // Mapeo de ApiActivity a VolunteerActivity usando el Mapper estándar
+                        // Esto asegura que ODS y Voluntarios se pueblen correctamente
                         VolunteerActivity volAct = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
                         
-                        // Override Organization info since we are in Org Context (though Mapper does it too if API has it)
-                        // ActivityMapper sets Org Name/Avatar from apiAct.getOrganization().
-                        // apiService.getOrganizationActivities returns Activity list but nested Org might be null 
-                        // or partial in some endpoints.
-                        // However, we have 'organization' object here. 
-                        // Let's rely on mapper first. If it's missing, we could patch it.
-                        // But wait, the backend for getOrganizationActivities just returns list of activities, 
-                        // it does NOT nest 'organization' inside each activity in the current Controller code I just saw/edited?
-                        // Checked Controller: It returns id, title... etc. It does NOT return 'organization' field in the JSON loop.
-                        // So Mapper will have null Organization.
-                        // We must manual set it since we know it.
+                        // Sobrescribir info de Organización ya que estamos en el contexto de la Organización
+                        // (El endpoint de actividades de organización no siempre devuelve el objeto organización anidado)
                         
                         if (volAct != null) {
                             volAct.setOrganizationName(organization.getName());

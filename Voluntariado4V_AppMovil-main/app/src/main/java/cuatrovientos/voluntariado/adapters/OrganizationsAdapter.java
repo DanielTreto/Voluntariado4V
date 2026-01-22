@@ -45,7 +45,7 @@ public class OrganizationsAdapter extends RecyclerView.Adapter<OrganizationsAdap
         
         holder.tvEmailInfo.setText(org.getEmail());
 
-        // Settings Phone (Common for both)
+        // Teléfono (Común)
         String phone = org.getPhone();
         if (phone == null || phone.isEmpty()) holder.tvPhone.setText("Sin teléfono");
         else holder.tvPhone.setText(phone);
