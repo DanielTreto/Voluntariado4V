@@ -89,8 +89,8 @@ export class ApiService {
     return this.http.post<any>(`${this.apiUrl}/organizations`, org);
   }
 
-  signUpForActivity(activityId: number, volunteerId: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/activities/${activityId}/signup`, { volunteerId });
+  signUpForActivity(activityId: number, volunteerId: number, role?: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/activities/${activityId}/signup`, { volunteerId, role });
   }
 
   unsubscribeFromActivity(activityId: number, volunteerId: number): Observable<any> {

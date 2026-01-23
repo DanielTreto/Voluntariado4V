@@ -9,12 +9,24 @@ El proyecto consta de dos componentes principales:
 
 ---
 
-## 🚀 Inicio Rápido (Quick Start)
+## 🚀 Instalación y Ejecución Automática
 
-Hemos automatizado la instalación del entorno para la versión Web.
+Hemos automatizado la instalación del entorno para la versión Web para facilitar el despliegue.
 
-1.  **Instalar Backend y Frontend**: Ejecuta `install.bat`.
-2.  **Iniciar Servidores**: Ejecuta `start.bat`.
+### 1. Instalación (`install.bat`)
+Ejecuta el archivo `install.bat` haciendo doble clic o desde la terminal. Este script se encargará de:
+*   Verificar que tengas instalados PHP, Composer y Node.js.
+*   Instalar las dependencias del **Backend** (Symfony).
+*   Configurar el entorno (creando el archivo `.env` si no existe).
+*   Crear la base de datos y actualizar el esquema.
+*   **Poblar la base de datos** con datos iniciales (Roles, Usuarios de prueba, etc.).
+*   Instalar las dependencias del **Frontend** (Angular).
+
+### 2. Ejecución (`start.bat`)
+Una vez completada la instalación, ejecuta `start.bat`. Este script:
+*   Verifica que todas las herramientas estén instaladas.
+*   Arranca el servidor de Symfony (Backend) en el puerto `8000`.
+*   Arranca el servidor de Angular (Frontend) en el puerto `4200` y abre el navegador automáticamente.
 
 > *Para más detalles sobre la instalación manual, consulta el [README de la Web](Voluntariado4V_Web/README.md).*
 

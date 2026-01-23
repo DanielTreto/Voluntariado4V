@@ -73,9 +73,18 @@ ECHO Populating initial data...
 :: Actually, 'doctrine:database:import' is not standard.
 :: Let's assume the user has configured .env.local.
 ECHO.
+ECHO.
 ECHO [WARNING] To populate data, please ensure 'populate_database.sql' is executed in your DB tool.
 ECHO Or if you have 'mysql' in path: mysql -u root volun4v < populate_database.sql
 ECHO.
+
+ECHO Populating initial data...
+call php load_sql.php
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO [ERROR] Data population failed.
+    PAUSE
+    EXIT /B 1
+)
 
 ECHO [3/4] Installing FRONTEND (Angular)...
 cd ..\frontend
