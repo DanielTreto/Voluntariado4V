@@ -1,9 +1,0 @@
-{
-    "name": "Test",
-    "surname1": "User",
-    "email": "test_debug@example.com",
-    "phone": "600000001",
-    "dni": "12345678Y",
-    "password": "password123",
-    "course": 1
-}
