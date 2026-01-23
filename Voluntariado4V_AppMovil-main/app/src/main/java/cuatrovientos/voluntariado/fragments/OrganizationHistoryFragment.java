@@ -21,28 +21,276 @@ public class OrganizationHistoryFragment extends Fragment {
 
     private RecyclerView rvHistory;
     private ActivitiesAdapter adapter;
+    private android.widget.LinearLayout emptyStateView;
+
+    private List<VolunteerActivity> masterHistoryList = new ArrayList<>();
+    private String currentSearchQuery = "";
+    private String currentTypeFilter = "Todos";
+    private String currentOdsFilter = "Todos";
+    private String currentStatusFilter = "Todos";
+    private String currentCapacityFilter = "Todos";
+    private String currentSortOption = "NameAsc";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // We can reuse the student history layout as it's just a Title + RecyclerView
         View view = inflater.inflate(R.layout.fragment_student_history, container, false);
 
         rvHistory = view.findViewById(R.id.rvHistory);
+        emptyStateView = view.findViewById(R.id.emptyHistory); 
         rvHistory.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        List<VolunteerActivity> historyList = new ArrayList<>();
-        // Mock Data: Finalized / Past activities for Org
-        historyList.add(new VolunteerActivity(
-                "Maratón Solidario 2024", "Evento deportivo benéfico.", "Ciudad Deportiva", "2024-03-15", "Deporte", "Finished", 0xFF009688
-        ));
 
-        // Using false (Org Mode) but since they are finished, maybe buttons shouldn't be active?
-        // Ideally we'd modify Adapter or Activity logic to handle 'Finished' state separately.
-        // For now, let's stick to simple display. Using 'true' (Student Mode) just to hide buttons for History view is a quick hack.
-        adapter = new ActivitiesAdapter(historyList, true); 
+        android.widget.Button btnFilterType = view.findViewById(R.id.btnFilterType);
+        btnFilterType.setOnClickListener(v -> showTypeFilterDialog());
+
+        android.widget.Button btnFilterOds = view.findViewById(R.id.btnFilterODS);
+        btnFilterOds.setOnClickListener(v -> showOdsFilterDialog());
+
+        android.widget.Button btnFilterStatus = view.findViewById(R.id.btnFilterStatus);
+        btnFilterStatus.setOnClickListener(v -> showStatusFilterDialog());
+
+        android.widget.Button btnFilterCapacity = view.findViewById(R.id.btnFilterCapacity);
+        btnFilterCapacity.setOnClickListener(v -> showCapacityFilterDialog());
+
+        android.widget.Button btnSortActivities = view.findViewById(R.id.btnSortActivities);
+        btnSortActivities.setOnClickListener(v -> toggleSort());
+
+        android.widget.EditText etSearchHistory = view.findViewById(R.id.etSearchHistory);
+        etSearchHistory.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                currentSearchQuery = s.toString();
+                filterList(currentSearchQuery);
+            }
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+
+        android.content.SharedPreferences prefs = getActivity().getSharedPreferences("UserSession", android.content.Context.MODE_PRIVATE);
+        String userId = prefs.getString("USER_ID", null);
+
+        adapter = new ActivitiesAdapter(new ArrayList<>(), true); 
         rvHistory.setAdapter(adapter);
 
+        if (userId != null) {
+            loadHistory(userId);
+        } else {
+             android.widget.Toast.makeText(getContext(), "Error: No se encontró sesión activa", android.widget.Toast.LENGTH_SHORT).show();
+             showEmptyState(true);
+        }
+
         return view;
+    }
+
+    private void toggleSort() {
+        android.widget.Button btn = getView().findViewById(R.id.btnSortActivities);
+        if (btn == null) return;
+
+        if (currentSortOption.equals("NameAsc")) {
+            currentSortOption = "NameDesc";
+            btn.setText("Orden: Z-A");
+        } else {
+            currentSortOption = "NameAsc";
+            btn.setText("Orden: A-Z");
+        }
+        filterList(currentSearchQuery);
+    }
+
+    private void showCapacityFilterDialog() {
+        String[] options = {"Todos", "Con Plazas", "Llenas"};
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Plazas")
+            .setItems(options, (dialog, which) -> {
+                currentCapacityFilter = options[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterCapacity);
+                if (btn != null) btn.setText(currentCapacityFilter.equals("Todos") ? "Plazas" : currentCapacityFilter);
+                filterList(currentSearchQuery);
+            })
+            .show();
+    }
+
+    private void showStatusFilterDialog() {
+        String[] statuses = {"Todos", "Finished", "Suspended"};
+        String[] displayStatuses = {"Todos", "Finalizada", "Suspendida"};
+        
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Estado")
+            .setItems(displayStatuses, (dialog, which) -> {
+                currentStatusFilter = statuses[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterStatus);
+                if (btn != null) btn.setText(currentStatusFilter.equals("Todos") ? "Estado" : displayStatuses[which]);
+                filterList(currentSearchQuery);
+            })
+            .show();
+    }
+
+    private void showTypeFilterDialog() {
+        if (masterHistoryList == null) return;
+        java.util.Set<String> typesSet = new java.util.HashSet<>();
+        typesSet.add("Todos");
+        for (VolunteerActivity act : masterHistoryList) {
+            if (act.getCategory() != null && !act.getCategory().isEmpty()) typesSet.add(act.getCategory());
+        }
+        
+        List<String> typesList = new ArrayList<>(typesSet);
+        java.util.Collections.sort(typesList);
+        String[] typesArray = typesList.toArray(new String[0]);
+
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por Tipo")
+            .setItems(typesArray, (dialog, which) -> {
+                currentTypeFilter = typesArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterType);
+                if (btn != null) btn.setText(currentTypeFilter.equals("Todos") ? "Tipo" : currentTypeFilter);
+                filterList(currentSearchQuery);
+            })
+            .show();
+    }
+
+    private void showOdsFilterDialog() {
+        String[] odsArray = new String[18];
+        odsArray[0] = "Todos";
+        for (int i = 1; i <= 17; i++) {
+            odsArray[i] = String.valueOf(i);
+        }
+
+        new android.app.AlertDialog.Builder(getContext())
+            .setTitle("Filtrar por ODS")
+            .setItems(odsArray, (dialog, which) -> {
+                currentOdsFilter = odsArray[which];
+                android.widget.Button btn = getView().findViewById(R.id.btnFilterODS);
+                if (btn != null) btn.setText(currentOdsFilter.equals("Todos") ? "ODS" : "ODS " + currentOdsFilter);
+                filterList(currentSearchQuery);
+            })
+            .show();
+    }
+
+    private void filterList(String query) {
+        List<VolunteerActivity> filteredList = new ArrayList<>();
+        String q = query.toLowerCase();
+
+        for (VolunteerActivity act : masterHistoryList) {
+            boolean matchesType = true;
+            if (!currentTypeFilter.equals("Todos")) {
+                if (act.getCategory() == null || !act.getCategory().equalsIgnoreCase(currentTypeFilter)) matchesType = false;
+            }
+
+            boolean matchesOds = true;
+            if (!currentOdsFilter.equals("Todos")) {
+                boolean hasOds = false;
+                try {
+                    int filterId = Integer.parseInt(currentOdsFilter);
+                    if (act.getOds() != null) {
+                        for (cuatrovientos.voluntariado.model.Ods ods : act.getOds()) {
+                            if (ods.getId() == filterId) { hasOds = true; break; }
+                        }
+                    }
+                } catch (NumberFormatException e) { }
+                if (!hasOds) matchesOds = false;
+            }
+
+            boolean matchesStatus = true;
+            if (!currentStatusFilter.equals("Todos")) {
+                if (!act.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
+            }
+
+            boolean matchesCapacity = true;
+            if (!currentCapacityFilter.equals("Todos")) {
+                 int currentParticipants = act.getParticipants() != null ? act.getParticipants().size() : 0;
+                 if (currentCapacityFilter.equals("Con Plazas")) {
+                     if (currentParticipants >= act.getMaxVolunteers()) matchesCapacity = false;
+                 } else if (currentCapacityFilter.equals("Llenas")) {
+                     if (currentParticipants < act.getMaxVolunteers()) matchesCapacity = false;
+                 }
+            }
+
+            boolean matchesSearch = true;
+            if (!q.isEmpty()) {
+                matchesSearch = false;
+                if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getTitle(), q)) matchesSearch = true;
+                else if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getCategory(), q)) matchesSearch = true;
+                else if (cuatrovientos.voluntariado.utils.SearchUtils.matches(act.getLocation(), q)) matchesSearch = true;
+            }
+
+            if (matchesType && matchesOds && matchesStatus && matchesCapacity && matchesSearch) {
+                filteredList.add(act);
+            }
+        }
+        
+        java.util.Collections.sort(filteredList, (a1, a2) -> {
+            if (currentSortOption.startsWith("Date")) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                java.util.Date d1, d2;
+                try { d1 = sdf.parse(a1.getDate()); } catch(Exception e) { d1 = new java.util.Date(0); }
+                try { d2 = sdf.parse(a2.getDate()); } catch(Exception e) { d2 = new java.util.Date(0); }
+                
+                if (currentSortOption.equals("DateAsc")) return d1.compareTo(d2);
+                else return d2.compareTo(d1);
+            } else {
+                String title1 = a1.getTitle().toLowerCase();
+                String title2 = a2.getTitle().toLowerCase();
+                if (currentSortOption.equals("NameAsc")) return title1.compareTo(title2);
+                else return title2.compareTo(title1);
+            }
+        });
+
+        if (adapter != null) {
+            adapter.updateList(filteredList);
+        }
+        showEmptyState(filteredList.isEmpty());
+    }
+
+    private void showEmptyState(boolean show) {
+        if (show) {
+            rvHistory.setVisibility(View.GONE);
+            emptyStateView.setVisibility(View.VISIBLE);
+        } else {
+            rvHistory.setVisibility(View.VISIBLE);
+            emptyStateView.setVisibility(View.GONE);
+        }
+    }
+
+    private void loadHistory(String userId) {
+        cuatrovientos.voluntariado.network.ApiService apiService = cuatrovientos.voluntariado.network.RetrofitClient.getClient().create(cuatrovientos.voluntariado.network.ApiService.class);
+        apiService.getOrganizationActivities(userId).enqueue(new retrofit2.Callback<List<cuatrovientos.voluntariado.network.model.ApiActivity>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, retrofit2.Response<List<cuatrovientos.voluntariado.network.model.ApiActivity>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    masterHistoryList.clear();
+                    List<VolunteerActivity> mappedList = new ArrayList<>();
+                    for (cuatrovientos.voluntariado.network.model.ApiActivity apiAct : response.body()) {
+                        
+                        String status = apiAct.getStatus();
+                        if (!("Finished".equalsIgnoreCase(status) || "FINALIZADA".equalsIgnoreCase(status) || "Suspended".equalsIgnoreCase(status) || "SUSPENDIDO".equalsIgnoreCase(status) || "SUSPENDIDA".equalsIgnoreCase(status))) {
+                            continue;
+                        }
+
+                        VolunteerActivity volAct = cuatrovientos.voluntariado.utils.ActivityMapper.mapApiToModel(apiAct);
+                        if (volAct != null) {
+                            mappedList.add(volAct);
+                        }
+                    }
+                    masterHistoryList.addAll(mappedList);
+                    filterList(currentSearchQuery);
+                    
+                } else {
+                    android.widget.Toast.makeText(getContext(), "Error al cargar historial", android.widget.Toast.LENGTH_SHORT).show();
+                    showEmptyState(true);
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<List<cuatrovientos.voluntariado.network.model.ApiActivity>> call, Throwable t) {
+                if (getContext() != null) {
+                    android.widget.Toast.makeText(getContext(), "Fallo de conexión", android.widget.Toast.LENGTH_SHORT).show();
+                    showEmptyState(true);
+                }
+            }
+        });
+
+
     }
 }

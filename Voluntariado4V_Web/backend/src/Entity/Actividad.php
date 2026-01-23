@@ -60,6 +60,14 @@ class Actividad
     #[ORM\InverseJoinColumn(name: 'NUMODS', referencedColumnName: 'NUMODS')]
     private $ods;
 
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Ods>
+     */
+    public function getOds(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->ods;
+    }
+
     #[ORM\Column(name: 'descripcion', length: 500)]
     #[Assert\NotBlank]
     #[Assert\Length(max: 500)]
@@ -74,6 +82,7 @@ class Actividad
     private ?string $UBICACION = null;
 
     #[ORM\Column(name: 'imagen', length: 255, nullable: true)]
+    #[Assert\Length(max: 255)]
     private ?string $IMAGEN = null;
 
     public function __construct()
@@ -183,9 +192,6 @@ class Actividad
 
     public function setCODORG(string $codOrg): static
     {
-        // This is tricky without fetching entity. ideally use setOrganizacion.
-        // For now, we leave it as is, or better, we might need repository to finding it.
-        // Assuming the controller handles setOrganizacion.
         return $this;
     }
 
@@ -208,6 +214,22 @@ class Actividad
     public function setESTADO(string $ESTADO): static
     {
         $this->ESTADO = $ESTADO;
+        return $this;
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, TipoActividad>
+     */
+    public function getTiposActividad(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->tiposActividad;
+    }
+
+    public function addTipoActividad(TipoActividad $tipoActividad): static
+    {
+        if (!$this->tiposActividad->contains($tipoActividad)) {
+            $this->tiposActividad->add($tipoActividad);
+        }
         return $this;
     }
 

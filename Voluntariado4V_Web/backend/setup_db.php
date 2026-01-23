@@ -12,6 +12,7 @@ if ($conn === false) {
     die(print_r(sqlsrv_errors(), true));
 }
 
+<<<<<<< HEAD
 // Wipe Database
 echo "Wiping database...\n";
 $wipeSql = "
@@ -30,6 +31,23 @@ if (sqlsrv_query($conn, "USE VOLUNTARIADOBD")) {
     echo "Database wiped.\n";
 } else {
     echo "Could not use VOLUNTARIADOBD, assuming it doesn't exist yet.\n";
+=======
+// Drop Database (Force Fresh Start)
+echo "Dropping database VOLUNTARIADOBD if exists...\n";
+$dropSql = "
+    IF EXISTS (SELECT name FROM sys.databases WHERE name = N'VOLUNTARIADOBD')
+    BEGIN
+        ALTER DATABASE [VOLUNTARIADOBD] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+        DROP DATABASE [VOLUNTARIADOBD];
+    END
+";
+
+if (sqlsrv_query($conn, $dropSql)) {
+    echo "Database VOLUNTARIADOBD dropped (if it existed).\n";
+} else {
+    echo "Error dropping database:\n";
+    print_r(sqlsrv_errors());
+>>>>>>> temp_mobile_api
 }
 
 $sqlFile = 'full_database_setup.sql';

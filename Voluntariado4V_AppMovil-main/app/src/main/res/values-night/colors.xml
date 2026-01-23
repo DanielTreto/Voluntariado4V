@@ -26,4 +26,13 @@
     <color name="purple_500">@color/colorPrimary</color>
     <color name="teal_200">@color/colorSecondary</color>
     <color name="teal_700">@color/colorPrimaryVariant</color>
+    
+    <color name="org_bg_color">#1AFFFFFF</color> <!-- Lighter/White transparency for dark mode -->
+    <color name="modal_background">@color/background_light</color> <!-- Matches card list background -->
+    <color name="category_text_color">#FFFFFF</color>
+    
+    <color name="modal_text_primary">#FFFFFF</color>
+    <color name="modal_text_secondary">#B0BEC5</color>
+    
+    <color name="dashboard_header_bg">#15202B</color> <!-- Dark Slate -->
 </resources>

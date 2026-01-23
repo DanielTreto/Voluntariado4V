@@ -14,19 +14,25 @@ import cuatrovientos.voluntariado.fragments.StudentHomeFragment;
 
 public class StudentActivity extends AppCompatActivity {
 
+    private String userId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_student_main); // Usamos el nuevo layout con navegación
+        setContentView(R.layout.activity_student_main); 
+        
+        userId = getIntent().getStringExtra("USER_ID");
+        
+        if (userId == null) {
+            android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
+            userId = prefs.getString("USER_ID", null);
+        }
 
         BottomNavigationView bottomNav = findViewById(R.id.student_bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        // Cargar fragmento inicial
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.student_fragment_container, new StudentHomeFragment())
-                    .commit();
+            loadFragment(new StudentHomeFragment());
         }
     }
 
@@ -48,11 +54,20 @@ public class StudentActivity extends AppCompatActivity {
                     }
 
                     if (selectedFragment != null) {
-                        getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.student_fragment_container, selectedFragment)
-                                .commit();
+                        loadFragment(selectedFragment);
                     }
                     return true;
                 }
             };
+            
+    private void loadFragment(Fragment fragment) {
+        if (userId != null) {
+            Bundle bundle = new Bundle();
+            bundle.putString("USER_ID", userId);
+            fragment.setArguments(bundle);
+        }
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.student_fragment_container, fragment)
+                .commit();
+    }
 }

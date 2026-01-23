@@ -221,7 +221,6 @@ class Organizacion
         $this->WEB = $WEB;
         return $this;
     }
-
     public function getAVATAR(): ?string
     {
         return $this->AVATAR;

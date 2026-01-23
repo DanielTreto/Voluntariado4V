@@ -25,6 +25,9 @@ class Disponibilidad
     #[Assert\PositiveOrZero]
     private ?int $NUM_HORAS = 0;
 
+    #[ORM\Column(length: 10, nullable: true)]
+    private ?string $HORA = null;
+
     public function getVoluntario(): ?Volunteer
     {
         return $this->voluntario;
@@ -55,6 +58,17 @@ class Disponibilidad
     public function setNUM_HORAS(int $NUM_HORAS): static
     {
         $this->NUM_HORAS = $NUM_HORAS;
+        return $this;
+    }
+
+    public function getHORA(): ?string
+    {
+        return $this->HORA;
+    }
+
+    public function setHORA(?string $HORA): static
+    {
+        $this->HORA = $HORA;
         return $this;
     }
 }

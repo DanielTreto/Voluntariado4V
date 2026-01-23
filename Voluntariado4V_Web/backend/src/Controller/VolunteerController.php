@@ -40,7 +40,11 @@ class VolunteerController extends AbstractController
                 'status' => $v->getESTADO(),
                 'avatar' => $v->getAVATAR(),
                 'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
-                'availability' => array_map(fn($d) => ['day' => $d->getDIA(), 'hours' => $d->getNUM_HORAS()], $v->getDisponibilidades()->toArray()),
+                'availability' => array_map(fn($d) => [
+                    'day' => $d->getDIA(),
+                    'hours' => $d->getNUM_HORAS(),
+                    'time' => method_exists($d, 'getHORA') ? $d->getHORA() : null // Support both if method exists
+                ], $v->getDisponibilidades()->toArray()),
             ];
         }
 
@@ -72,7 +76,11 @@ class VolunteerController extends AbstractController
             'status' => $v->getESTADO(),
             'avatar' => $v->getAVATAR(),
             'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
-            'availability' => array_map(fn($d) => ['day' => $d->getDIA(), 'hours' => $d->getNUM_HORAS()], $v->getDisponibilidades()->toArray()),
+            'availability' => array_map(fn($d) => [
+                'day' => $d->getDIA(),
+                'hours' => $d->getNUM_HORAS(),
+                'time' => method_exists($d, 'getHORA') ? $d->getHORA() : null
+            ], $v->getDisponibilidades()->toArray()),
         ];
 
         $response = new JsonResponse($data);
@@ -120,12 +128,11 @@ class VolunteerController extends AbstractController
         }
 
 
-
         $volunteer->setESTADO('PENDIENTE');
         
         // Generate Custom ID
         $newId = $volunteerRepository->findNextId();
-        $volunteer->setCODVOL($newId);
+        $volunteer->setCODVOL((string)$newId);
 
         // Create Credentials
         $credenciales = new Credenciales();
@@ -135,7 +142,7 @@ class VolunteerController extends AbstractController
         $credenciales->setPassword($data['password'] ?? '');
         $entityManager->persist($credenciales);
 
-        // Process Preferences (Interests)
+        // Process Preferences (Interests) - Preserve Web Logic (IDs)
         if (isset($data['preferences']) && is_array($data['preferences'])) {
             foreach ($data['preferences'] as $typeId) {
                 $tipo = $tipoActividadRepository->find($typeId);
@@ -145,7 +152,7 @@ class VolunteerController extends AbstractController
             }
         }
 
-        // Process Availability
+        // Process Availability - Preserve Web Logic (Hours)
         if (isset($data['availability']) && is_array($data['availability'])) {
             foreach ($data['availability'] as $avail) {
                 if (isset($avail['day']) && isset($avail['hours'])) {
@@ -153,11 +160,12 @@ class VolunteerController extends AbstractController
                     $disponibilidad->setVoluntario($volunteer);
                     $disponibilidad->setDIA($avail['day']);
                     $disponibilidad->setNUM_HORAS((int)$avail['hours']);
+                    // If Mobile sends time, we could set it too if entity supports it
+                    // if (isset($avail['time'])) $disponibilidad->setHORA($avail['time']);
                     $entityManager->persist($disponibilidad);
                 }
             }
         }
-
         // Validation
         $errors = $validator->validate($volunteer);
         if (count($errors) > 0) {
@@ -342,7 +350,6 @@ class VolunteerController extends AbstractController
                  }
              }
         }
-
         // Validate
         $errors = $validator->validate($volunteer);
         if (count($errors) > 0) {
@@ -372,12 +379,47 @@ class VolunteerController extends AbstractController
         $data = [];
 
         foreach ($activities as $act) {
+            // Filter out SUSPENDIDA activities
+            if ($act->getESTADO() === 'SUSPENDIDA') {
+                continue;
+            }
+
+            $vols = [];
+            foreach ($act->getVoluntarios() as $v) {
+                $fullName = $v->getNOMBRE() . ' ' . $v->getAPELLIDO1();
+                if ($v->getAPELLIDO2()) {
+                    $fullName .= ' ' . $v->getAPELLIDO2();
+                }
+                $vols[] = [
+                    'id' => $v->getCODVOL(),
+                    'name' => trim($fullName),
+                    'avatar' => $v->getAVATAR()
+                ];
+            }
             $data[] = [
                 'id' => $act->getCODACT(),
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
+                'date' => $act->getFECHA_INICIO()->format('d/m/y H:i'),
+                'endDate' => $act->getFECHA_FIN() ? $act->getFECHA_FIN()->format('Y-m-d') : null,
+                'location' => $act->getUBICACION(),
+                'duration' => $act->getDURACION_SESION(),
                 'status' => $act->getESTADO(),
+                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
+                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
+                'imagen' => $act->getIMAGEN(),
+                'ods' => array_map(function($ods) {
+                    return [
+                        'id' => $ods->getNUMODS(),
+                        'description' => $ods->getDESCRIPCION()
+                    ];
+                }, $act->getOds()->toArray()),
+                'volunteers' => $vols,
+                'organization' => $act->getOrganizacion() ? [
+                    'id' => $act->getOrganizacion()->getCODORG(),
+                    'name' => $act->getOrganizacion()->getNOMBRE(),
+                    'avatar' => $act->getOrganizacion()->getAVATAR()
+                ] : null
             ];
         }
 

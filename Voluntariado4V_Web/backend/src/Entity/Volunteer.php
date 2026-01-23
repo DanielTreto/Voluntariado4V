@@ -113,6 +113,34 @@ class Volunteer
         $this->preferencias = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Disponibilidad>
+     */
+    public function getDisponibilidades(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->disponibilidades;
+    }
+
+    public function addDisponibilidad(Disponibilidad $disponibilidad): static
+    {
+        if (!$this->disponibilidades->contains($disponibilidad)) {
+            $this->disponibilidades->add($disponibilidad);
+            $disponibilidad->setVoluntario($this);
+        }
+        return $this;
+    }
+
+    public function removeDisponibilidad(Disponibilidad $disponibilidad): static
+    {
+        if ($this->disponibilidades->removeElement($disponibilidad)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilidad->getVoluntario() === $this) {
+                $disponibilidad->setVoluntario(null);
+            }
+        }
+        return $this;
+    }
+
     public function getCODVOL(): ?string
     {
         return $this->CODVOL;
@@ -292,34 +320,6 @@ class Volunteer
     public function removePreferencia(TipoActividad $preferencia): static
     {
         $this->preferencias->removeElement($preferencia);
-        return $this;
-    }
-
-    /**
-     * @return \Doctrine\Common\Collections\Collection<int, Disponibilidad>
-     */
-    public function getDisponibilidades(): \Doctrine\Common\Collections\Collection
-    {
-        return $this->disponibilidades;
-    }
-
-    public function addDisponibilidad(Disponibilidad $disponibilidad): static
-    {
-        if (!$this->disponibilidades->contains($disponibilidad)) {
-            $this->disponibilidades->add($disponibilidad);
-            $disponibilidad->setVoluntario($this);
-        }
-        return $this;
-    }
-
-    public function removeDisponibilidad(Disponibilidad $disponibilidad): static
-    {
-        if ($this->disponibilidades->removeElement($disponibilidad)) {
-            // set the owning side to null (unless already changed)
-            if ($disponibilidad->getVoluntario() === $this) {
-                $disponibilidad->setVoluntario(null);
-            }
-        }
         return $this;
     }
 }

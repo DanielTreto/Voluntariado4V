@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Credenciales;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 #[Route('/api')]
@@ -34,6 +33,7 @@ class OrganizationController extends AbstractController
                 'scope' => $org->getAMBITO(),
                 'description' => $org->getDESCRIPCION(),
                 'status' => $org->getESTADO(),
+                'contactPerson' => $org->getPERSONA_CONTACTO(),
                 'avatar' => $org->getAVATAR(),
             ];
         }
@@ -117,8 +117,16 @@ class OrganizationController extends AbstractController
             return new JsonResponse(['errors' => $errorMessages], 400);
         }
 
-        $entityManager->persist($org);
-        $entityManager->flush();
+        try {
+            $entityManager->persist($org);
+            $entityManager->flush();
+        } catch (UniqueConstraintViolationException $e) {
+            return new JsonResponse([
+                'errors' => [
+                    'DUPLICADO' => 'El teléfono o el correo electrónico ya están registrados por otra organización.'
+                ]
+            ], 400);
+        }
 
         $response = new JsonResponse(['status' => 'Organization created', 'id' => $org->getCODORG()], 201);
         // CORS headers for development
@@ -246,7 +254,28 @@ class OrganizationController extends AbstractController
                 'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
                 'status' => $act->getESTADO(),
-                'volunteersCount' => $act->getVoluntarios()->count()
+                'volunteersCount' => $act->getVoluntarios()->count(),
+                'volunteers' => array_map(function($vol) {
+                     return [
+                         'id' => $vol->getCODVOL(),
+                         'name' => $vol->getNOMBRE(),
+                         'surname1' => $vol->getAPELLIDO1(),
+                         'surname2' => $vol->getAPELLIDO2(),
+                         'avatar' => $vol->getAVATAR()
+                     ];
+                }, $act->getVoluntarios()->toArray()),
+                'ods' => array_map(function($ods) {
+                    return [
+                        'id' => $ods->getNUMODS(),
+                        'description' => $ods->getDESCRIPCION()
+                    ];
+                }, $act->getOds()->toArray()),
+                // Add Organization info for Mapper to pick up
+                'organization' => [
+                     'id' => $org->getCODORG(), // Use the org we already fetched
+                     'name' => $org->getNOMBRE(),
+                     'avatar' => $org->getAVATAR()
+                ]
             ];
         }
 

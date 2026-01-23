@@ -1,0 +1,12 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/dashboard_header_bg" /> 
+    <stroke
+        android:width="2dp"
+        android:color="@color/colorPrimary" /> <!-- Navy Blue Border -->
+    <!-- Square corners (radius removed) -->
+    <padding
+        android:left="8dp"
+        android:top="4dp"
+        android:right="8dp"
+        android:bottom="4dp" />
+</shape>

@@ -14,9 +14,16 @@ import cuatrovientos.voluntariado.model.EventDay;
 public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder> {
 
     private List<EventDay> days;
+    private OnEventClickListener listener;
 
-    public CalendarAdapter(List<EventDay> days) {
+    public interface OnEventClickListener {
+        void onEventClick(java.util.List<cuatrovientos.voluntariado.model.VolunteerActivity> activities);
+        void onEventClick(cuatrovientos.voluntariado.model.VolunteerActivity activity);
+    }
+
+    public CalendarAdapter(List<EventDay> days, OnEventClickListener listener) {
         this.days = days;
+        this.listener = listener;
     }
 
     @NonNull
@@ -31,22 +38,27 @@ public class CalendarAdapter extends RecyclerView.Adapter<CalendarAdapter.Calend
     public void onBindViewHolder(@NonNull CalendarViewHolder holder, int position) {
         EventDay day = days.get(position);
 
-        // Poner el número
         holder.tvDayNumber.setText(day.getDayNumber());
 
-        // Configurar el evento
         if (day.getEventTitle() != null && !day.getEventTitle().isEmpty()) {
             holder.tvEventTag.setVisibility(View.VISIBLE);
             holder.tvEventTag.setText(day.getEventTitle());
 
-            // Parsear el color hexadecimal
             try {
                 holder.tvEventTag.setBackgroundColor(Color.parseColor(day.getColorHex()));
             } catch (Exception e) {
-                holder.tvEventTag.setBackgroundColor(Color.GRAY); // Color por defecto si falla
+                holder.tvEventTag.setBackgroundColor(Color.GRAY);
             }
+            
+            holder.itemView.setOnClickListener(v -> {
+                if (listener != null && day.getActivity() != null) {
+                    listener.onEventClick(day.getActivity());
+                }
+            });
+
         } else {
-            holder.tvEventTag.setVisibility(View.INVISIBLE); // Invisible para mantener altura o GONE para colapsar
+            holder.tvEventTag.setVisibility(View.INVISIBLE); 
+            holder.itemView.setOnClickListener(null);
         }
     }
 

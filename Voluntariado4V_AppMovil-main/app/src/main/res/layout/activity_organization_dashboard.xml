@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -14,7 +15,92 @@
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="16dp"/>
+
+    <EditText
+        android:id="@+id/etSearchOrgDash"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_card_outline"
+        android:drawableStart="@drawable/ic_search"
+        android:drawableTint="@color/text_secondary"
+        android:drawablePadding="12dp"
+        android:hint="Buscar actividades..."
+        android:padding="12dp"
+        android:inputType="text"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_secondary" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSortActivities"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Orden: A-Z"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Estado"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterType"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Tipo"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterODS"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="ODS"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterCapacity"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Plazas"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+        </LinearLayout>
+    </HorizontalScrollView>
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,5 +116,27 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/item_activity_card"/>
+
+
+    <LinearLayout
+        android:id="@+id/emptyStateView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_assignment" 
+            app:tint="@color/text_secondary"
+            android:layout_marginBottom="16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No tienes actividades publicadas"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"/>
+    </LinearLayout>
 
 </LinearLayout>
