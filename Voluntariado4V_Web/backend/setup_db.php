@@ -6,6 +6,9 @@ $connectionOptions = array(
 );
 
 // Connect
+if (!function_exists('sqlsrv_connect')) {
+    die("[ERROR] 'sqlsrv_connect' function not found. Please ensure the SQL Server drivers for PHP are installed and enabled in php.ini.\n");
+}
 $conn = sqlsrv_connect($serverName, $connectionOptions);
 
 if ($conn === false) {

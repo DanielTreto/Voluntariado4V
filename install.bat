@@ -29,6 +29,19 @@ IF %ERRORLEVEL% NEQ 0 (
     EXIT /B 1
 )
 
+:: Check for System Requirements (PHP Extensions)
+ECHO [0/4] Checking System Requirements...
+cd Voluntariado4V_Web\backend
+call php check_requirements.php
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO.
+    ECHO [ERROR] System requirements check failed.
+    ECHO Please fix the issues listed above and try again.
+    PAUSE
+    EXIT /B 1
+)
+cd ..\..
+
 ECHO [1/4] Setting up BACKEND (Symfony)...
 cd Voluntariado4V_Web\backend
 call composer install
