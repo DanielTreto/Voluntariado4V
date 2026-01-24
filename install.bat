@@ -101,7 +101,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 ECHO [3/4] Installing FRONTEND (Angular)...
 cd ..\frontend
-call npm install
+call npm install --legacy-peer-deps
 IF %ERRORLEVEL% NEQ 0 (
     ECHO [ERROR] NPM install failed.
     PAUSE
