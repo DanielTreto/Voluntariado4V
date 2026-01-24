@@ -109,7 +109,11 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 ECHO.
-ECHO [4/4] Installation Complete!
+ECHO.
+powershell -Command "Write-Host '=============================================' -ForegroundColor Green"
+powershell -Command "Write-Host '           INSTALACIÓN COMPLETADA            ' -ForegroundColor Green"
+powershell -Command "Write-Host '=============================================' -ForegroundColor Green"
+ECHO.
 ECHO You can now run 'start.bat' to launch the application.
 cd ..
 PAUSE
