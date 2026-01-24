@@ -27,11 +27,22 @@ echo "Loading SQL from $sqlFile...\n";
 $sql = file_get_contents($sqlFile);
 
 try {
-    $queries = explode(';', $sql);
+    // Split by GO batch separator (case insensitive, on its own line)
+    $queries = preg_split('/^GO\s*$/im', $sql);
+    
     foreach ($queries as $query) {
         $query = trim($query);
-        if (!empty($query)) {
+        // Skip empty queries
+        if (empty($query)) {
+            continue;
+        }
+
+        try {
             $connection->executeStatement($query);
+        } catch (\Exception $e) {
+            // Log error but maybe continue or stop? For now let's stop on error to be safe, 
+            // but wrap in try-catch to give better context if needed.
+            throw $e;
         }
     }
     echo "Database populated successfully!\n";
