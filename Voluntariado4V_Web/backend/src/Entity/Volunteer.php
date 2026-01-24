@@ -6,9 +6,13 @@ use App\Repository\VolunteerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: VolunteerRepository::class)]
 #[ORM\Table(name: 'VOLUNTARIO')]
+#[UniqueEntity(fields: ['CORREO'], message: 'Este correo ya está registrado.')]
+#[UniqueEntity(fields: ['DNI'], message: 'Este DNI ya está registrado.')]
+#[UniqueEntity(fields: ['firebaseUid'], message: 'Este usuario de Firebase ya existe.')]
 class Volunteer
 {
     #[ORM\Id]

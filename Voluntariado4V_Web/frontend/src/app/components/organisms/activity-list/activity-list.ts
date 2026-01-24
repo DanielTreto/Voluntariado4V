@@ -36,7 +36,7 @@ interface Activity {
   organization: Organization;
   volunteers: Volunteer[];
   maxVolunteers?: number;
-  type: 'Medio Ambiente' | 'Social' | 'Tecnológico' | 'Educativo' | 'Salud';
+  type: 'Digital' | 'Salud' | 'Educativo' | 'Ambiental' | 'Deportivo' | 'Social' | 'Cultural' | 'Tecnico';
   status: 'active' | 'pending' | 'ended';
 }
 
@@ -573,5 +573,9 @@ export class ActivityListComponent implements OnInit {
   closeRequestInfoModal() {
     this.showRequestInfoModal = false;
     this.selectedRequestVolunteer = null;
+  }
+
+  handleImageError(event: any) {
+    event.target.src = 'https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png';
   }
 }

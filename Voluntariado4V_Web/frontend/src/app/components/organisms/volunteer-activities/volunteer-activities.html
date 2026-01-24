@@ -67,7 +67,8 @@
     <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden activity-card-hover">
         <div class="position-relative">
             <img [src]="activity.image ? (activity.image.startsWith('/uploads') ? 'http://localhost:8000' + activity.image : activity.image) : 'assets/images/activity-default.jpg'"
-                class="card-img-top" alt="{{ activity.title }}" style="height: 200px; object-fit: cover;">
+                (error)="handleImageError($event)" class="card-img-top" alt="{{ activity.title }}"
+                style="height: 200px; object-fit: cover;">
 
             <div class="position-absolute top-0 end-0 p-3">
                 <!-- Status Logic -->
@@ -147,8 +148,8 @@
             <div class="modal-body">
                 <!-- Activity Image -->
                 <img [src]="selectedActivity.image ? (selectedActivity.image.startsWith('/uploads') ? 'http://localhost:8000' + selectedActivity.image : selectedActivity.image) : 'assets/images/activity-default.jpg'"
-                    class="w-100 rounded-3 mb-4" style="max-height: 300px; object-fit: cover;"
-                    alt="{{ selectedActivity.title }}">
+                    (error)="handleImageError($event)" class="w-100 rounded-3 mb-4"
+                    style="max-height: 300px; object-fit: cover;" alt="{{ selectedActivity.title }}">
 
                 <!-- Status Badge -->
                 <div class="mb-3">

@@ -12,11 +12,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Volunteer;
 use App\Entity\Organizacion;
-<<<<<<< HEAD
-=======
 use App\Repository\ActivityRepository;
 use App\Repository\VolunteerRepository;
->>>>>>> temp_mobile_api
+use App\Repository\OrganizationRepository;
 
 #[Route('/api')]
 class AdministratorController extends AbstractController
@@ -134,13 +132,10 @@ class AdministratorController extends AbstractController
         $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
-<<<<<<< HEAD
-=======
-    
     }
 
     #[Route('/admin/dashboard/stats', name: 'api_admin_stats', methods: ['GET'])]
-    public function stats(Request $request, ActivityRepository $activityRepo, VolunteerRepository $volRepo, \App\Repository\OrganizationRepository $orgRepo): JsonResponse
+    public function stats(Request $request, ActivityRepository $activityRepo, VolunteerRepository $volRepo, OrganizationRepository $orgRepo): JsonResponse
     {
         $totalActivities = $activityRepo->count([]);
         $totalVolunteers = $volRepo->count([]);
@@ -243,6 +238,5 @@ class AdministratorController extends AbstractController
         $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
->>>>>>> temp_mobile_api
     }
 }

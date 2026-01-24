@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Repository\VolunteerRepository;
+use App\Repository\TipoActividadRepository;
 use App\Entity\Volunteer;
 
 #[Route('/api')]
@@ -112,7 +113,7 @@ class ActivityController extends AbstractController
     }
 
     #[Route('/activities', name: 'api_activities_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, TipoActividadRepository $tipoActividadRepository, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -139,6 +140,19 @@ class ActivityController extends AbstractController
             $actividad->setFECHA_FIN($endDate); // Simplification: starts and ends same day
         } catch (\Exception $e) {
             return new JsonResponse(['error' => 'Invalid date format'], 400);
+        }
+
+        // Link Activity Type
+        if (isset($data['typeId'])) {
+            $tipo = $tipoActividadRepository->find($data['typeId']);
+            if ($tipo) {
+                $actividad->addTipoActividad($tipo);
+            }
+        } elseif (isset($data['type'])) {
+            $tipo = $tipoActividadRepository->findOneBy(['DESCRIPCION' => $data['type']]);
+            if ($tipo) {
+                $actividad->addTipoActividad($tipo);
+            }
         }
 
         $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
@@ -210,7 +224,7 @@ class ActivityController extends AbstractController
     }
 
     #[Route('/activities/{id}', name: 'api_activities_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository): JsonResponse
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, TipoActividadRepository $tipoActividadRepository): JsonResponse
     {
         $act = $activityRepository->find($id);
 
@@ -238,7 +252,23 @@ class ActivityController extends AbstractController
         if (isset($data['image'])) {
             $act->setIMAGEN($data['image']);
         }
-        // Add other fields as needed
+        
+        // Update Type (Clear existing and set new)
+        if (isset($data['typeID']) || isset($data['typeId']) || isset($data['type'])) {
+            // Clear existing types
+            foreach ($act->getTiposActividad() as $existingType) {
+                $act->getTiposActividad()->removeElement($existingType);
+            }
+
+            $newType = null;
+            if (isset($data['typeID'])) $newType = $tipoActividadRepository->find($data['typeID']);
+            elseif (isset($data['typeId'])) $newType = $tipoActividadRepository->find($data['typeId']);
+            elseif (isset($data['type'])) $newType = $tipoActividadRepository->findOneBy(['DESCRIPCION' => $data['type']]);
+
+            if ($newType) {
+                $act->addTipoActividad($newType);
+            }
+        }
 
         $entityManager->flush();
 
@@ -451,6 +481,40 @@ class ActivityController extends AbstractController
         $response = new JsonResponse(null, 204);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+
+    #[Route('/activities/{id}', name: 'api_activities_delete', methods: ['DELETE'])]
+    public function delete(int $id, EntityManagerInterface $entityManager, ActivityRepository $activityRepository): JsonResponse
+    {
+        $act = $activityRepository->find($id);
+
+        if (!$act) {
+            return new JsonResponse(['error' => 'Activity not found'], 404);
+        }
+
+        // 1. Manually remove related Solicitud entities (Constraint Fix)
+        $solicitudes = $entityManager->getRepository(\App\Entity\Solicitud::class)->findBy(['actividad' => $act]);
+        foreach ($solicitudes as $solicitud) {
+            $entityManager->remove($solicitud);
+        }
+
+        // 2. Remove Activity (Doctrine handles ManyToMany join tables like VOL_PARTICIPA_ACT automatically)
+        $entityManager->remove($act);
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Activity deleted'], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/activities/{id}', name: 'api_activities_delete_options', methods: ['OPTIONS'])]
+    public function deleteOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'PUT, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }

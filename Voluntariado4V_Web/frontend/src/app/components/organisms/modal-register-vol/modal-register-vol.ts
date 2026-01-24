@@ -102,7 +102,7 @@ export class ModalRegisterVol implements OnInit {
     // If I send 0, backend stores 0. Let's send all.
 
     this.volunteer.availability = formattedAvailability;
-
+    
     this.apiService.registerVolunteer(this.volunteer).subscribe({
       next: (response) => {
         console.log('Volunteer registered', response);
@@ -113,8 +113,17 @@ export class ModalRegisterVol implements OnInit {
         console.error('Error registering volunteer', error);
 
         let msg = 'Error en el registro. Inténtalo de nuevo.';
-        if (error.error && error.error.error) {
-          msg = error.error.error;
+        if (error.error) {
+            if (error.error.errors) {
+                // Formatting validation errors
+                const serverErrors = error.error.errors;
+                const firstKey = Object.keys(serverErrors)[0];
+                msg = `${firstKey}: ${serverErrors[firstKey]}`;
+                this.globalError = msg;
+                return;
+            } else if (error.error.error) {
+                msg = error.error.error;
+            }
         }
 
         // Detect duplicates
