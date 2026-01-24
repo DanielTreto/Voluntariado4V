@@ -62,7 +62,10 @@ Aplicación nativa para dispositivos Android diseñada para potenciar la experie
 
 Para ejecutar el ecosistema completo necesitarás:
 
-*   **Web**: Node.js, PHP, Composer, Symfony CLI, MySQL Server.
+
+*   **Web**: Node.js, PHP, Composer, Symfony CLI, SQL Server (con controladores PHP instalados y extensión `zip` habilitada).
+    *   **Importante**: Para usar SQL Server con PHP, necesitas descargar los controladores de [Microsoft Drivers for PHP for SQL Server](https://learn.microsoft.com/en-us/sql/connect/php/download-drivers-php-sql-server).
+    *   Para PHP 8.2 en XAMPP, se recomiendan: `php_sqlsrv_82_ts_x64.dll` y `php_pdo_sqlsrv_82_ts_x64.dll`.
 *   **Móvil**: Android Studio (para compilar y ejecutar la app móvil).
 
 ---
