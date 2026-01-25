@@ -40,9 +40,15 @@ Antes de empezar, asegúrate de tener instalado en tu equipo:
 
 ## ⚡ Quick Start (Windows)
 
-We have included automated scripts to simplify the installation process.
+Hemos incluido scripts automatizados para simplificar el proceso de instalación.
 
-### 1. Instalación
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/DanielTreto/Voluntariado4V.git
+cd Voluntariado4V
+```
+
+### 2. Instalación
 Ejecuta el script `install.bat`. Esto hará lo siguiente:
 *   Verificar las herramientas necesarias (PHP, Composer, Node/NPM).
 *   Instalar dependencias del Backend.

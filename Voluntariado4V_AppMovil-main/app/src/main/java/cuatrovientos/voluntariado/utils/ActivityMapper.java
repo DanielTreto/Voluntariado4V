@@ -102,7 +102,9 @@ public class ActivityMapper {
 
     public static int getColorForType(String type) {
         if (type == null) return 0xFF616161;
-        switch (type) {
+        String mappedType = getTypeName(type);
+        
+        switch (mappedType) {
             case "Ambiental": return 0xFF2E7D32;
             case "Social": return 0xFF1976D2;
             case "Digital": return 0xFFFFC107;
@@ -113,6 +115,21 @@ public class ActivityMapper {
             case "Tecnico": return 0xFF455A64;
             case "General": return 0xFF616161;
             default: return 0xFF616161;
+        }
+    }
+
+    public static String getTypeName(String idOrName) {
+        if (idOrName == null) return "Desconocido";
+        switch (idOrName) {
+            case "1": return "Digital";
+            case "2": return "Salud";
+            case "3": return "Educativo";
+            case "4": return "Ambiental";
+            case "5": return "Deportivo";
+            case "6": return "Social";
+            case "7": return "Cultural";
+            case "8": return "Tecnico";
+            default: return idOrName; // Return original if it's already a name or unknown ID
         }
     }
 

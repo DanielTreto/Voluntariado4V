@@ -114,12 +114,14 @@ public class VolunteerDetailDialog extends DialogFragment {
                 chipGroup.removeAllViews();
                 
                 for (String pref : volunteer.getPreferences()) {
+                    String typeName = cuatrovientos.voluntariado.utils.ActivityMapper.getTypeName(pref);
+
                     com.google.android.material.chip.Chip chip = new com.google.android.material.chip.Chip(getContext());
-                    chip.setText(pref);
+                    chip.setText(typeName);
                     chip.setTextColor(android.graphics.Color.WHITE);
                     chip.setChipCornerRadius(0f); 
                     
-                    int color = cuatrovientos.voluntariado.utils.ActivityMapper.getColorForType(pref);
+                    int color = cuatrovientos.voluntariado.utils.ActivityMapper.getColorForType(typeName);
                     chip.setChipBackgroundColor(android.content.res.ColorStateList.valueOf(color));
                     
                     chipGroup.addView(chip);

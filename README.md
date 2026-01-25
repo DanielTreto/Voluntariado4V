@@ -41,7 +41,7 @@ Una Single Page Application (SPA) moderna conectada a una API REST.
 
 *   **Frontend**: Angular 20, TypeScript, Bootstrap 5.
 *   **Backend**: Symfony 7.3, PHP 8.2, Doctrine ORM.
-*   **Base de Datos**: MySQL.
+*   **Base de Datos**: SQL Server.
 *   **Características**:
     *   Gestión de Usuarios (Voluntarios, Organizaciones, Admin).
     *   Publicación y Gestión de Actividades.

@@ -139,14 +139,19 @@ public class VolunteersFragment extends Fragment {
     private void showPreferencesFilterDialog() {
         if (masterList == null) return;
         java.util.Set<String> prefSet = new java.util.HashSet<>();
-        prefSet.add("Todos");
         for (Volunteer v : masterList) {
             if (v.getPreferences() != null) {
-                prefSet.addAll(v.getPreferences());
+                for (String pref : v.getPreferences()) {
+                     prefSet.add(cuatrovientos.voluntariado.utils.ActivityMapper.getTypeName(pref));
+                }
             }
         }
+        
         List<String> prefList = new ArrayList<>(prefSet);
         Collections.sort(prefList);
+        
+        prefList.add(0, "Todos");
+        
         String[] prefArray = prefList.toArray(new String[0]);
 
         new android.app.AlertDialog.Builder(getContext())
@@ -165,29 +170,22 @@ public class VolunteersFragment extends Fragment {
 
     private void showAvailabilityFilterDialog() {
         if (masterList == null) return;
-        java.util.Set<String> availSet = new java.util.HashSet<>();
-        availSet.add("Todos");
         
-        for (Volunteer v : masterList) {
-            if (v.getAvailability() != null) {
-                for (String avString : v.getAvailability()) {
-                    if (avString.contains(":")) {
-                        String day = avString.split(":")[0].trim().toUpperCase();
-                        availSet.add(day);
-                    }
-                }
-            }
-        }
-        List<String> availList = new ArrayList<>(availSet);
-        Collections.sort(availList);
-        String[] availArray = availList.toArray(new String[0]);
+        String[] daysOfWeek = {
+            "Todos",
+            "LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"
+        };
+        String[] displayDays = {
+            "Todos", 
+            "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"
+        };
 
         new android.app.AlertDialog.Builder(getContext())
             .setTitle("Filtrar por Disponibilidad (Día)")
-            .setItems(availArray, (dialog, which) -> {
-                currentAvailabilityFilter = availArray[which];
+            .setItems(displayDays, (dialog, which) -> {
+                currentAvailabilityFilter = daysOfWeek[which];
                 android.widget.Button btn = getView().findViewById(R.id.btnFilterAvailability);
-                if (btn != null) btn.setText(currentAvailabilityFilter.equals("Todos") ? "Disponibilidad" : currentAvailabilityFilter);
+                if (btn != null) btn.setText(currentAvailabilityFilter.equals("Todos") ? "Disponibilidad" : displayDays[which]);
                 
                 TabLayout tabs = getView().findViewById(R.id.tabLayout);
                 if (tabs.getSelectedTabPosition() == 0) filterList("Solicitudes");
@@ -289,15 +287,16 @@ public class VolunteersFragment extends Fragment {
             if (!tabName.equals("Solicitudes") && !currentStatusFilter.equals("Todos")) {
                  if (!v.getStatus().equalsIgnoreCase(currentStatusFilter)) matchesStatus = false;
             }
-
             boolean matchesPreference = true;
             if (!currentPreferenceFilter.equals("Todos")) {
                 matchesPreference = false;
                 if (v.getPreferences() != null) {
                     for (String pref : v.getPreferences()) {
-                        if (pref.equalsIgnoreCase(currentPreferenceFilter)) {
+                        String prefName = cuatrovientos.voluntariado.utils.ActivityMapper.getTypeName(pref);
+                        if (prefName.equalsIgnoreCase(currentPreferenceFilter)) {
                             matchesPreference = true;
                             break;
+                            
                         }
                     }
                 }
