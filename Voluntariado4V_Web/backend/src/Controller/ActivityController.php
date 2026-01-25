@@ -156,7 +156,13 @@ class ActivityController extends AbstractController
         }
 
         $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
-        $actividad->setESTADO('PENDIENTE');
+        
+        // If created by admin, auto-validate the activity
+        if (isset($data['createdByAdmin']) && $data['createdByAdmin'] === true) {
+            $actividad->setESTADO('EN_PROGRESO');
+        } else {
+            $actividad->setESTADO('PENDIENTE');
+        }
 
         // Link Organization (Merged Logic)
         if (isset($data['organizationId'])) {
@@ -346,6 +352,35 @@ class ActivityController extends AbstractController
             'volunteer' => $volunteer,
             'actividad' => $act
         ]);
+
+        // Check for direct add (admin adding volunteer directly)
+        $directAdd = $data['directAdd'] ?? false;
+        
+        if ($directAdd === true) {
+            // Admin is directly adding volunteer - skip request creation
+            // Remove any existing pending request
+            if ($existingRequest && $existingRequest->getStatus() === 'PENDIENTE') {
+                $entityManager->remove($existingRequest);
+            }
+            
+            // Add volunteer directly to activity
+            $act->addVoluntario($volunteer);
+            
+            // Create accepted request record for history
+            $solicitud = new \App\Entity\Solicitud();
+            $solicitud->setVolunteer($volunteer);
+            $solicitud->setActividad($act);
+            $solicitud->setStatus('ACEPTADA');
+            $solicitud->setFechaSolicitud(new \DateTime());
+            $solicitud->setMensaje('Añadido por administrador');
+            
+            $entityManager->persist($solicitud);
+            $entityManager->flush();
+
+            $response = new JsonResponse(['status' => 'Volunteer added successfully'], 200);
+            $response->headers->set('Access-Control-Allow-Origin', '*');
+            return $response;
+        }
 
         if ($existingRequest) {
             return new JsonResponse(['error' => 'Request already pending or processed'], 400);
