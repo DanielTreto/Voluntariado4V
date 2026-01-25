@@ -63,14 +63,15 @@ If you prefer to install manually or are on a non-Windows system, follow these s
 
 ### 1. Clonar el repositorio
 ```bash
-git clone https://github.com/DanielTreto/Voluntariado4V_Web.git
-cd Voluntariado4V_Web
+git clone https://github.com/DanielTreto/Voluntariado4V.git
+cd Voluntariado4V
 ```
 
 ### 2. Configuración del Backend (Symfony)
 
 1.  Navega a la carpeta del backend:
     ```bash
+    cd Voluntariado4V_Web
     cd backend
     ```
 
@@ -86,13 +87,13 @@ cd Voluntariado4V_Web
     DATABASE_URL="mysql://usuario:password@127.0.0.1:3306/voluntariado_db?serverVersion=8.0&charset=utf8mb4"
     ```
 
-4.  Crea la base de datos y el esquema:
+4.  Crea la base de datos y ejecuta las migraciones:
     ```bash
     php bin/console doctrine:database:create
-    php bin/console doctrine:schema:update --force
+    php bin/console doctrine:migrations:migrate
     ```
 
-5.  (Opcional) Carga datos de prueba si dispones de accesorios (fixtures).
+5.  (Opcional) Carga datos de prueba de el archivo full_database_setup.sql de la carpeta /src/BDD.
 
 6.  Inicia el servidor de Symfony:
     ```bash
@@ -104,6 +105,7 @@ cd Voluntariado4V_Web
 
 1.  Abre una nueva terminal y navega a la carpeta del frontend:
     ```bash
+    cd Voluntariado4V_Web
     cd frontend
     ```
 
@@ -126,9 +128,9 @@ Para probar la aplicación puedes utilizar las siguientes credenciales pre-confi
 
 | Rol | Email | Contraseña |
 |-----|-------|------------|
-| **Voluntario** | `testVoluntario@gmail.com` | `1234` |
-| **Organización** | `solera@example.com` | `temp1234` |
-| **Admin** | *(Requiere registro en BBDD)* | --- |
+| **Voluntario** | `pedro@email.com` | `admin123` |
+| **Organización** | `cruzroja@email.com` | `admin123` |
+| **Admin** | `admin@voluntariado.com` | `admin123` |
 
 ---
 

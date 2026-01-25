@@ -254,4 +254,17 @@ class Actividad
         $this->voluntarios->removeElement($volunteer);
         return $this;
     }
+    public function addOd(Ods $od): static
+    {
+        if (!$this->ods->contains($od)) {
+            $this->ods->add($od);
+        }
+        return $this;
+    }
+
+    public function removeOd(Ods $od): static
+    {
+        $this->ods->removeElement($od);
+        return $this;
+    }
 }

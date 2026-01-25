@@ -159,4 +159,8 @@ export class ApiService {
     formData.append('image', file);
     return this.http.post(`${this.apiUrl}/activities/${id}/image`, formData);
   }
+
+  getOds(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/ods`);
+  }
 }

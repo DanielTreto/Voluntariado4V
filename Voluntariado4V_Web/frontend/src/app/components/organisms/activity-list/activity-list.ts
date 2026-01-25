@@ -38,6 +38,7 @@ interface Activity {
   maxVolunteers?: number;
   type: 'Digital' | 'Salud' | 'Educativo' | 'Ambiental' | 'Deportivo' | 'Social' | 'Cultural' | 'Tecnico';
   status: 'active' | 'pending' | 'ended';
+  ods?: any[];
 }
 
 @Component({
@@ -56,6 +57,7 @@ export class ActivityListComponent implements OnInit {
 
   allVolunteers: Volunteer[] = [];
   allOrganizations: Organization[] = [];
+  odsList: any[] = [];
   activities: Activity[] = [];
   requests: any[] = [];
   pendingRequestsCount: number = 0;
@@ -91,14 +93,18 @@ export class ActivityListComponent implements OnInit {
     image: 'assets/images/activity-1.jpg',
     organization: undefined,
     volunteers: [],
-    status: 'pending'
+    status: 'pending',
+    ods: []
   };
   selectedOrgId: number | null = null;
+  selectedOdsId: number | null = null;
+  editOdsId: number | null = null;
 
   ngOnInit() {
     this.loadData();
     this.loadVolunteers();
     this.loadOrganizations();
+    this.loadOds();
     this.loadRequests(); // Preload requests count
   }
 
@@ -129,6 +135,7 @@ export class ActivityListComponent implements OnInit {
           })),
           maxVolunteers: act.maxVolunteers || 10,
           type: act.type || 'Social',
+          ods: act.ods || [],
           status: this.mapStatus(act.status)
         }));
         this.cdr.detectChanges();
@@ -236,6 +243,13 @@ export class ActivityListComponent implements OnInit {
     });
   }
 
+  loadOds() {
+    this.apiService.getOds().subscribe({
+      next: (data) => this.odsList = data,
+      error: (err) => console.error('Error loading ODS', err)
+    });
+  }
+
   mapStatus(backendStatus: string): 'active' | 'pending' | 'ended' {
     const map: any = {
       'PENDIENTE': 'pending',
@@ -292,6 +306,7 @@ export class ActivityListComponent implements OnInit {
   // Edit Modal
   openEdit(activity: Activity) {
     this.selectedActivity = { ...activity, volunteers: [...activity.volunteers] };
+    this.editOdsId = activity.ods && activity.ods.length > 0 ? activity.ods[0].id : null;
     this.selectedFile = null;
     this.imagePreview = activity.image;
     this.showEditModal = true;
@@ -309,7 +324,8 @@ export class ActivityListComponent implements OnInit {
         description: this.selectedActivity.description,
         location: this.selectedActivity.location,
         date: this.selectedActivity.date,
-        type: this.selectedActivity.type
+        type: this.selectedActivity.type,
+        ods: this.editOdsId
       };
 
       this.apiService.updateActivity(this.selectedActivity.id, payload).subscribe({
@@ -460,9 +476,11 @@ export class ActivityListComponent implements OnInit {
       image: 'assets/images/activity-1.jpg',
       organization: undefined,
       volunteers: [],
-      status: 'pending'
+      status: 'pending',
+      ods: []
     };
     this.selectedOrgId = null;
+    this.selectedOdsId = null;
     this.selectedFile = null;
     this.imagePreview = null;
     this.showCreateModal = true;
@@ -493,7 +511,8 @@ export class ActivityListComponent implements OnInit {
       date: this.newActivity.date,
       type: this.newActivity.type,
       image: null, // Image handled via upload
-      organizationId: this.selectedOrgId
+      organizationId: this.selectedOrgId,
+      ods: this.selectedOdsId
     };
 
     this.apiService.createActivity(payload).subscribe({

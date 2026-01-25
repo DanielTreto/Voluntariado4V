@@ -113,7 +113,7 @@ class ActivityController extends AbstractController
     }
 
     #[Route('/activities', name: 'api_activities_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, TipoActividadRepository $tipoActividadRepository, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -153,6 +153,14 @@ class ActivityController extends AbstractController
             if ($tipo) {
                 $actividad->addTipoActividad($tipo);
             }
+        }
+
+        // Link ODS
+        if (isset($data['ods'])) {
+             $ods = $odsRepository->find($data['ods']);
+             if ($ods) {
+                 $actividad->addOd($ods);
+             }
         }
 
         $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
@@ -224,7 +232,7 @@ class ActivityController extends AbstractController
     }
 
     #[Route('/activities/{id}', name: 'api_activities_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, TipoActividadRepository $tipoActividadRepository): JsonResponse
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository): JsonResponse
     {
         $act = $activityRepository->find($id);
 
@@ -268,6 +276,17 @@ class ActivityController extends AbstractController
             if ($newType) {
                 $act->addTipoActividad($newType);
             }
+        }
+
+        // Update ODS
+        if (isset($data['ods'])) {
+             foreach ($act->getOds() as $existingOds) {
+                 $act->removeOd($existingOds);
+             }
+             $ods = $odsRepository->find($data['ods']);
+             if ($ods) {
+                 $act->addOd($ods);
+             }
         }
 
         $entityManager->flush();

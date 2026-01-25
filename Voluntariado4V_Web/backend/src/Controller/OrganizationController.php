@@ -254,13 +254,17 @@ class OrganizationController extends AbstractController
                 'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
                 'status' => $act->getESTADO(),
+                'image' => $act->getIMAGEN(), // Added
+                'location' => $act->getUBICACION(), // Added
+                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(), // Added (mapped to N_MAX_VOLUNTARIOS in frontend via spread or explicit)
+                'N_MAX_VOLUNTARIOS' => $act->getN_MAX_VOLUNTARIOS(), // Explicitly adding strictly for frontend compatibility if needed
+                'duration' => $act->getDURACION_SESION(), // Added
+                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General', // Added
                 'volunteersCount' => $act->getVoluntarios()->count(),
                 'volunteers' => array_map(function($vol) {
                      return [
                          'id' => $vol->getCODVOL(),
-                         'name' => $vol->getNOMBRE(),
-                         'surname1' => $vol->getAPELLIDO1(),
-                         'surname2' => $vol->getAPELLIDO2(),
+                         'name' => trim($vol->getNOMBRE() . ' ' . $vol->getAPELLIDO1() . ' ' . ($vol->getAPELLIDO2() ?? '')),
                          'avatar' => $vol->getAVATAR()
                      ];
                 }, $act->getVoluntarios()->toArray()),

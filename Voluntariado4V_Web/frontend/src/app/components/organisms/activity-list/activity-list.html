@@ -306,6 +306,14 @@
                                 <option value="Salud">Salud</option>
                             </select>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">ODS</label>
+                            <select class="form-select" [(ngModel)]="editOdsId" name="editOds">
+                                <option [ngValue]="null" disabled>Selecciona ODS...</option>
+                                <option *ngFor="let ods of odsList" [ngValue]="ods.id">{{ ods.id }} - {{ ods.description
+                                    }}</option>
+                            </select>
+                        </div>
                         <div class="col-12">
                             <label class="form-label">Imagen</label>
                             <div class="d-flex align-items-center gap-2">
@@ -565,6 +573,14 @@
                             <option value="Tecnológico">Tecnológico</option>
                             <option value="Educativo">Educativo</option>
                             <option value="Salud">Salud</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ODS</label>
+                        <select class="form-select" [(ngModel)]="selectedOdsId" name="newOds">
+                            <option [ngValue]="null" disabled selected>Elige un ODS...</option>
+                            <option *ngFor="let ods of odsList" [ngValue]="ods.id">{{ ods.id }} - {{ ods.description }}
+                            </option>
                         </select>
                     </div>
                 </form>

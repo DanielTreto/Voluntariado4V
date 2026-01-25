@@ -202,7 +202,16 @@
                     </div>
                     <div class="col-md-7">
                         <h4 class="fw-bold mb-2">{{ viewActivity.title }}</h4>
-                        <span class="badge bg-secondary mb-3">{{ viewActivity.status }}</span>
+                        <div class="d-flex gap-2 mb-3">
+                            <span class="badge bg-primary">{{ viewActivity.type }}</span>
+                            <span class="badge bg-secondary">{{ viewActivity.status }}</span>
+                        </div>
+                        <div *ngIf="viewActivity.ods && viewActivity.ods.length > 0" class="mb-3">
+                            <small class="text-muted d-block mb-1">ODS:</small>
+                            <span class="badge bg-info text-dark me-1" *ngFor="let ods of viewActivity.ods">
+                                {{ ods.id }} - {{ ods.description }}
+                            </span>
+                        </div>
                         <p class="text-muted">{{ viewActivity.description }}</p>
                     </div>
                     <div class="col-md-6">
