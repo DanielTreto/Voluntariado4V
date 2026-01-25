@@ -164,7 +164,14 @@ class ActivityController extends AbstractController
         }
 
         $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
-        $actividad->setESTADO('PENDIENTE');
+        
+        // Admin validation bypass
+        $role = $data['role'] ?? null;
+        if ($role === 'admin') {
+            $actividad->setESTADO('EN_PROGRESO');
+        } else {
+            $actividad->setESTADO('PENDIENTE');
+        }
 
         // Link Organization (Merged Logic)
         if (isset($data['organizationId'])) {
@@ -366,15 +373,43 @@ class ActivityController extends AbstractController
             'actividad' => $act
         ]);
 
+        $role = $data['role'] ?? null;
+
         if ($existingRequest) {
-            return new JsonResponse(['error' => 'Request already pending or processed'], 400);
+            // If admin, we can override the existing request (e.g. approve it)
+            if ($role === 'admin') {
+                $existingRequest->setStatus('ACEPTADA');
+                $existingRequest->setFechaSolicitud(new \DateTime()); // Update date? Optional.
+                
+                if (!$act->getVoluntarios()->contains($volunteer)) {
+                    $act->addVoluntario($volunteer);
+                    $entityManager->persist($act);
+                }
+                
+                $entityManager->flush();
+                
+                $response = new JsonResponse(['status' => 'Request updated and accepted by admin'], 200);
+                $response->headers->set('Access-Control-Allow-Origin', '*');
+                return $response;
+
+            } else {
+                return new JsonResponse(['error' => 'Request already pending or processed'], 400);
+            }
         }
 
         // Create Request
         $solicitud = new \App\Entity\Solicitud();
         $solicitud->setVolunteer($volunteer);
         $solicitud->setActividad($act);
-        $solicitud->setStatus('PENDIENTE');
+        
+        if ($role === 'admin') {
+             $solicitud->setStatus('ACEPTADA');
+             $act->addVoluntario($volunteer);
+             $entityManager->persist($act);
+        } else {
+             $solicitud->setStatus('PENDIENTE');
+        }
+        
         $solicitud->setFechaSolicitud(new \DateTime());
         
         $entityManager->persist($solicitud);

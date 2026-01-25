@@ -41,7 +41,7 @@ class Volunteer
     #[Assert\Length(max: 50)]
     private ?string $CORREO = null;
 
-    #[ORM\Column(length: 9, columnDefinition: 'CHAR(9)')]
+    #[ORM\Column(length: 9, nullable: true, options: ['fixed' => true])]
     #[Assert\NotBlank]
     #[Assert\Regex(pattern: '/^[6-9][0-9]{8}$/', message: 'Invalid phone number')]
     private ?string $TELEFONO = null;
@@ -59,7 +59,7 @@ class Volunteer
     #[Assert\NotNull(message: 'El ciclo formativo es obligatorio.')]
     private ?Ciclo $ciclo = null;
 
-    #[ORM\Column(length: 9, unique: true, columnDefinition: 'CHAR(9)')]
+    #[ORM\Column(length: 9, unique: true, nullable: true, options: ['fixed' => true])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 9, max: 9)]
     private ?string $DNI = null;
