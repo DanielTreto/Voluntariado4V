@@ -9,8 +9,6 @@ import android.widget.TextView;
 import android.graphics.Color;
 import android.view.Gravity;
 
-// No necesitamos layout XML para este ejemplo rápido, lo crearemos por código
-// para asegurarnos de que ves los cambios.
 public class BlankFragment extends Fragment {
 
     private static final String ARG_TITLE = "title";
@@ -20,7 +18,6 @@ public class BlankFragment extends Fragment {
     private String mSubtitle;
 
     public BlankFragment() {
-        // Required empty public constructor
     }
 
     public static BlankFragment newInstance(String title, String subtitle) {
@@ -44,7 +41,6 @@ public class BlankFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Creamos una vista simple programáticamente para mostrar dónde estamos
         TextView textView = new TextView(getActivity());
         textView.setText(mTitle + "\n\n" + mSubtitle);
         textView.setTextSize(24);

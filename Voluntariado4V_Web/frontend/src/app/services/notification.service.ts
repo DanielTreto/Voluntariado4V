@@ -127,17 +127,17 @@ export class NotificationService {
       }
 
       if (targetRole === 'organization') {
-        return currentRole === 'organization' && (!n.recipientId || n.recipientId === currentId);
+        if (currentRole !== 'organization') return false;
+        // If specific recipient ID is set, it MUST match.
+        if (n.recipientId && n.recipientId != currentId) return false;
+        return true;
       }
 
       if (targetRole === 'volunteer') {
-        // Must match role AND (if specific ID is set) match ID
         if (currentRole !== 'volunteer') return false;
-
-        if (n.recipientId) {
-          return n.recipientId === currentId;
-        }
-        return true; // Broadcast to all volunteers (e.g. "System down")
+        // If specific recipient ID is set, it MUST match.
+        if (n.recipientId && n.recipientId != currentId) return false;
+        return true;
       }
 
       return false;
@@ -157,54 +157,29 @@ export class NotificationService {
   }
 
   private saveNotifications(notifications: AdminNotification[]) {
-    // When saving, we must be careful not to overwrite "other people's" notifications if we only loaded "ours".
-    // So we should probably load ALL from storage, merge OUR changes, and save back.
-    // BUT for simplicity in this frontend-only mock:
-    // We will just read ALL from storage again, find the ones we modified (by ID), update them, and save.
-
     const allStored = this.loadNotificationsFromStorage();
-    const currentInMemory = notifications; // These are the ones we are working with (filtered)
 
-    // Merge: update items in 'allStored' that exist in 'currentInMemory'
-    const updatedAll = allStored.map(stored => {
-      const found = currentInMemory.find(curr => curr.id === stored.id);
-      return found ? found : stored;
+    // Create a map of stored items for easy updating
+    const storedMap = new Map(allStored.map(n => [n.id, n]));
+
+    // Update with new state from 'notifications' (filtered view)
+    notifications.forEach(n => {
+      storedMap.set(n.id, n);
     });
 
-    // Also add any NEW ones that might be in currentInMemory but not in allStored (rare case if addNotification pushes to storage first)
-    // Actually addNotification pushes to storage directly.
+    // Convert back to array
+    const updatedAll = Array.from(storedMap.values());
 
     localStorage.setItem('admin_notifications', JSON.stringify(updatedAll));
 
-    // Re-emit filtered
-    this.notificationsSubject.next(currentInMemory);
+    // Re-emit the current filtered view (which is 'notifications')
+    // We must ensure the subject emits exactly what was passed or a re-filtered version.
+    // Since 'notifications' might be just the filtered subset (e.g. from markAsRead),
+    // we should trust it portrays the latest state of THAT subset.
+    this.notificationsSubject.next(notifications);
   }
 
   private getMockData(): AdminNotification[] {
-    return [
-      {
-        id: '1',
-        type: 'ORG_REGISTER',
-        title: 'Nueva Organización',
-        message: 'Fundación Ayuda Global está intentando registrarse.',
-        entityName: 'Fundación Ayuda Global',
-        timestamp: new Date(new Date().getTime() - 1000 * 60 * 10),
-        read: false,
-        actionUrl: '/dashboard/organizations',
-        recipientRole: 'admin'
-      },
-      // Mock for a volunteer (assuming ID 1 for testing)
-      {
-        id: '99',
-        type: 'JOIN_REQUEST_ACCEPTED',
-        title: 'Solicitud Aceptada',
-        message: 'Has sido aceptado en "Comedor Social".',
-        timestamp: new Date(new Date().getTime() - 1000 * 60 * 60),
-        read: false,
-        actionUrl: '/volunteer-dashboard/activities',
-        recipientRole: 'volunteer',
-        recipientId: 1 // We will assume the test user has ID 1
-      }
-    ];
+    return [];
   }
 }

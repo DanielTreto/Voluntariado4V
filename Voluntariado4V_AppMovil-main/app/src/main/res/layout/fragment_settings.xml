@@ -88,7 +88,9 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Notification Section -->
+
+
+        <!-- Dark Mode Section -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -109,7 +111,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_bell"
+                    android:src="@drawable/ic_dark_mode"
                     app:tint="@color/colorPrimary"
                     android:layout_marginEnd="16dp"/>
 
@@ -121,130 +123,29 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Notificaciones Push"
+                        android:text="Modo Oscuro"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/text_primary"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Recibe alertas de actividad"
+                        android:text="Cambiar apariencia de la app"
                         android:textSize="14sp"
                         android:textColor="@color/text_secondary"/>
                 </LinearLayout>
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchNotifications"
+                    android:id="@+id/switchDarkMode"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"/>
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
 
-        <!-- Account Details Toggle -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnToggleDetails"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:text="Cambiar detalles de la cuenta"
-            android:backgroundTint="@color/colorPrimary"
-            app:cornerRadius="12dp"
-            android:textSize="16sp"
-            android:layout_marginBottom="16dp"/>
 
-        <!-- Editable Form -->
-        <LinearLayout
-            android:id="@+id/containerAccountDetails"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nombre Completo"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEditName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPersonName"/>
-            </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="URL Foto de Perfil"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEditPhotoUrl"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textUri"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Correo Electrónico"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etEditEmail"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Contraseña Actual"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="16dp"
-                app:endIconMode="password_toggle"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Nueva Contraseña"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_marginBottom="24dp"
-                app:endIconMode="password_toggle"
-                app:boxStrokeColor="@color/input_border_selector"
-                app:hintTextColor="@color/colorPrimary">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textPassword"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.button.MaterialButton
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:text="Guardar Cambios"
-                android:backgroundTint="@color/green_active"
-                app:cornerRadius="12dp"
-                android:layout_marginBottom="24dp"/>
-
-        </LinearLayout>
 
     </LinearLayout>
 </ScrollView>

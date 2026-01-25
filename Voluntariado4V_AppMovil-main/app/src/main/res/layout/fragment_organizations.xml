@@ -7,6 +7,84 @@
     android:orientation="vertical"
     android:background="@color/background_light">
 
+    <EditText
+        android:id="@+id/etSearchOrg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_card_outline"
+        android:drawableStart="@drawable/ic_search"
+        android:drawableTint="@color/text_secondary"
+        android:drawablePadding="12dp"
+        android:hint="Buscar organizaciones..."
+        android:padding="12dp"
+        android:inputType="text"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textColorHint="@color/text_secondary" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSortOrganizations"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Orden: A-Z"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Estado"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterScope"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Ámbito"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/btnFilterActivityStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="Actividades"
+                android:textSize="12sp"
+                android:backgroundTint="@color/white"
+                android:textColor="@color/colorPrimary"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_marginEnd="8dp"/>
+
+
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutOrg"
         android:layout_width="match_parent"
@@ -24,7 +102,7 @@
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Activos" />
+            android:text="Registradas" />
     </com.google.android.material.tabs.TabLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -35,5 +113,26 @@
         android:clipToPadding="false"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:scrollbars="vertical" />
+
+    <LinearLayout
+        android:id="@+id/emptyOrganizations"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        <ImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_business" 
+            app:tint="@color/text_secondary"
+            android:layout_marginBottom="16dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No hay organizaciones disponibles"
+            android:textSize="16sp"
+            android:textColor="@color/text_secondary"/>
+    </LinearLayout>
 
 </LinearLayout>

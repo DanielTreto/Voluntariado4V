@@ -8,12 +8,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\AdministratorRepository;
+use App\Repository\CredencialesRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 #[Route('/api')]
 class AuthController extends AbstractController
 {
     #[Route('/login', name: 'api_login', methods: ['POST'])]
-    public function login(Request $request, VolunteerRepository $volRepo, OrganizationRepository $orgRepo, \App\Repository\AdministratorRepository $adminRepo, \App\Repository\CredencialesRepository $credRepo, \Doctrine\ORM\EntityManagerInterface $entityManager): JsonResponse
+    public function login(
+        Request $request, 
+        VolunteerRepository $volRepo, 
+        OrganizationRepository $orgRepo, 
+        AdministratorRepository $adminRepo,
+        CredencialesRepository $credRepo, 
+        EntityManagerInterface $entityManager
+    ): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $token = $data['token'] ?? '';
@@ -22,16 +32,20 @@ class AuthController extends AbstractController
 
         // 1. Firebase Token Login
         if ($token) {
-            // Decode token to get UID (sub) without verification for now (Fast implementation)
             $tokenParts = explode('.', $token);
+            $uid = $token; 
+            $payload = [];
+            
             if (count($tokenParts) >= 2) {
                 $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $tokenParts[1])), true);
-                $uid = $payload['sub'] ?? $payload['user_id'] ?? $token; 
-            } else {
-                $uid = $token; // Fallback (should not happen with valid JWT)
+                if (isset($payload['sub'])) {
+                    $uid = $payload['sub'];
+                } elseif (isset($payload['user_id'])) {
+                    $uid = $payload['user_id'];
+                }
             }
             
-            $tokenEmail = $data['email'] ?? ($payload['email'] ?? ''); // Try to get email from token if not in body
+            $tokenEmail = $data['email'] ?? ($payload['email'] ?? ''); 
 
             // 1. Check Volunteer by UID
             $volunteer = $volRepo->findOneBy(['firebaseUid' => $uid]);
@@ -41,16 +55,13 @@ class AuthController extends AbstractController
 
             // 3. Email Fallback & Account Linking
             if (!$volunteer && !$org && $tokenEmail) {
-                // Check Volunteer by Email
                 $volunteerByEmail = $volRepo->findOneBy(['CORREO' => $tokenEmail]);
                 if ($volunteerByEmail) {
-                    // Update UID to link account
                     $volunteerByEmail->setFirebaseUid($uid);
                     $entityManager->persist($volunteerByEmail);
                     $entityManager->flush();
                     $volunteer = $volunteerByEmail;
                 } else {
-                    // Check Organization by Email
                     $orgByEmail = $orgRepo->findOneBy(['CORREO' => $tokenEmail]); 
                     if ($orgByEmail) {
                         $orgByEmail->setFirebaseUid($uid);
@@ -62,21 +73,19 @@ class AuthController extends AbstractController
             }
 
             if ($volunteer) {
-                // If we just linked, we need to persist. 
-                // Since user didn't inject EM, let's do it properly now by modifying signature.
                 return new JsonResponse([
                     'success' => true,
                     'role' => 'volunteer',
                     'id' => $volunteer->getCODVOL(),
-                    'name' => $volunteer->getNOMBRE(),
+                    'name' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
                     'email' => $volunteer->getCORREO(),
                     'firebaseUid' => $volunteer->getFirebaseUid(),
-                    'avatar' => $volunteer->getAVATAR()
+                    'avatar' => $volunteer->getAVATAR(),
+                    'status' => $volunteer->getESTADO()
                 ]);
             }
 
             if ($org) {
-                 // If we just linked, we need to persist.
                 return new JsonResponse([
                     'success' => true,
                     'role' => 'organization',
@@ -84,7 +93,8 @@ class AuthController extends AbstractController
                     'name' => $org->getNOMBRE(),
                     'email' => $org->getCORREO(),
                     'firebaseUid' => $org->getFirebaseUid(),
-                    'avatar' => $org->getAVATAR()
+                    'avatar' => $org->getAVATAR(),
+                    'status' => $org->getESTADO()
                 ]);
             }
         }
@@ -92,19 +102,37 @@ class AuthController extends AbstractController
         elseif ($email && $password) {
             $cred = $credRepo->findOneBy(['correo' => $email]);
             
-            if ($cred && $cred->getPassword() === $password) { // Plain text for now as per registration
-                
-                // Handle Admin Login
+            if ($cred && $cred->getPassword() === $password) {
                 if (in_array(strtoupper($cred->getUserType()), ['ADMIN', 'ADMINISTRADOR'])) {
                     $admin = $adminRepo->findOneBy(['correo' => $email]);
+                    if (!$admin) {
+                        $admin = $cred->getAdministrator(); 
+                    }
+
                     if ($admin) {
+                        $name = method_exists($admin, 'getNombre') ? $admin->getNombre() : 'Admin';
+                        if (method_exists($admin, 'getApellidos')) {
+                            $name .= ' ' . $admin->getApellidos();
+                        }
+                        
                         return new JsonResponse([
                             'success' => true,
                             'role' => 'admin',
                             'id' => $admin->getId(),
-                            'name' => $admin->getNombre(),
+                            'name' => trim($name),
                             'email' => $admin->getCorreo(),
-                            'avatar' => $admin->getAVATAR()
+                            'firebaseUid' => method_exists($admin, 'getFirebaseUid') ? $admin->getFirebaseUid() : 'admin-uid',
+                            'avatar' => method_exists($admin, 'getAVATAR') ? $admin->getAVATAR() : null
+                        ]);
+                    } else {
+                         return new JsonResponse([
+                            'success' => true,
+                            'role' => 'admin',
+                            'id' => 'adm001', 
+                            'name' => 'Administrador System',
+                            'email' => $cred->getCorreo(),
+                            'firebaseUid' => 'admin-uid',
+                            'avatar' => null
                         ]);
                     }
                 }
@@ -115,14 +143,14 @@ class AuthController extends AbstractController
                         'success' => true,
                         'role' => 'volunteer',
                         'id' => $volunteer->getCODVOL(),
-                        'name' => $volunteer->getNOMBRE(),
+                        'name' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
                         'email' => $volunteer->getCORREO(),
                         'firebaseUid' => $volunteer->getFirebaseUid(),
-                        'avatar' => $volunteer->getAVATAR()
+                        'avatar' => $volunteer->getAVATAR(),
+                        'status' => $volunteer->getESTADO()
                     ]);
                 }
                 
-                // Handle organization login
                 $org = $cred->getOrganizacion();
                 if ($org) {
                     return new JsonResponse([
@@ -132,7 +160,8 @@ class AuthController extends AbstractController
                         'name' => $org->getNOMBRE(),
                         'email' => $org->getCORREO(),
                         'firebaseUid' => $org->getFirebaseUid(),
-                        'avatar' => $org->getAVATAR()
+                        'avatar' => $org->getAVATAR(),
+                        'status' => $org->getESTADO()
                     ]);
                 }
             }
@@ -147,10 +176,10 @@ class AuthController extends AbstractController
     #[Route('/login', name: 'api_login_options', methods: ['OPTIONS'])]
     public function loginOptions(): JsonResponse
     {
-        $response = new JsonResponse(null, 200); // Return 200 instead of 204 just to be safe
+        $response = new JsonResponse(null, 200);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, WebSocket-Protocol, Authorization'); // Added typical headers
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, WebSocket-Protocol, Authorization'); 
         return $response;
     }
 }

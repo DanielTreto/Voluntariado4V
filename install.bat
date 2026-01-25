@@ -29,6 +29,19 @@ IF %ERRORLEVEL% NEQ 0 (
     EXIT /B 1
 )
 
+:: Check for System Requirements (PHP Extensions)
+ECHO [0/4] Checking System Requirements...
+cd Voluntariado4V_Web\backend
+call php check_requirements.php
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO.
+    ECHO [ERROR] System requirements check failed.
+    ECHO Please fix the issues listed above and try again.
+    PAUSE
+    EXIT /B 1
+)
+cd ..\..
+
 ECHO [1/4] Setting up BACKEND (Symfony)...
 cd Voluntariado4V_Web\backend
 call composer install
@@ -36,6 +49,16 @@ IF %ERRORLEVEL% NEQ 0 (
     ECHO [ERROR] Composer install failed.
     PAUSE
     EXIT /B 1
+)
+
+:: Setup .env.local if not exists
+IF NOT EXIST .env.local (
+    ECHO Creating .env.local from .env...
+    copy .env .env.local
+    ECHO.
+    ECHO [IMPORTANT] Please check .env.local and configure your DATABASE_URL.
+    ECHO Press any key when you are ready to continue...
+    PAUSE
 )
 
 ECHO.
@@ -46,39 +69,15 @@ IF %ERRORLEVEL% NEQ 0 (
     ECHO [ERROR] Database creation failed. Allow it if it already exists.
 )
 
-ECHO Updating schema...
-call php bin/console doctrine:schema:update --force
+ECHO Running Migrations...
+call php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Schema update failed.
+    ECHO [ERROR] Migrations failed.
     PAUSE
     EXIT /B 1
 )
 
-ECHO Populating initial data...
-:: We use the existing SQL script. 
-:: NOTE: Ideally this should be a doctrine fixture or migration, but we use the provided SQL.
-:: We need to execute the SQL against the DB. Assuming default Doctrine connection.
-:: Since dbal:run-sql reads from string, we might need a different approach or just rely on the user running it if complex.
-:: However, we can use a small PHP helper or doctrine command if available.
-:: Let's try to import it via dbal:run-sql or mysql command if mysql is in path. 
-:: Easier way: Create a temporary DoctrineFixtures or just warn the user.
-:: BETTER: Create a Symfony command to import it, OR pipe it if mysql client exists.
-:: Fallback: We will try to run a command that reads the file.
-:: Windows pipe: type populate_database.sql | mysql ... (requires credentials).
-:: Safe bet: Let's use a doctrine migration approach or a custom command. 
-:: BUT given the context, let's assume 'php bin/console doctrine:query:sql' isn't standard.
-:: Let's assume for now we just notify success of schema and skip massive SQL unless we have a specific runner.
-:: Reviewing previous work: I created 'populate_database.sql'. 
-:: Let's add a basic instruction to user or try to run it via doctrine:dbal:run-sql if modest size.
-:: Actually, 'doctrine:database:import' is not standard.
-:: Let's assume the user has configured .env.local.
-ECHO.
-ECHO.
-ECHO [WARNING] To populate data, please ensure 'populate_database.sql' is executed in your DB tool.
-ECHO Or if you have 'mysql' in path: mysql -u root volun4v < populate_database.sql
-ECHO.
-
-ECHO Populating initial data...
+ECHO Populating initial data (from src/BDD/full_database_setup.sql)...
 call php load_sql.php
 IF %ERRORLEVEL% NEQ 0 (
     ECHO [ERROR] Data population failed.
@@ -88,7 +87,7 @@ IF %ERRORLEVEL% NEQ 0 (
 
 ECHO [3/4] Installing FRONTEND (Angular)...
 cd ..\frontend
-call npm install
+call npm install --legacy-peer-deps
 IF %ERRORLEVEL% NEQ 0 (
     ECHO [ERROR] NPM install failed.
     PAUSE
@@ -96,7 +95,11 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 
 ECHO.
-ECHO [4/4] Installation Complete!
+ECHO.
+powershell -Command "Write-Host '=============================================' -ForegroundColor Green"
+powershell -Command "Write-Host '           INSTALACIÓN COMPLETADA            ' -ForegroundColor Green"
+powershell -Command "Write-Host '=============================================' -ForegroundColor Green"
+ECHO.
 ECHO You can now run 'start.bat' to launch the application.
-cd ..
+cd ..\..
 PAUSE

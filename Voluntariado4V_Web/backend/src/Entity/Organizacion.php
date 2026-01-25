@@ -40,7 +40,7 @@ class Organizacion
     #[Assert\Email]
     private ?string $CORREO = null;
 
-    #[ORM\Column(length: 9, unique: true, columnDefinition: 'CHAR(9)')]
+    #[ORM\Column(length: 9, unique: true, nullable: true, options: ['fixed' => true])]
     #[Assert\NotBlank]
     #[Assert\Regex(pattern: '/^[0-9]{9}$/', message: 'Invalid phone number')]
     private ?string $TELEFONO = null;
@@ -221,7 +221,6 @@ class Organizacion
         $this->WEB = $WEB;
         return $this;
     }
-
     public function getAVATAR(): ?string
     {
         return $this->AVATAR;

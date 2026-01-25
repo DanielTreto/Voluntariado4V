@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
-            android:text="Jane Doe"
+            android:text=""
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/text_primary"
@@ -53,15 +53,13 @@
             app:layout_constraintEnd_toEndOf="@+id/tvName"
             app:layout_constraintTop_toBottomOf="@+id/tvName" />
 
-        <TextView
+        <ImageView
             android:id="@+id/btnMoreOptions"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:text="⋮"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textColor="@color/text_secondary"
+            android:src="@drawable/ic_add"
+            android:padding="4dp"
+            app:tint="@color/text_secondary"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:focusable="true"
@@ -108,7 +106,10 @@
                 android:text="jane.doe@example.com"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
-                android:drawablePadding="8dp" />
+                app:drawableStartCompat="@drawable/ic_email"
+                app:drawableTint="@color/text_secondary"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"/>
 
             <TextView
                 android:id="@+id/tvPhone"
@@ -117,16 +118,24 @@
                 android:text="(555) 123-4567"
                 android:textSize="14sp"
                 android:textColor="@color/text_secondary"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="4dp"
+                app:drawableStartCompat="@drawable/ic_phone"
+                app:drawableTint="@color/text_secondary"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"/>
 
             <TextView
-                android:id="@+id/tvDate"
+                android:id="@+id/tvDni"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Last Activity: 2023-10-26"
-                android:textSize="12sp"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/text_secondary"/>
+                android:text="12345678A"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_secondary"
+                app:drawableStartCompat="@drawable/ic_badge"
+                app:drawableTint="@color/text_secondary"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"/>
         </LinearLayout>
 
         <LinearLayout

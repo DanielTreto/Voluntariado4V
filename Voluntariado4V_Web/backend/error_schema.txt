@@ -1,5 +1,0 @@
-Se cambió el contexto de la base de datos a 'VOLUNTARIADOBD'.
-Mensaje 1778, Nivel 16, Estado 1, Servidor MSI, Línea 2
-El tipo de datos de la columna 'VOLUNTARIO.CODVOL' no coincide con el de la columna 'DISPONIBILIDAD.CODVOL' que hace la referencia en la clave externa 'FK_DISPONIBILIDAD_VOLUNTARIO'.
-Mensaje 1750, Nivel 16, Estado 1, Servidor MSI, Línea 2
-No se pudo crear la restricción o el índice. Vea los errores anteriores.

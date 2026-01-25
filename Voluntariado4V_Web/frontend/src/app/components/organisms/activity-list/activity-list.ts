@@ -4,6 +4,7 @@ import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
+import { NotificationService } from '../../../services/notification.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
 
@@ -36,8 +37,9 @@ interface Activity {
   organization: Organization;
   volunteers: Volunteer[];
   maxVolunteers?: number;
-  type: 'Medio Ambiente' | 'Social' | 'Tecnológico' | 'Educativo' | 'Salud';
+  type: 'Digital' | 'Salud' | 'Educativo' | 'Ambiental' | 'Deportivo' | 'Social' | 'Cultural' | 'Tecnico';
   status: 'active' | 'pending' | 'ended';
+  ods?: any[];
 }
 
 @Component({
@@ -49,6 +51,7 @@ interface Activity {
 })
 export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
+  private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
 
@@ -56,6 +59,7 @@ export class ActivityListComponent implements OnInit {
 
   allVolunteers: Volunteer[] = [];
   allOrganizations: Organization[] = [];
+  odsList: any[] = [];
   activities: Activity[] = [];
   requests: any[] = [];
   pendingRequestsCount: number = 0;
@@ -91,14 +95,18 @@ export class ActivityListComponent implements OnInit {
     image: 'assets/images/activity-1.jpg',
     organization: undefined,
     volunteers: [],
-    status: 'pending'
+    status: 'pending',
+    ods: []
   };
   selectedOrgId: number | null = null;
+  selectedOdsId: number | null = null;
+  editOdsId: number | null = null;
 
   ngOnInit() {
     this.loadData();
     this.loadVolunteers();
     this.loadOrganizations();
+    this.loadOds();
     this.loadRequests(); // Preload requests count
   }
 
@@ -129,6 +137,7 @@ export class ActivityListComponent implements OnInit {
           })),
           maxVolunteers: act.maxVolunteers || 10,
           type: act.type || 'Social',
+          ods: act.ods || [],
           status: this.mapStatus(act.status)
         }));
         this.cdr.detectChanges();
@@ -184,8 +193,18 @@ export class ActivityListComponent implements OnInit {
       next: (res) => {
         req.status = status;
         this.loadRequests(); // Refresh list
-        this.loadData(); // Refresh activities data to show new volunteers
-        alert(`Solicitud ${status === 'ACEPTADA' ? 'aceptada' : 'rechazada'} correctamente.`);
+        this.loadData(); // Refresh activities data to show new volunteers // REENABLE IF NEEDED
+
+        // Notify Volunteer
+        const isAccepted = status === 'ACEPTADA';
+        this.notificationService.notifyVolunteerJoinStatus(
+          req.volunteer.id,
+          req.title || 'Actividad', // fallback title if not present in request object
+          isAccepted,
+          req.activityId
+        );
+
+        alert(`Solicitud ${isAccepted ? 'aceptada' : 'rechazada'} correctamente.`);
       },
       error: (err) => {
         console.error('Error updating request', err);
@@ -233,6 +252,13 @@ export class ActivityListComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading organizations', err)
+    });
+  }
+
+  loadOds() {
+    this.apiService.getOds().subscribe({
+      next: (data) => this.odsList = data,
+      error: (err) => console.error('Error loading ODS', err)
     });
   }
 
@@ -292,6 +318,7 @@ export class ActivityListComponent implements OnInit {
   // Edit Modal
   openEdit(activity: Activity) {
     this.selectedActivity = { ...activity, volunteers: [...activity.volunteers] };
+    this.editOdsId = activity.ods && activity.ods.length > 0 ? activity.ods[0].id : null;
     this.selectedFile = null;
     this.imagePreview = activity.image;
     this.showEditModal = true;
@@ -309,7 +336,8 @@ export class ActivityListComponent implements OnInit {
         description: this.selectedActivity.description,
         location: this.selectedActivity.location,
         date: this.selectedActivity.date,
-        type: this.selectedActivity.type
+        type: this.selectedActivity.type,
+        ods: this.editOdsId
       };
 
       this.apiService.updateActivity(this.selectedActivity.id, payload).subscribe({
@@ -365,7 +393,7 @@ export class ActivityListComponent implements OnInit {
   addVolunteerToActivity(volunteer: Volunteer) {
     if (this.selectedActivity && this.selectedActivity.id) {
       if (!this.selectedActivity.volunteers.find(v => v.id == volunteer.id)) {
-        this.apiService.signUpForActivity(this.selectedActivity.id, volunteer.id, 'admin').subscribe({
+        this.apiService.signUpForActivity(this.selectedActivity.id, volunteer.id).subscribe({
           next: () => {
             this.selectedActivity!.volunteers.push(volunteer);
             // Update the original activity in the array
@@ -460,9 +488,11 @@ export class ActivityListComponent implements OnInit {
       image: 'assets/images/activity-1.jpg',
       organization: undefined,
       volunteers: [],
-      status: 'pending'
+      status: 'pending',
+      ods: []
     };
     this.selectedOrgId = null;
+    this.selectedOdsId = null;
     this.selectedFile = null;
     this.imagePreview = null;
     this.showCreateModal = true;
@@ -494,7 +524,7 @@ export class ActivityListComponent implements OnInit {
       type: this.newActivity.type,
       image: null, // Image handled via upload
       organizationId: this.selectedOrgId,
-      role: 'admin' // Bypass validation
+      ods: this.selectedOdsId
     };
 
     this.apiService.createActivity(payload).subscribe({
@@ -530,6 +560,7 @@ export class ActivityListComponent implements OnInit {
     this.apiService.updateActivityStatus(activity.id, 'EN_PROGRESO').subscribe({
       next: () => {
         activity.status = 'active';
+        this.notificationService.notifyActivityRequestStatus(activity.organization.id, activity.title, true, activity.id);
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -543,6 +574,7 @@ export class ActivityListComponent implements OnInit {
       this.apiService.updateActivityStatus(activity.id, 'DENEGADA').subscribe({
         next: () => {
           this.activities = this.activities.filter(a => a.id !== activity.id);
+          this.notificationService.notifyActivityRequestStatus(activity.organization.id, activity.title, false, activity.id);
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -574,5 +606,9 @@ export class ActivityListComponent implements OnInit {
   closeRequestInfoModal() {
     this.showRequestInfoModal = false;
     this.selectedRequestVolunteer = null;
+  }
+
+  handleImageError(event: any) {
+    event.target.src = 'https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png';
   }
 }

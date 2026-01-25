@@ -97,9 +97,8 @@ export class ModalRegisterVol implements OnInit {
     // Format Availability for Backend
     const formattedAvailability = this.days.map(day => ({
       day: day,
-      hours: this.availabilityMap[day] || 0
-    })).filter(a => a.hours >= 0); // Include 0 hours? Requirement says "cuantas horas". Usually 0 means not available. 
-    // If I send 0, backend stores 0. Let's send all.
+      hours: Number(this.availabilityMap[day]) || 0
+    })).filter(a => a.hours > 0); // Only send days with actual availability
 
     this.volunteer.availability = formattedAvailability;
 
@@ -113,8 +112,17 @@ export class ModalRegisterVol implements OnInit {
         console.error('Error registering volunteer', error);
 
         let msg = 'Error en el registro. Inténtalo de nuevo.';
-        if (error.error && error.error.error) {
-          msg = error.error.error;
+        if (error.error) {
+          if (error.error.errors) {
+            // Formatting validation errors
+            const serverErrors = error.error.errors;
+            const firstKey = Object.keys(serverErrors)[0];
+            msg = `${firstKey}: ${serverErrors[firstKey]}`;
+            this.globalError = msg;
+            return;
+          } else if (error.error.error) {
+            msg = error.error.error;
+          }
         }
 
         // Detect duplicates

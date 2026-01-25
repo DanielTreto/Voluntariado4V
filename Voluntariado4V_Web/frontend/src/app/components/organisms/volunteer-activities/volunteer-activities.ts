@@ -107,7 +107,7 @@ export class VolunteerActivitiesComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading activities:', err);
+        console.error('Error loading activities', err);
         this.message = 'Error al cargar las actividades.';
       }
     });
@@ -177,5 +177,9 @@ export class VolunteerActivitiesComponent implements OnInit {
   closeDetailsModal() {
     this.showDetailsModal = false;
     this.selectedActivity = null;
+  }
+
+  handleImageError(event: any) {
+    event.target.src = 'https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png';
   }
 }

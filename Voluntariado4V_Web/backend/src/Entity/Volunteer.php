@@ -6,9 +6,13 @@ use App\Repository\VolunteerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: VolunteerRepository::class)]
 #[ORM\Table(name: 'VOLUNTARIO')]
+#[UniqueEntity(fields: ['CORREO'], message: 'Este correo ya está registrado.')]
+#[UniqueEntity(fields: ['DNI'], message: 'Este DNI ya está registrado.')]
+#[UniqueEntity(fields: ['firebaseUid'], message: 'Este usuario de Firebase ya existe.')]
 class Volunteer
 {
     #[ORM\Id]
@@ -37,7 +41,7 @@ class Volunteer
     #[Assert\Length(max: 50)]
     private ?string $CORREO = null;
 
-    #[ORM\Column(length: 9, columnDefinition: 'CHAR(9)')]
+    #[ORM\Column(length: 9, nullable: true, options: ['fixed' => true])]
     #[Assert\NotBlank]
     #[Assert\Regex(pattern: '/^[6-9][0-9]{8}$/', message: 'Invalid phone number')]
     private ?string $TELEFONO = null;
@@ -55,7 +59,7 @@ class Volunteer
     #[Assert\NotNull(message: 'El ciclo formativo es obligatorio.')]
     private ?Ciclo $ciclo = null;
 
-    #[ORM\Column(length: 9, unique: true, columnDefinition: 'CHAR(9)')]
+    #[ORM\Column(length: 9, unique: true, nullable: true, options: ['fixed' => true])]
     #[Assert\NotBlank]
     #[Assert\Length(min: 9, max: 9)]
     private ?string $DNI = null;
@@ -111,6 +115,34 @@ class Volunteer
         $this->actividades = new \Doctrine\Common\Collections\ArrayCollection();
         $this->disponibilidades = new \Doctrine\Common\Collections\ArrayCollection();
         $this->preferencias = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * @return \Doctrine\Common\Collections\Collection<int, Disponibilidad>
+     */
+    public function getDisponibilidades(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->disponibilidades;
+    }
+
+    public function addDisponibilidad(Disponibilidad $disponibilidad): static
+    {
+        if (!$this->disponibilidades->contains($disponibilidad)) {
+            $this->disponibilidades->add($disponibilidad);
+            $disponibilidad->setVoluntario($this);
+        }
+        return $this;
+    }
+
+    public function removeDisponibilidad(Disponibilidad $disponibilidad): static
+    {
+        if ($this->disponibilidades->removeElement($disponibilidad)) {
+            // set the owning side to null (unless already changed)
+            if ($disponibilidad->getVoluntario() === $this) {
+                $disponibilidad->setVoluntario(null);
+            }
+        }
+        return $this;
     }
 
     public function getCODVOL(): ?string
@@ -292,34 +324,6 @@ class Volunteer
     public function removePreferencia(TipoActividad $preferencia): static
     {
         $this->preferencias->removeElement($preferencia);
-        return $this;
-    }
-
-    /**
-     * @return \Doctrine\Common\Collections\Collection<int, Disponibilidad>
-     */
-    public function getDisponibilidades(): \Doctrine\Common\Collections\Collection
-    {
-        return $this->disponibilidades;
-    }
-
-    public function addDisponibilidad(Disponibilidad $disponibilidad): static
-    {
-        if (!$this->disponibilidades->contains($disponibilidad)) {
-            $this->disponibilidades->add($disponibilidad);
-            $disponibilidad->setVoluntario($this);
-        }
-        return $this;
-    }
-
-    public function removeDisponibilidad(Disponibilidad $disponibilidad): static
-    {
-        if ($this->disponibilidades->removeElement($disponibilidad)) {
-            // set the owning side to null (unless already changed)
-            if ($disponibilidad->getVoluntario() === $this) {
-                $disponibilidad->setVoluntario(null);
-            }
-        }
         return $this;
     }
 }

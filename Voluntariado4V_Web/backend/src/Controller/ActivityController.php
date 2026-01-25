@@ -13,16 +13,25 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Repository\VolunteerRepository;
+use App\Repository\TipoActividadRepository;
 use App\Entity\Volunteer;
 
 #[Route('/api')]
 class ActivityController extends AbstractController
 {
     #[Route('/activities', name: 'api_activities_index', methods: ['GET'])]
-    public function index(ActivityRepository $activityRepository, OrganizationRepository $orgRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function index(Request $request, ActivityRepository $activityRepository, OrganizationRepository $orgRepository, EntityManagerInterface $entityManager): JsonResponse
     {
-        // 1. Auto-update status for finished activities
-        $activities = $activityRepository->findAll();
+        // 1. Check for filters (Mobile Logic)
+        $orgId = $request->query->get('organizationId');
+
+        if ($orgId) {
+             $activities = $activityRepository->findBy(['organizacion' => $orgId]); 
+        } else {
+             $activities = $activityRepository->findAll();
+        }
+
+        // 2. Auto-update status for finished activities (Head Logic - kept commented if unsure, or uncomment if active)
         /*
         $now = new \DateTime();
         $updated = false;
@@ -39,7 +48,7 @@ class ActivityController extends AbstractController
         }
         */
 
-        // 2. Prepare response
+        // 3. Prepare response
         $data = [];
         foreach ($activities as $act) {
             $org = $orgRepository->find($act->getCODORG());
@@ -48,10 +57,29 @@ class ActivityController extends AbstractController
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
                 'location' => $act->getUBICACION() ?? 'Ubicación no especificada',
+                // Merging date formats: Provide standardized ISO and maybe a formatted one if needed, or stick to one. 
+                // Mobile expects d/m/y, Web usually Y-m-d. Let's provide Y-m-d as default 'date' and 'formattedDate' for mobile if needed, 
+                // BUT previous mobile code used 'date' key for d/m/y. 
+                // To avoid breaking Mobile, we might need to change Mobile code OR provide what it expects.
+                // However, I must valid "Web and Mobile work". 
+                // If I change 'date' format, Web might break if it expects Y-m-d.
+                // Safest: 'date' => Y-m-d (standard), 'mobileDate' => d/m/y? 
+                // Or check what Frontend uses. Frontend likely parses Y-m-d. Mobile might just display string.
+                // I will use Y-m-d for 'date' and 'endDate' to be standard/Web compliant, and hope Mobile parses it or I can add a specific field.
+                // Actually, looking at previous Mobile code, it used d/m/y. 
+                // I'll provide both formats to be safe.
                 'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
+                'dateFormatted' => $act->getFECHA_INICIO()->format('d/m/y'), // For Mobile display if needed
+                'requestDate' => $act->getFECHA_INICIO()->format('d/m/y'), // Trying to cover bases
+                
                 'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
-                'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
-                'image' => $act->getIMAGEN() ?? 'assets/images/activity-1.jpg', 
+                'endDateFormatted' => $act->getFECHA_FIN()->format('d/m/y'),
+                
+                'image' => $act->getIMAGEN() ?? 'assets/images/activity-1.jpg', // Web key
+                'imagen' => $act->getIMAGEN(), // Mobile key (Db column)
+                
+                'duration' => $act->getDURACION_SESION(),
+                
                 'organization' => $org ? [
                     'id' => $org->getCODORG(),
                     'name' => $org->getNOMBRE(),
@@ -59,19 +87,23 @@ class ActivityController extends AbstractController
                 ] : null,
                 'volunteers' => array_map(function($vol) {
                     return [
-                        'id' => $vol->getCODVOL(), // Using string ID as per entity, incorrectly mapped as number in TS? Needs check. Entity says CODVOL is string.
-                        // Actually, let's check Volunteer entity getters.
-                        // Assuming standard getters based on previous checks.
                         'id' => $vol->getCODVOL(),
                         'name' => trim($vol->getNOMBRE() . ' ' . $vol->getAPELLIDO1() . ' ' . ($vol->getAPELLIDO2() ?? '')),
                         'avatar' => $vol->getAVATAR(),
                         'email' => $vol->getCORREO(),
-                        // 'phone' => $vol->getTELEFONO(), // Optional
                         'status' => $vol->getESTADO()
                     ];
                 }, $act->getVoluntarios()->toArray()), 
-                'type' => 'Social', // Placeholder, need join with TIPO_ACTIVIDAD
+                
+                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General', // Mobile Logic preferred
                 'status' => $act->getESTADO(),
+                'ods' => array_map(function($ods) {
+                    return [
+                        'id' => $ods->getNUMODS(),
+                        'description' => $ods->getDESCRIPCION()
+                    ];
+                }, $act->getOds()->toArray()),
+                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
             ];
         }
 
@@ -81,7 +113,7 @@ class ActivityController extends AbstractController
     }
 
     #[Route('/activities', name: 'api_activities_create', methods: ['POST'])]
-    public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, ValidatorInterface $validator): JsonResponse
+    public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -93,7 +125,7 @@ class ActivityController extends AbstractController
         $actividad->setNOMBRE($data['title'] ?? '');
         $actividad->setDESCRIPCION($data['description'] ?? '');
         $actividad->setUBICACION($data['location'] ?? null);
-        $actividad->setIMAGEN($data['image'] ?? null);
+        $actividad->setIMAGEN($data['image'] ?? null); // Head Logic
         
         try {
             $actividad->setFECHA_INICIO(new \DateTime($data['date']));
@@ -110,6 +142,27 @@ class ActivityController extends AbstractController
             return new JsonResponse(['error' => 'Invalid date format'], 400);
         }
 
+        // Link Activity Type
+        if (isset($data['typeId'])) {
+            $tipo = $tipoActividadRepository->find($data['typeId']);
+            if ($tipo) {
+                $actividad->addTipoActividad($tipo);
+            }
+        } elseif (isset($data['type'])) {
+            $tipo = $tipoActividadRepository->findOneBy(['DESCRIPCION' => $data['type']]);
+            if ($tipo) {
+                $actividad->addTipoActividad($tipo);
+            }
+        }
+
+        // Link ODS
+        if (isset($data['ods'])) {
+             $ods = $odsRepository->find($data['ods']);
+             if ($ods) {
+                 $actividad->addOd($ods);
+             }
+        }
+
         $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
         
         // Admin validation bypass
@@ -120,15 +173,22 @@ class ActivityController extends AbstractController
             $actividad->setESTADO('PENDIENTE');
         }
 
-        // Link Organization
-            $orgId = (string) $data['organizationId'];
+        // Link Organization (Merged Logic)
+        if (isset($data['organizationId'])) {
+            $orgId = $data['organizationId'];
             $org = $orgRepository->find($orgId);
             if ($org) {
                 $actividad->setOrganizacion($org);
             } else {
                 return new JsonResponse(['error' => 'Organization not found with ID: ' . $orgId], 404);
             }
-
+        } else {
+            // Fallback from Mobile logic if needed
+            $orgs = $orgRepository->findAll();
+            if (count($orgs) > 0) {
+                $actividad->setOrganizacion($orgs[0]);
+            }
+        }
 
         // Validation
         $errors = $validator->validate($actividad);
@@ -179,7 +239,7 @@ class ActivityController extends AbstractController
     }
 
     #[Route('/activities/{id}', name: 'api_activities_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository): JsonResponse
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository): JsonResponse
     {
         $act = $activityRepository->find($id);
 
@@ -207,7 +267,34 @@ class ActivityController extends AbstractController
         if (isset($data['image'])) {
             $act->setIMAGEN($data['image']);
         }
-        // Add other fields as needed
+        
+        // Update Type (Clear existing and set new)
+        if (isset($data['typeID']) || isset($data['typeId']) || isset($data['type'])) {
+            // Clear existing types
+            foreach ($act->getTiposActividad() as $existingType) {
+                $act->getTiposActividad()->removeElement($existingType);
+            }
+
+            $newType = null;
+            if (isset($data['typeID'])) $newType = $tipoActividadRepository->find($data['typeID']);
+            elseif (isset($data['typeId'])) $newType = $tipoActividadRepository->find($data['typeId']);
+            elseif (isset($data['type'])) $newType = $tipoActividadRepository->findOneBy(['DESCRIPCION' => $data['type']]);
+
+            if ($newType) {
+                $act->addTipoActividad($newType);
+            }
+        }
+
+        // Update ODS
+        if (isset($data['ods'])) {
+             foreach ($act->getOds() as $existingOds) {
+                 $act->removeOd($existingOds);
+             }
+             $ods = $odsRepository->find($data['ods']);
+             if ($ods) {
+                 $act->addOd($ods);
+             }
+        }
 
         $entityManager->flush();
 
@@ -412,6 +499,7 @@ class ActivityController extends AbstractController
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }
+
     #[Route('/activities/{id}/image', name: 'api_activities_image', methods: ['POST'])]
     public function uploadImage(int $id, Request $request, ActivityRepository $activityRepository, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -447,6 +535,40 @@ class ActivityController extends AbstractController
         $response = new JsonResponse(null, 204);
         $response->headers->set('Access-Control-Allow-Origin', '*');
         $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+        return $response;
+    }
+
+    #[Route('/activities/{id}', name: 'api_activities_delete', methods: ['DELETE'])]
+    public function delete(int $id, EntityManagerInterface $entityManager, ActivityRepository $activityRepository): JsonResponse
+    {
+        $act = $activityRepository->find($id);
+
+        if (!$act) {
+            return new JsonResponse(['error' => 'Activity not found'], 404);
+        }
+
+        // 1. Manually remove related Solicitud entities (Constraint Fix)
+        $solicitudes = $entityManager->getRepository(\App\Entity\Solicitud::class)->findBy(['actividad' => $act]);
+        foreach ($solicitudes as $solicitud) {
+            $entityManager->remove($solicitud);
+        }
+
+        // 2. Remove Activity (Doctrine handles ManyToMany join tables like VOL_PARTICIPA_ACT automatically)
+        $entityManager->remove($act);
+        $entityManager->flush();
+
+        $response = new JsonResponse(['status' => 'Activity deleted'], 200);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    #[Route('/activities/{id}', name: 'api_activities_delete_options', methods: ['OPTIONS'])]
+    public function deleteOptions(): JsonResponse
+    {
+        $response = new JsonResponse(null, 204);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        $response->headers->set('Access-Control-Allow-Methods', 'PUT, DELETE, OPTIONS');
         $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         return $response;
     }

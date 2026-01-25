@@ -17,12 +17,11 @@ public class OrganizationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_organization_main); // New layout with navigation
+        setContentView(R.layout.activity_organization_main);
 
         BottomNavigationView bottomNav = findViewById(R.id.org_bottom_nav);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
 
-        // Load initial fragment
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.org_fragment_container, new OrganizationHomeFragment())

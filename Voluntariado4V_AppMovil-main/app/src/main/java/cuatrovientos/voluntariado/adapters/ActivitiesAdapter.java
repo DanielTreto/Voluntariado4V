@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 import cuatrovientos.voluntariado.R;
 import cuatrovientos.voluntariado.model.VolunteerActivity;
+import com.bumptech.glide.Glide;
 
 public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.ActivityViewHolder> {
 
@@ -48,27 +49,71 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
         holder.tvTitle.setText(act.getTitle());
         holder.tvDesc.setText(act.getDescription());
         holder.tvLocation.setText(act.getLocation());
-        holder.tvDate.setText(act.getDate());
+        String dateText = act.getDate();
+        if (dateText != null && dateText.contains(" ")) {
+            dateText = dateText.split(" ")[0];
+        }
+        holder.tvDate.setText(dateText);
+        
+
         holder.tvCategory.setText(act.getCategory());
+        holder.tvCategory.setBackgroundColor(act.getImageColor());
 
-        // Simular imagen con color
-        holder.imgHeader.setColorFilter(act.getImageColor(), PorterDuff.Mode.SRC_IN);
+        String status = act.getStatus();
+        holder.tvStatusTag.setText(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusLabel(status));
+        holder.tvStatusTag.setBackgroundColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusBackgroundColor(status));
+        holder.tvStatusTag.setTextColor(cuatrovientos.voluntariado.utils.ActivityMapper.getStatusTextColor(status));
 
-        if (isStudent) {
-            // Estudiante: No mostrar botones de gestión
-            holder.layoutButtonsActive.setVisibility(View.GONE);
-            holder.layoutButtonsPending.setVisibility(View.GONE);
+        List<String> avatars = act.getParticipantAvatars();
+        int count = avatars != null ? avatars.size() : 0;
+        
+        holder.imgVol1.setVisibility(View.GONE);
+        holder.imgVol2.setVisibility(View.GONE);
+        holder.tvVolCount.setVisibility(View.GONE);
+        holder.tvNoVolunteers.setVisibility(View.GONE);
+
+        if (count == 0) {
+            holder.tvNoVolunteers.setVisibility(View.VISIBLE);
         } else {
-            if (act.getStatus().equals("Active")) {
-                // Pestaña ACTIVIDADES: Mostrar botones de gestión
-                holder.layoutButtonsActive.setVisibility(View.VISIBLE);
-                holder.layoutButtonsPending.setVisibility(View.GONE);
-            } else {
-                // Pestaña SOLICITUDES: Mostrar botones Aceptar/Denegar grande -> AHORA OCULTO
-                holder.layoutButtonsActive.setVisibility(View.GONE);
-                holder.layoutButtonsPending.setVisibility(View.GONE);
+            if (count >= 1) {
+                holder.imgVol1.setVisibility(View.VISIBLE);
+                Glide.with(holder.itemView.getContext()).load(avatars.get(0)).circleCrop().placeholder(R.drawable.ic_profile_placeholder).into(holder.imgVol1);
+            }
+            if (count >= 2) {
+                holder.imgVol2.setVisibility(View.VISIBLE);
+                 Glide.with(holder.itemView.getContext()).load(avatars.get(1)).circleCrop().placeholder(R.drawable.ic_profile_placeholder).into(holder.imgVol2);
+            }
+            if (count > 2) {
+                holder.tvVolCount.setVisibility(View.VISIBLE);
+                holder.tvVolCount.setText("+" + (count - 2));
             }
         }
+        
+        String imageUrl = act.getImageUrl();
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
+        }
+        String fallbackUrl = "https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png";
+        
+        holder.imgHeader.setColorFilter(null); 
+        Glide.with(holder.itemView.getContext())
+                .load(imageUrl)
+                .centerCrop()
+                .placeholder(R.drawable.ic_launcher_background) 
+                .error(Glide.with(holder.itemView.getContext()).load(fallbackUrl))
+                .into(holder.imgHeader);
+        
+        holder.layoutButtonsActive.setVisibility(View.VISIBLE);
+        holder.layoutButtonsPending.setVisibility(View.GONE);
+        
+        holder.btnViewDetails.setOnClickListener(v -> {
+            if (v.getContext() instanceof androidx.fragment.app.FragmentActivity) {
+                androidx.fragment.app.FragmentActivity activity = (androidx.fragment.app.FragmentActivity) v.getContext();
+                cuatrovientos.voluntariado.dialogs.ActivityDetailDialog dialog = 
+                    cuatrovientos.voluntariado.dialogs.ActivityDetailDialog.newInstance(act, isStudent);
+                dialog.show(activity.getSupportFragmentManager(), "ActivityDetailDialog");
+            }
+        });
     }
 
     @Override
@@ -77,9 +122,11 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
     }
 
     public static class ActivityViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvDesc, tvLocation, tvDate, tvCategory;
-        ImageView imgHeader;
+        TextView tvTitle, tvDesc, tvLocation, tvDate, tvCategory, tvStatusTag;
+        TextView tvNoVolunteers, tvVolCount;
+        ImageView imgHeader, imgVol1, imgVol2;
         LinearLayout layoutButtonsActive, layoutButtonsPending;
+        android.widget.Button btnViewDetails;
 
         public ActivityViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -88,10 +135,19 @@ public class ActivitiesAdapter extends RecyclerView.Adapter<ActivitiesAdapter.Ac
             tvLocation = itemView.findViewById(R.id.tvActLocation);
             tvDate = itemView.findViewById(R.id.tvActDate);
             tvCategory = itemView.findViewById(R.id.tvCategory);
+            tvStatusTag = itemView.findViewById(R.id.tvStatusTag);
+            
             imgHeader = itemView.findViewById(R.id.imgActivityHeader);
+            
+            tvNoVolunteers = itemView.findViewById(R.id.tvNoVolunteers);
+            imgVol1 = itemView.findViewById(R.id.imgVol1);
+            imgVol2 = itemView.findViewById(R.id.imgVol2);
+            tvVolCount = itemView.findViewById(R.id.tvVolCountPlus);
 
             layoutButtonsActive = itemView.findViewById(R.id.layoutButtonsActive);
             layoutButtonsPending = itemView.findViewById(R.id.layoutButtonsPending);
+            
+            btnViewDetails = itemView.findViewById(R.id.btnViewDetails); 
         }
     }
 }

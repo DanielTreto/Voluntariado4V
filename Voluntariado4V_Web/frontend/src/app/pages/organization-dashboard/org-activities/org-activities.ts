@@ -34,11 +34,14 @@ export class OrgActivitiesComponent implements OnInit {
     ];
 
     activityTypes = [
-        { id: 1, name: 'Social' },
-        { id: 2, name: 'Ambiental' },
-        { id: 3, name: 'Educativa' },
-        { id: 4, name: 'Cultural' },
-        { id: 5, name: 'Deportiva' }
+        { id: 1, name: 'Digital' },
+        { id: 2, name: 'Salud' },
+        { id: 3, name: 'Educativo' },
+        { id: 4, name: 'Ambiental' },
+        { id: 5, name: 'Deportivo' },
+        { id: 6, name: 'Social' },
+        { id: 7, name: 'Cultural' },
+        { id: 8, name: 'Tecnico' }
     ];
 
     private apiService = inject(ApiService);
@@ -165,7 +168,8 @@ export class OrgActivitiesComponent implements OnInit {
             date: formValue.FECHA_INICIO,
             duration: formValue.DURACION_SESION,
             organizationId: user.id,
-            maxVolunteers: formValue.N_MAX_VOLUNTARIOS
+            maxVolunteers: formValue.N_MAX_VOLUNTARIOS,
+            typeId: formValue.CODTIPO
         };
 
         this.apiService.createActivity(payload).subscribe({
@@ -208,5 +212,9 @@ export class OrgActivitiesComponent implements OnInit {
         this.requestForm.reset();
         this.selectedFile = null;
         this.imagePreview = null;
+    }
+
+    handleImageError(event: any) {
+        event.target.src = 'https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png';
     }
 }
