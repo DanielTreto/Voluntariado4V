@@ -42,14 +42,14 @@ export class VolunteerActivitiesComponent implements OnInit {
 
     // Check for deep link
     this.route.queryParams.subscribe(params => {
-       const openId = params['openId'];
-       if (openId) {
-           // We need to wait for activities to load. 
-           // If activities are not loaded yet, this might fail unless we check after load.
-           // Moving this logic to loadActivities or using a flag?
-           // Simplest: check in loadActivities after data arrives.
-           this.pendingOpenId = +openId;
-       }
+      const openId = params['openId'];
+      if (openId) {
+        // We need to wait for activities to load. 
+        // If activities are not loaded yet, this might fail unless we check after load.
+        // Moving this logic to loadActivities or using a flag?
+        // Simplest: check in loadActivities after data arrives.
+        this.pendingOpenId = +openId;
+      }
     });
   }
 
@@ -79,7 +79,7 @@ export class VolunteerActivitiesComponent implements OnInit {
 
         // Filter and process all activities first
         if (results.all) {
-          this.activities = results.all.filter((a: any) => ['PENDIENTE', 'EN_PROGRESO'].includes(a.status?.toUpperCase()));
+          this.activities = results.all.filter((a: any) => a.status?.toUpperCase() === 'EN_PROGRESO');
         }
 
         // Process requests
@@ -99,11 +99,11 @@ export class VolunteerActivitiesComponent implements OnInit {
         this.cdr.detectChanges();
 
         if (this.pendingOpenId) {
-            const act = this.activities.find(a => a.id === this.pendingOpenId);
-            if (act) {
-                this.openActivityDetails(act);
-                this.pendingOpenId = null; // Clear it
-            }
+          const act = this.activities.find(a => a.id === this.pendingOpenId);
+          if (act) {
+            this.openActivityDetails(act);
+            this.pendingOpenId = null; // Clear it
+          }
         }
       },
       error: (err) => {

@@ -53,8 +53,10 @@
                 <tbody>
                     <tr *ngFor="let activity of filteredActivities">
                         <td class="ps-3">
-                            <img [src]="activity.image" alt="Activity Image" class="rounded"
-                                style="width: 60px; height: 60px; object-fit: cover;">
+                            <img [src]="activity.image?.startsWith('/uploads') ? 'http://localhost:8000' + activity.image : (activity.image || 'assets/images/activity-default.jpg')" 
+                                alt="Activity Image" class="rounded"
+                                style="width: 60px; height: 60px; object-fit: cover;"
+                                (error)="handleImageError($event)">
                         </td>
                         <td class="ps-3">
                             <div class="fw-bold text-dark">{{ activity.title }}</div>
@@ -63,8 +65,10 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
-                                <img [src]="activity.organization.logo" alt="Logo" class="rounded-circle me-2"
-                                    width="32" height="32">
+                                <img [src]="activity.organization.logo?.startsWith('/uploads') ? 'http://localhost:8000' + activity.organization.logo : (activity.organization.logo || 'assets/images/org-default.png')" 
+                                    alt="Logo" class="rounded-circle me-2"
+                                    width="32" height="32"
+                                    (error)="handleImageError($event)">
                                 <span class="fw-semibold">{{ activity.organization.name }}</span>
                             </div>
                         </td>
@@ -76,7 +80,11 @@
                                 }}</small>
                         </td>
                         <td class="pe-3">
-                            <button class="btn btn-success btn-sm me-2 rounded-pill px-3"
+                            <button class="btn btn-outline-info btn-sm me-1 rounded-pill px-2" 
+                                (click)="openViewDetails(activity)" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn btn-success btn-sm me-1 rounded-pill px-3"
                                 (click)="acceptActivity(activity)">
                                 <i class="bi bi-check-lg"></i> Aceptar
                             </button>
