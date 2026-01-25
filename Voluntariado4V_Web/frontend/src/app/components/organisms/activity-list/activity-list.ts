@@ -4,6 +4,7 @@ import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
+import { NotificationService } from '../../../services/notification.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
 
@@ -50,6 +51,7 @@ interface Activity {
 })
 export class ActivityListComponent implements OnInit {
   private apiService = inject(ApiService);
+  private notificationService = inject(NotificationService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
 
@@ -191,8 +193,18 @@ export class ActivityListComponent implements OnInit {
       next: (res) => {
         req.status = status;
         this.loadRequests(); // Refresh list
-        this.loadData(); // Refresh activities data to show new volunteers
-        alert(`Solicitud ${status === 'ACEPTADA' ? 'aceptada' : 'rechazada'} correctamente.`);
+        this.loadData(); // Refresh activities data to show new volunteers // REENABLE IF NEEDED
+
+        // Notify Volunteer
+        const isAccepted = status === 'ACEPTADA';
+        this.notificationService.notifyVolunteerJoinStatus(
+          req.volunteer.id,
+          req.title || 'Actividad', // fallback title if not present in request object
+          isAccepted,
+          req.activityId
+        );
+
+        alert(`Solicitud ${isAccepted ? 'aceptada' : 'rechazada'} correctamente.`);
       },
       error: (err) => {
         console.error('Error updating request', err);
@@ -548,6 +560,7 @@ export class ActivityListComponent implements OnInit {
     this.apiService.updateActivityStatus(activity.id, 'EN_PROGRESO').subscribe({
       next: () => {
         activity.status = 'active';
+        this.notificationService.notifyActivityRequestStatus(activity.organization.id, activity.title, true, activity.id);
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -561,6 +574,7 @@ export class ActivityListComponent implements OnInit {
       this.apiService.updateActivityStatus(activity.id, 'DENEGADA').subscribe({
         next: () => {
           this.activities = this.activities.filter(a => a.id !== activity.id);
+          this.notificationService.notifyActivityRequestStatus(activity.organization.id, activity.title, false, activity.id);
           this.cdr.detectChanges();
         },
         error: (err) => {

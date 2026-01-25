@@ -127,18 +127,17 @@ export class NotificationService {
       }
 
       if (targetRole === 'organization') {
-        return currentRole === 'organization' && (!n.recipientId || n.recipientId == currentId);
+        if (currentRole !== 'organization') return false;
+        // If specific recipient ID is set, it MUST match.
+        if (n.recipientId && n.recipientId != currentId) return false;
+        return true;
       }
 
       if (targetRole === 'volunteer') {
-        // Must match role AND (if specific ID is set) match ID
         if (currentRole !== 'volunteer') return false;
-
-        if (n.recipientId) {
-          // Use loose equality to handle string vs number IDs from localStorage vs Int matches
-          return n.recipientId == currentId;
-        }
-        return true; // Broadcast to all volunteers (e.g. "System down")
+        // If specific recipient ID is set, it MUST match.
+        if (n.recipientId && n.recipientId != currentId) return false;
+        return true;
       }
 
       return false;
@@ -159,7 +158,7 @@ export class NotificationService {
 
   private saveNotifications(notifications: AdminNotification[]) {
     const allStored = this.loadNotificationsFromStorage();
-    
+
     // Create a map of stored items for easy updating
     const storedMap = new Map(allStored.map(n => [n.id, n]));
 
@@ -181,30 +180,6 @@ export class NotificationService {
   }
 
   private getMockData(): AdminNotification[] {
-    return [
-      {
-        id: '1',
-        type: 'ORG_REGISTER',
-        title: 'Nueva Organización',
-        message: 'Fundación Ayuda Global está intentando registrarse.',
-        entityName: 'Fundación Ayuda Global',
-        timestamp: new Date(new Date().getTime() - 1000 * 60 * 10),
-        read: false,
-        actionUrl: '/dashboard/organizations',
-        recipientRole: 'admin'
-      },
-      // Mock for a volunteer (assuming ID 1 for testing)
-      {
-        id: '99',
-        type: 'JOIN_REQUEST_ACCEPTED',
-        title: 'Solicitud Aceptada',
-        message: 'Has sido aceptado en "Comedor Social".',
-        timestamp: new Date(new Date().getTime() - 1000 * 60 * 60),
-        read: false,
-        actionUrl: '/volunteer-dashboard/activities',
-        recipientRole: 'volunteer',
-        recipientId: 1 // We will assume the test user has ID 1
-      }
-    ];
+    return [];
   }
 }

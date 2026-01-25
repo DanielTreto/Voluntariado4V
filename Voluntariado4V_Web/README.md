@@ -20,7 +20,7 @@ Hemos utilizado un stack tecnológico de última generación para asegurar rendi
 ### Backend (API REST)
 *   **Framework:** **Symfony 7.3**.
 *   **Lenguaje:** PHP 8.2+.
-*   **Base de Datos:** MySQL (con Doctrine ORM).
+*   **Base de Datos:** SQL Server (con Doctrine ORM).
 *   **Seguridad:** Autenticación mixta (JWT Firebase + Credenciales SQL).
 
 ---
@@ -33,7 +33,7 @@ Antes de empezar, asegúrate de tener instalado en tu equipo:
 2.  **PHP** (v8.2 o superior).
 3.  **Composer** (Gestor de paquetes PHP).
 4.  **Symfony CLI** (Recomendado para ejecutar el servidor).
-5.  **MySQL Server** (XAMPP, Docker o instalación nativa).
+5.  **SQL Server** (Instalación nativa o Docker).
 
 ---
 
@@ -42,23 +42,23 @@ Antes de empezar, asegúrate de tener instalado en tu equipo:
 
 We have included automated scripts to simplify the installation process.
 
-### 1. Installation
-Run the `install.bat` script. This will:
-*   Check for required tools (PHP, Composer, Node/NPM).
-*   Install Backend dependencies.
-*   Setup the Database (Create & Schema).
-*   Install Frontend dependencies.
+### 1. Instalación
+Ejecuta el script `install.bat`. Esto hará lo siguiente:
+*   Verificar las herramientas necesarias (PHP, Composer, Node/NPM).
+*   Instalar dependencias del Backend.
+*   Configurar la Base de Datos (Creación y Esquema).
+*   Instalar dependencias del Frontend.
 
-### 2. Execution
-Run the `start.bat` script. This will:
-*   Launch the Symfony Backend server.
-*   Launch the Angular Frontend server.
-*   Open your browser automatically.
+### 2. Ejecución
+Ejecuta el script `start.bat`. Esto hará lo siguiente:
+*   Lanzar el servidor Backend de Symfony.
+*   Lanzar el servidor Frontend de Angular.
+*   Abrir tu navegador automáticamente.
 
 ---
 
-## 🚀 Manual Installation and Setup
-If you prefer to install manually or are on a non-Windows system, follow these steps:
+## 🚀 Instalación y Configuración Manual
+Si prefieres instalar manualmente o estás en un sistema no-Windows, sigue estos pasos:
 
 
 ### 1. Clonar el repositorio
@@ -82,9 +82,9 @@ cd Voluntariado4V
 
 3.  Configura la conexión a base de datos:
     *   Crea un archivo `.env.local` (o edita el `.env` existente).
-    *   Ajusta la variable `DATABASE_URL` con tus credenciales de MySQL:
+    *   Ajusta la variable `DATABASE_URL` con tus credenciales de SQL Server:
     ```env
-    DATABASE_URL="mysql://usuario:password@127.0.0.1:3306/voluntariado_db?serverVersion=8.0&charset=utf8mb4"
+    DATABASE_URL="sqlsrv://usuario:password@127.0.0.1:1433/voluntariado_db"
     ```
 
 4.  Crea la base de datos y ejecuta las migraciones:
@@ -124,7 +124,7 @@ cd Voluntariado4V
 
 ## 🧪 Usuarios de Prueba (Demo)
 
-Para probar la aplicación puedes utilizar las siguientes credenciales pre-configuradas (si has cargado los datos iniciales):
+Para probar la aplicación puedes utilizar las siguientes credenciales (si has cargado los datos iniciales):
 
 | Rol | Email | Contraseña |
 |-----|-------|------------|
@@ -136,10 +136,19 @@ Para probar la aplicación puedes utilizar las siguientes credenciales pre-confi
 
 ## 📂 Estructura del Proyecto
 
-*   `/backend`: API REST (Symfony). Controladores en `src/Controller`, Entidades en `src/Entity`.
-*   `/frontend`: SPA (Angular). Componentes en `src/app/components`, Páginas en `src/app/pages`.
-*   `/BBDD`: Scripts SQL de inicialización y modelo de datos.
+*   `/backend`: API REST (Symfony).
+    *   `src/Controller`: Controladores de la API (Auth, Activity, Organization, etc.).
+    *   `src/Entity`: Definición de modelos de datos (ORM Doctrine).
+    *   `src/Repository`: Consultas a la base de datos.
+    *   `src/BBDD`: Scripts SQL iniciales (`full_database_setup.sql`).
+*   `/frontend`: SPA (Angular).
+    *   `src/app/components`: Componentes reutilizables (Átomos, Moléculas, Organismos).
+    *   `src/app/pages`: Vistas principales (Dashboard, Home, Login).
+    *   `src/app/services`: Lógica de negocio y comunicación HTTP (`ApiService`, `NotificationService`).
+    *   `src/app/guards`: Protección de rutas.
 
 ---
 
 **Desarrollado por el equipo de Voluntariado 4 Vientos**
+
+[⬅️ Volver al Proyecto Principal](../README.md)
