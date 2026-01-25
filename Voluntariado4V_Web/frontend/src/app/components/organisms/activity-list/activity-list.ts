@@ -609,6 +609,6 @@ export class ActivityListComponent implements OnInit {
   }
 
   handleImageError(event: any) {
-    event.target.src = 'https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png';
+    event.target.src = 'assets/images/activity-default.jpg';
   }
 }

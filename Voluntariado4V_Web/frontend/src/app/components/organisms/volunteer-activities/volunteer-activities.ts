@@ -77,9 +77,9 @@ export class VolunteerActivitiesComponent implements OnInit {
           this.myActivityIds = new Set();
         }
 
-        // Filter and process all activities first
+        // Filter and process all activities first - only show approved (EN_PROGRESO, APROBADA) activities to volunteers
         if (results.all) {
-          this.activities = results.all.filter((a: any) => a.status?.toUpperCase() === 'EN_PROGRESO');
+          this.activities = results.all.filter((a: any) => ['EN_PROGRESO', 'APROBADA'].includes(a.status?.toUpperCase()));
         }
 
         // Process requests
@@ -107,7 +107,7 @@ export class VolunteerActivitiesComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error loading activities', err);
+        console.error('Error loading activities:', err);
         this.message = 'Error al cargar las actividades.';
       }
     });
@@ -180,6 +180,6 @@ export class VolunteerActivitiesComponent implements OnInit {
   }
 
   handleImageError(event: any) {
-    event.target.src = 'https://blog.vicensvives.com/wp-content/uploads/2019/12/Voluntariado.png';
+    event.target.src = 'assets/images/activity-default.jpg';
   }
 }
