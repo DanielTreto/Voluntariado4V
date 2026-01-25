@@ -23,23 +23,31 @@ if (!file_exists($sqlFile)) {
 echo "Loading SQL from: $sqlFile\n";
 $sql = file_get_contents($sqlFile);
 
+// Split by GO batch separator (case insensitive, on its own line)
+// This is required for SQL Server scripts that use GO
+$queries = preg_split('/^GO\s*$/im', $sql);
+
 try {
-    // Disable foreign key checks to avoid ordering issues
-    $connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
-    
-    // Execute raw SQL. 
-    // Note: Doctrine executeStatement runs single statement usually? 
-    // PDO::exec might handle multiple if strictly raw, but depending on driver.
-    // Safest is to split by ; if necessary, but big dumps often work directly or needing splitting.
-    // Let's try splitting if it fails, or just run it. 
-    // dbal typically expects prepared statements. For a dump, strict PDO exec is better.
-    
-    $pdo = $connection->getNativeConnection();
-    $pdo->exec($sql);
-    
-    $connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
-    echo "Database populated successfully!\n";
+    foreach ($queries as $index => $query) {
+        $query = trim($query);
+        if (empty($query)) {
+            continue;
+        }
+
+        try {
+            $connection->executeStatement($query);
+            echo "."; 
+        } catch (\Exception $e) {
+            echo "\n[ERROR] Failed executing query #$index:\n";
+            echo "--------------------------------------------------\n";
+            echo substr($query, 0, 500) . "...\n";
+            echo "--------------------------------------------------\n";
+            echo "Message: " . $e->getMessage() . "\n";
+            throw $e;
+        }
+    }
+    echo "\nDatabase populated successfully!\n";
 } catch (\Exception $e) {
-    echo "Error loading SQL: " . $e->getMessage() . "\n";
+    echo "\nFATAL ERROR: " . $e->getMessage() . "\n";
     exit(1);
 }

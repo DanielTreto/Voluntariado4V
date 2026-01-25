@@ -155,7 +155,7 @@ class VolunteerController extends AbstractController
         // Process Availability - Preserve Web Logic (Hours)
         if (isset($data['availability']) && is_array($data['availability'])) {
             foreach ($data['availability'] as $avail) {
-                if (isset($avail['day']) && isset($avail['hours'])) {
+                if (isset($avail['day']) && isset($avail['hours']) && (int)$avail['hours'] > 0) {
                     $disponibilidad = new Disponibilidad();
                     $disponibilidad->setVoluntario($volunteer);
                     $disponibilidad->setDIA($avail['day']);
@@ -163,6 +163,7 @@ class VolunteerController extends AbstractController
                     // If Mobile sends time, we could set it too if entity supports it
                     // if (isset($avail['time'])) $disponibilidad->setHORA($avail['time']);
                     $entityManager->persist($disponibilidad);
+                    $volunteer->addDisponibilidad($disponibilidad);
                 }
             }
         }

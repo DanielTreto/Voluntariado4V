@@ -25,6 +25,14 @@ Hemos utilizado un stack tecnológico de última generación para asegurar rendi
 
 ---
 
+## 🎨 Diseño y UX
+
+Para detalles sobre la identidad visual, guías de estilo y acceso al archivo Figma del proyecto, consulta nuestra guía de diseño:
+
+👉 **[Ver Documentación de Diseño y Figma](design/DESIGN.md)**
+
+---
+
 ## 📋 Requisitos Previos
 
 Antes de empezar, asegúrate de tener instalado en tu equipo:
@@ -55,7 +63,7 @@ Ejecuta el script `install.bat`. Esto hará lo siguiente:
 *   Configurar la Base de Datos (Creación y Esquema).
 *   Instalar dependencias del Frontend.
 
-### 2. Ejecución
+### 3. Ejecución
 Ejecuta el script `start.bat`. Esto hará lo siguiente:
 *   Lanzar el servidor Backend de Symfony.
 *   Lanzar el servidor Frontend de Angular.

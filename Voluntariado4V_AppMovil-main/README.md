@@ -48,4 +48,12 @@ Aplicación Móvil nativa para Android, parte del proyecto **Voluntariado 4 Vien
 
 ---
 
+## 🎨 Diseño y UX
+
+Para conocer los lineamientos de diseño Material Design y recursos gráficos de la app:
+
+👉 **[Ver Documentación de Diseño Móvil](design/DESIGN.md)**
+
+---
+
 [⬅️ Volver al Proyecto Principal](../README.md)
