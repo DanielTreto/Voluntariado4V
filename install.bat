@@ -1,5 +1,16 @@
 @echo off
 TITLE Installing Voluntariado4V Environment
+SETLOCAL EnableDelayedExpansion
+
+:: Check for Administrator privileges
+net session >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO [ERROR] This script requires Administrator privileges.
+    ECHO Please right-click and "Run as Administrator".
+    PAUSE
+    EXIT /B 1
+)
+
 ECHO ======================================================
 ECHO      VOLUNTARIADO4V - AUTOMATED INSTALLATION
 ECHO ======================================================
@@ -9,47 +20,61 @@ ECHO.
 where php >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     ECHO [WARNING] PHP is not installed. Attempting to install via Winget...
-    winget install -e --id PHP.PHP
-    IF %ERRORLEVEL% NEQ 0 (
-        ECHO [ERROR] Failed to install PHP. Please install it manually.
+    winget install -e --id PHP.PHP --accept-package-agreements --accept-source-agreements --silent
+    IF !ERRORLEVEL! NEQ 0 (
+        ECHO [ERROR] Failed to install PHP via Winget.
+        ECHO Attempting alternative ID...
+        winget install -e --id PHP.PHP.8.2 --accept-package-agreements --accept-source-agreements --silent
+    )
+    
+    :: Final check after attempt
+    where php >nul 2>&1
+    IF !ERRORLEVEL! NEQ 0 (
+        ECHO [CRITICAL] Could not install PHP automatically. 
+        ECHO Possible reasons: Internet connection or Winget blocked.
         PAUSE
         EXIT /B 1
     )
-    :: Refresh env vars
-    call refreshenv 2>nul
+    ECHO [SUCCESS] PHP installed successfully.
+    :: Refresh PATH for current session
+    FOR /F "tokens=*" %%g IN ('powershell -Command "[System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')"') DO SET "PATH=%%g"
 )
 
 :: Check for Composer
 where composer >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     ECHO [WARNING] Composer is not installed. Attempting to install via Winget...
-    winget install -e --id Composer.Composer
-    IF %ERRORLEVEL% NEQ 0 (
-        ECHO [ERROR] Failed to install Composer. Please install it manually.
+    winget install -e --id Composer.Composer --accept-package-agreements --accept-source-agreements --silent
+    IF !ERRORLEVEL! NEQ 0 (
+        ECHO [ERROR] Failed to install Composer.
         PAUSE
         EXIT /B 1
     )
+    :: Refresh PATH for current session
+    FOR /F "tokens=*" %%g IN ('powershell -Command "[System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')"') DO SET "PATH=%%g"
 )
 
 :: Check for Node/NPM
 where node >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     ECHO [WARNING] Node.js is not installed. Attempting to install via Winget...
-    winget install -e --id OpenJS.NodeJS
-    IF %ERRORLEVEL% NEQ 0 (
-        ECHO [ERROR] Failed to install Node.js. Please install it manually.
+    winget install -e --id OpenJS.NodeJS --accept-package-agreements --accept-source-agreements --silent
+    IF !ERRORLEVEL! NEQ 0 (
+        ECHO [ERROR] Failed to install Node.js.
         PAUSE
         EXIT /B 1
     )
+    :: Refresh PATH for current session
+    FOR /F "tokens=*" %%g IN ('powershell -Command "[System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')"') DO SET "PATH=%%g"
 )
 
 :: Check for Symfony CLI
 where symfony >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
     ECHO [WARNING] Symfony CLI is not installed. Attempting to install via Winget...
-    winget install -e --id Symfony.SymfonyCLI
-    IF %ERRORLEVEL% NEQ 0 (
-        ECHO [INFO] Failed to install Symfony CLI via Winget. Continuing without it (using PHP directly).
+    winget install -e --id Symfony.SymfonyCLI --accept-package-agreements --accept-source-agreements --silent
+    IF !ERRORLEVEL! NEQ 0 (
+        ECHO [INFO] Failed to install Symfony CLI via Winget. Continuing without it.
     )
 )
 
