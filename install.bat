@@ -16,6 +16,21 @@ ECHO      VOLUNTARIADO4V - AUTOMATED INSTALLATION
 ECHO ======================================================
 ECHO.
 
+:: Check for Winget
+where winget >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO [WARNING] Winget is not installed. Attempting to install Microsoft App Installer...
+    powershell -Command "Start-Process ms-windows-store://pdp/?ProductId=9nblggh4nns1"
+    ECHO [INFO] Please click 'Install' or 'Update' in the Microsoft Store window that just opened.
+    ECHO [INFO] Once finished, restart this script.
+    PAUSE
+    EXIT /B 1
+)
+
+:: Alternative automated install (more complex but silent) - currently using Store fallback for reliability
+:: powershell -Command "Invoke-WebRequest -Uri https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle -OutFile AppInstaller.msixbundle; Add-AppxPackage AppInstaller.msixbundle; Remove-Item AppInstaller.msixbundle"
+
+
 :: Check for PHP
 where php >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
