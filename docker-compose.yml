@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourPassword123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "/opt/mssql-tools18/bin/sqlcmd",
+          "-S",
+          "localhost",
+          "-U",
+          "sa",
+          "-P",
+          "YourPassword123!",
+          "-C",
+          "-Q",
+          "SELECT 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./Voluntariado4V_Web/backend
+    environment:
+      - DATABASE_URL=sqlsrv://sa:YourPassword123!@db/VOLUNTARIADOBD?serverVersion=latest&TrustServerCertificate=true&charset=UTF-8
+      - APP_ENV=dev
+      - APP_SECRET=bb9f1b0a5e8c4e4b8a9b3d2c1a0f9e8d
+    volumes:
+      - ./Voluntariado4V_Web/backend:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./Voluntariado4V_Web/frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
