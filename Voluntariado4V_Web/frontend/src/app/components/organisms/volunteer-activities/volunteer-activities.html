@@ -238,7 +238,7 @@
                         <div class="bg-light rounded-3 p-3">
                             <small class="text-muted text-uppercase fw-bold d-block mb-1">Organización</small>
                             <div class="d-flex align-items-center">
-                                <img [src]="selectedActivity.organization?.avatar ? (selectedActivity.organization.avatar.startsWith('/uploads') ? 'http://localhost:8000' + selectedActivity.organization.avatar : selectedActivity.organization.avatar) : 'assets/images/org-default.png'"
+                                <img [src]="selectedActivity.organization?.avatar ? (selectedActivity.organization.avatar.startsWith('/uploads') ? apiService.baseUrl + selectedActivity.organization.avatar : selectedActivity.organization.avatar) : 'assets/images/org-default.png'"
                                     class="rounded-circle me-2 border" width="24" height="24"
                                     style="object-fit: cover;">
                                 <span>{{ selectedActivity.organization?.name || selectedActivity.organization }}</span>

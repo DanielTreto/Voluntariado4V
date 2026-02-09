@@ -32,7 +32,7 @@
 
     <div *ngIf="errorMessage" class="alert alert-danger rounded-3 mb-4">
         <i class="bi bi-exclamation-triangle me-2"></i> {{ errorMessage }}
-        <div class="small mt-1">Verifica que el backend esté corriendo en http://localhost:8000</div>
+        <div class="small mt-1">Verifica que el servidor esté corriendo en {{ apiService.baseUrl }}</div>
     </div>
 
     <div class="table-responsive">

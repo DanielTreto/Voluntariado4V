@@ -36,7 +36,7 @@ interface Volunteer {
   styleUrl: './volunteer-table.css'
 })
 export class VolunteerTableComponent implements OnInit {
-  private apiService = inject(ApiService);
+  public apiService = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
   private toastService = inject(ToastService);

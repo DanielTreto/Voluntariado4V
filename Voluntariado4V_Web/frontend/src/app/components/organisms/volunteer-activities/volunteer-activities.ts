@@ -28,7 +28,7 @@ export class VolunteerActivitiesComponent implements OnInit {
   userRole: string | null = null;
   // message state removed in favor of ToastService
 
-  private apiService = inject(ApiService);
+  public apiService = inject(ApiService);
   private toastService = inject(ToastService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
