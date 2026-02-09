@@ -6,7 +6,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { ApiService } from '../../../services/api.service';
 import { ToastService } from '../../../services/toast.service';
 import { NotificationService } from '../../../services/notification.service';
-import { InputTextComponent } from '../../atoms/input-text/input-text.component';
+
 
 interface Volunteer {
   id: number;
@@ -31,7 +31,7 @@ interface Volunteer {
 @Component({
   selector: 'app-volunteer-table',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule, ReactiveFormsModule, InputTextComponent],
+  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule, ReactiveFormsModule],
   templateUrl: './volunteer-table.html',
   styleUrl: './volunteer-table.css'
 })

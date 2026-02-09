@@ -321,12 +321,12 @@
                     <div class="row">
                         <div class="col-md-6">
                             <app-input-text label="Nombre" formControlName="name"
-                                [isInvalid]="editForm.get('name')?.invalid && editForm.get('name')?.touched"
+                                [isInvalid]="(editForm.get('name')?.invalid && editForm.get('name')?.touched) ?? false"
                                 errorMessage="Obligatorio"></app-input-text>
                         </div>
                         <div class="col-md-6">
                             <app-input-text label="Email" formControlName="email"
-                                [isInvalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
+                                [isInvalid]="(editForm.get('email')?.invalid && editForm.get('email')?.touched) ?? false"
                                 errorMessage="Email inválido"></app-input-text>
                         </div>
                     </div>

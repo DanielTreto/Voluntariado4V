@@ -99,7 +99,7 @@
             <div class="mb-3">
                 <app-input-text label="Título de la Actividad" placeholder="Ej: Taller de Reciclaje"
                     formControlName="NOMBRE"
-                    [isInvalid]="requestForm.get('NOMBRE')?.touched && requestForm.get('NOMBRE')?.invalid"
+                    [isInvalid]="(requestForm.get('NOMBRE')?.touched && requestForm.get('NOMBRE')?.invalid) ?? false"
                     errorMessage="El título es obligatorio.">
                 </app-input-text>
             </div>
@@ -115,7 +115,7 @@
 
             <div class="mb-3">
                 <app-input-text label="Ubicación" placeholder="Ej: Calle Gran Vía 123" formControlName="UBICACION"
-                    [isInvalid]="requestForm.get('UBICACION')?.touched && requestForm.get('UBICACION')?.invalid"
+                    [isInvalid]="(requestForm.get('UBICACION')?.touched && requestForm.get('UBICACION')?.invalid) ?? false"
                     errorMessage="La ubicación es obligatoria.">
                 </app-input-text>
             </div>
@@ -147,13 +147,13 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <app-input-text type="date" label="Fecha Inicio" formControlName="FECHA_INICIO"
-                        [isInvalid]="requestForm.get('FECHA_INICIO')?.touched && requestForm.get('FECHA_INICIO')?.invalid"
+                        [isInvalid]="(requestForm.get('FECHA_INICIO')?.touched && requestForm.get('FECHA_INICIO')?.invalid) ?? false"
                         errorMessage="Campo obligatorio.">
                     </app-input-text>
                 </div>
                 <div class="col-md-6 mb-3">
                     <app-input-text type="date" label="Fecha Fin" formControlName="FECHA_FIN"
-                        [isInvalid]="requestForm.get('FECHA_FIN')?.touched && requestForm.get('FECHA_FIN')?.invalid"
+                        [isInvalid]="(requestForm.get('FECHA_FIN')?.touched && requestForm.get('FECHA_FIN')?.invalid) ?? false"
                         errorMessage="Campo obligatorio.">
                     </app-input-text>
                 </div>
@@ -162,13 +162,13 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <app-input-text label="Duración Sesión" placeholder="Ej: 2 horas" formControlName="DURACION_SESION"
-                        [isInvalid]="requestForm.get('DURACION_SESION')?.touched && requestForm.get('DURACION_SESION')?.invalid"
+                        [isInvalid]="(requestForm.get('DURACION_SESION')?.touched && requestForm.get('DURACION_SESION')?.invalid) ?? false"
                         errorMessage="Campo obligatorio.">
                     </app-input-text>
                 </div>
                 <div class="col-md-6 mb-3">
                     <app-input-text type="number" label="Max. Voluntarios" formControlName="N_MAX_VOLUNTARIOS"
-                        [isInvalid]="requestForm.get('N_MAX_VOLUNTARIOS')?.touched && requestForm.get('N_MAX_VOLUNTARIOS')?.invalid"
+                        [isInvalid]="(requestForm.get('N_MAX_VOLUNTARIOS')?.touched && requestForm.get('N_MAX_VOLUNTARIOS')?.invalid) ?? false"
                         errorMessage="Campo obligatorio.">
                     </app-input-text>
                 </div>
@@ -178,13 +178,13 @@
                 <div class="col-md-6 mb-3">
                     <app-select-field label="Tipo de Actividad" formControlName="CODTIPO"
                         [options]="activityTypeOptions"
-                        [isInvalid]="requestForm.get('CODTIPO')?.touched && requestForm.get('CODTIPO')?.invalid"
+                        [isInvalid]="(requestForm.get('CODTIPO')?.touched && requestForm.get('CODTIPO')?.invalid) ?? false"
                         errorMessage="Selecciona un tipo.">
                     </app-select-field>
                 </div>
                 <div class="col-md-6 mb-3">
                     <app-select-field label="ODS Principal" formControlName="NUMODS" [options]="odsOptions"
-                        [isInvalid]="requestForm.get('NUMODS')?.touched && requestForm.get('NUMODS')?.invalid"
+                        [isInvalid]="(requestForm.get('NUMODS')?.touched && requestForm.get('NUMODS')?.invalid) ?? false"
                         errorMessage="Selecciona un ODS.">
                     </app-select-field>
                 </div>

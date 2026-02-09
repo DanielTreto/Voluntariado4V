@@ -98,7 +98,7 @@ class Volunteer
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $AVATAR = null;
 
-    #[ORM\OneToMany(mappedBy: 'voluntario', targetEntity: Disponibilidad::class)]
+    #[ORM\OneToMany(mappedBy: 'voluntario', targetEntity: Disponibilidad::class, orphanRemoval: true)]
     private $disponibilidades;
 
     #[ORM\ManyToMany(targetEntity: Actividad::class, mappedBy: 'voluntarios')]

@@ -108,8 +108,10 @@ export class ModalLogin {
       });
   }
 
-  private handleLoginSuccess(response: any) {
-
+  private handleLoginSuccess(response: any, token?: string) {
+    if (token) {
+      response.token = token;
+    }
     localStorage.setItem('user', JSON.stringify(response));
     this.onModalClick.emit();
     // Redirect based on role
@@ -126,7 +128,7 @@ export class ModalLogin {
   private sendTokenToBackend(token: string, email: string = '') {
     this.apiService.login({ token, email }).subscribe({
       next: (response) => {
-        this.handleLoginSuccess(response);
+        this.handleLoginSuccess(response, token);
       },
       error: (error) => {
         this.submitting = false;

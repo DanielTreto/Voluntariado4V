@@ -17,11 +17,11 @@ class Solicitud
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: Volunteer::class)]
-    #[ORM\JoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL', nullable: false)]
+    #[ORM\JoinColumn(name: 'CODVOL', referencedColumnName: 'CODVOL', nullable: false, onDelete: 'CASCADE')]
     private ?Volunteer $volunteer = null;
 
     #[ORM\ManyToOne(targetEntity: Actividad::class)]
-    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT', nullable: false)]
+    #[ORM\JoinColumn(name: 'CODACT', referencedColumnName: 'CODACT', nullable: false, onDelete: 'CASCADE')]
     private ?Actividad $actividad = null;
 
     #[ORM\Column(length: 20)]

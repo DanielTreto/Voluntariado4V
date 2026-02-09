@@ -19,12 +19,12 @@ export class App implements OnInit {
   private apiService = inject(ApiService);
 
   ngOnInit() {
-    this.apiService.getUsuarios().subscribe({
-      next: (data) => {
-        // console.log('Datos recibidos del backend:', data);
-        this.usuarios.set(data);
-      },
-      error: (err) => console.error('Error al conectar con el backend:', err)
-    });
+    // this.apiService.getUsuarios().subscribe({
+    //   next: (data) => {
+    //     // console.log('Datos recibidos del backend:', data);
+    //     this.usuarios.set(data);
+    //   },
+    //   error: (err) => console.error('Error al conectar con el backend:', err)
+    // });
   }
 }

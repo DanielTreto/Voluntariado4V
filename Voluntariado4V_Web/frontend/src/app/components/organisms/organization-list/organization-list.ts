@@ -5,7 +5,7 @@ import { BadgeComponent } from '../../atoms/badge/badge';
 import { ApiService } from '../../../services/api.service';
 import { ToastService } from '../../../services/toast.service';
 import { InputTextComponent } from '../../atoms/input-text/input-text.component';
-import { SelectFieldComponent } from '../../atoms/select-field/select-field.component';
+
 import { NotificationService } from '../../../services/notification.service';
 
 interface Activity {
@@ -35,7 +35,7 @@ interface Organization {
 @Component({
   selector: 'app-organization-list',
   standalone: true,
-  imports: [CommonModule, BadgeComponent, FormsModule, ReactiveFormsModule, InputTextComponent, SelectFieldComponent],
+  imports: [CommonModule, BadgeComponent, FormsModule, ReactiveFormsModule, InputTextComponent],
   templateUrl: './organization-list.html',
   styleUrl: './organization-list.css'
 })

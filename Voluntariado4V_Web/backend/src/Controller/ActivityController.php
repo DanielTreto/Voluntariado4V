@@ -342,25 +342,28 @@ class ActivityController extends AbstractController
             'actividad' => $act
         ]);
 
-        $role = $data['role'] ?? null;
+        // Check if caller is Admin or the Organization owner of this activity
+        $authUser = $request->attributes->get('authenticated_user');
+        $isAdmin = ($data['role'] ?? null) === 'admin'; // Legacy check
+        $isOwner = false;
+
+        if ($authUser instanceof \App\Entity\Administrator) {
+            $isAdmin = true;
+        } elseif ($authUser instanceof \App\Entity\Organizacion) {
+            if ($act->getOrganizacion() && $act->getOrganizacion()->getCODORG() === $authUser->getCODORG()) {
+                $isOwner = true;
+            }
+        }
 
         if ($existingRequest) {
-            // If admin, we can override the existing request (e.g. approve it)
-            if ($role === 'admin') {
+            if ($isAdmin || $isOwner) {
                 $existingRequest->setStatus('ACEPTADA');
-                $existingRequest->setFechaSolicitud(new \DateTime()); // Update date? Optional.
-                
                 if (!$act->getVoluntarios()->contains($volunteer)) {
                     $act->addVoluntario($volunteer);
                     $entityManager->persist($act);
                 }
-                
                 $entityManager->flush();
-                
-                $response = new JsonResponse(['status' => 'Request updated and accepted by admin'], 200);
-                $response->headers->set('Access-Control-Allow-Origin', '*');
-                return $response;
-
+                return new JsonResponse(['status' => 'Request updated and accepted by ' . ($isAdmin ? 'admin' : 'organization')], 200);
             } else {
                 return new JsonResponse(['error' => 'Request already pending or processed'], 400);
             }
@@ -371,7 +374,7 @@ class ActivityController extends AbstractController
         $solicitud->setVolunteer($volunteer);
         $solicitud->setActividad($act);
         
-        if ($role === 'admin') {
+        if ($isAdmin || $isOwner) {
              $solicitud->setStatus('ACEPTADA');
              $act->addVoluntario($volunteer);
              $entityManager->persist($act);

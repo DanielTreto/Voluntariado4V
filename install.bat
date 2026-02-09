@@ -6,27 +6,51 @@ ECHO ======================================================
 ECHO.
 
 :: Check for PHP
-php -v >nul 2>&1
+where php >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] PHP is not installed or not in PATH.
-    PAUSE
-    EXIT /B 1
+    ECHO [WARNING] PHP is not installed. Attempting to install via Winget...
+    winget install -e --id PHP.PHP
+    IF %ERRORLEVEL% NEQ 0 (
+        ECHO [ERROR] Failed to install PHP. Please install it manually.
+        PAUSE
+        EXIT /B 1
+    )
+    :: Refresh env vars
+    call refreshenv 2>nul
 )
 
 :: Check for Composer
-call composer -V >nul 2>&1
+where composer >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Composer is not installed or not in PATH.
-    PAUSE
-    EXIT /B 1
+    ECHO [WARNING] Composer is not installed. Attempting to install via Winget...
+    winget install -e --id Composer.Composer
+    IF %ERRORLEVEL% NEQ 0 (
+        ECHO [ERROR] Failed to install Composer. Please install it manually.
+        PAUSE
+        EXIT /B 1
+    )
 )
 
 :: Check for Node/NPM
-call npm -v >nul 2>&1
+where node >nul 2>&1
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Node.js/NPM is not installed or not in PATH.
-    PAUSE
-    EXIT /B 1
+    ECHO [WARNING] Node.js is not installed. Attempting to install via Winget...
+    winget install -e --id OpenJS.NodeJS
+    IF %ERRORLEVEL% NEQ 0 (
+        ECHO [ERROR] Failed to install Node.js. Please install it manually.
+        PAUSE
+        EXIT /B 1
+    )
+)
+
+:: Check for Symfony CLI
+where symfony >nul 2>&1
+IF %ERRORLEVEL% NEQ 0 (
+    ECHO [WARNING] Symfony CLI is not installed. Attempting to install via Winget...
+    winget install -e --id Symfony.SymfonyCLI
+    IF %ERRORLEVEL% NEQ 0 (
+        ECHO [INFO] Failed to install Symfony CLI via Winget. Continuing without it (using PHP directly).
+    )
 )
 
 :: Check for System Requirements (PHP Extensions)
@@ -42,57 +66,35 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 cd ..\..
 
-ECHO [1/4] Setting up BACKEND (Symfony)...
-cd Voluntariado4V_Web\backend
-call composer install
-IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Composer install failed.
-    PAUSE
-    EXIT /B 1
-)
-
-:: Setup .env.local if not exists
+:: Setup Backend .env.local if not exists
+CD Voluntariado4V_Web\backend
 IF NOT EXIST .env.local (
-    ECHO Creating .env.local from .env...
+    ECHO [INFO] Creating .env.local from .env...
     copy .env .env.local
-    ECHO.
-    ECHO [IMPORTANT] Please check .env.local and configure your DATABASE_URL.
-    ECHO Press any key when you are ready to continue...
-    PAUSE
+    ECHO [IMPORTANT] Please edit .env.local with your database credentials if needed.
 )
+call composer install
+ECHO [INFO] Creating database and running migrations...
+call php bin/console doctrine:database:create --if-not-exists
+call php bin/console doctrine:migrations:migrate --no-interaction
+CD ..\..
 
 ECHO.
-ECHO [2/4] Configuring DATABASE...
-ECHO Creating database if not exists...
-call php bin/console doctrine:database:create --if-not-exists
-IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Database creation failed. Allow it if it already exists.
-)
+ECHO [2/4] Setting up Frontend (Angular)...
+CD Voluntariado4V_Web\frontend
+call npm install
+CD ..\..
 
-ECHO Running Migrations...
-call php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
-IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Migrations failed.
-    PAUSE
-    EXIT /B 1
-)
-
-ECHO Populating initial data (from src/BDD/full_database_setup.sql)...
+ECHO [3/4] populating Initial Data...
+CD Voluntariado4V_Web\backend
 call php load_sql.php
 IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] Data population failed.
-    PAUSE
-    EXIT /B 1
+    ECHO [WARNING] Data population might have failed if database was already populated.
 )
+CD ..\..
 
-ECHO [3/4] Installing FRONTEND (Angular)...
-cd ..\frontend
-call npm install --legacy-peer-deps
-IF %ERRORLEVEL% NEQ 0 (
-    ECHO [ERROR] NPM install failed.
-    PAUSE
-    EXIT /B 1
-)
+ECHO.
+ECHO [4/4] Finishing...
 
 ECHO.
 ECHO.

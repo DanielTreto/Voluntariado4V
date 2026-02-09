@@ -29,15 +29,15 @@ class Credenciales
     private ?string $password = null;
 
     #[ORM\OneToOne(targetEntity: Volunteer::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: "CODVOL", referencedColumnName: "CODVOL", nullable: true)]
+    #[ORM\JoinColumn(name: "CODVOL", referencedColumnName: "CODVOL", nullable: true, onDelete: 'CASCADE')]
     private ?Volunteer $voluntario = null;
     
     #[ORM\OneToOne(targetEntity: Organizacion::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: "CODORG", referencedColumnName: "CODORG", nullable: true)]
+    #[ORM\JoinColumn(name: "CODORG", referencedColumnName: "CODORG", nullable: true, onDelete: 'CASCADE')]
     private ?Organizacion $organizacion = null;
 
     #[ORM\OneToOne(targetEntity: Administrator::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(name: "CODADMIN", referencedColumnName: "id", nullable: true)]
+    #[ORM\JoinColumn(name: "CODADMIN", referencedColumnName: "id", nullable: true, onDelete: 'CASCADE')]
     private ?Administrator $administrador = null;
 
     public function getId(): ?int
