@@ -48,9 +48,7 @@ class VolunteerController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
     #[Route('/volunteers/{id}', name: 'api_volunteers_show', methods: ['GET'])]
@@ -83,9 +81,7 @@ class VolunteerController extends AbstractController
             ], $v->getDisponibilidades()->toArray()),
         ];
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
     #[Route('/volunteers', name: 'api_volunteers_create', methods: ['POST'])]
@@ -181,25 +177,10 @@ class VolunteerController extends AbstractController
         $entityManager->persist($volunteer);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Volunteer created', 'id' => $volunteer->getCODVOL()], 201);
-        // CORS headers for development
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-
-        return $response;
+        return new JsonResponse(['status' => 'Volunteer created', 'id' => $volunteer->getCODVOL()], 201);
     }
 
-    // Simple OPTIONS handler for CORS preflight
-    #[Route('/volunteers', name: 'api_volunteers_options', methods: ['OPTIONS'])]
-    public function options(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, DELETE');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 
     #[Route('/volunteers/{id}', name: 'api_volunteers_delete', methods: ['DELETE'])]
     public function delete(string $id, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
@@ -213,20 +194,10 @@ class VolunteerController extends AbstractController
         $entityManager->remove($volunteer);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Volunteer deleted'], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Volunteer deleted'], 200);
     }
 
-    #[Route('/volunteers/{id}', name: 'api_volunteers_item_options', methods: ['OPTIONS'])]
-    public function itemOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, PUT, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
     #[Route('/volunteers/{id}/status', name: 'api_volunteers_update_status', methods: ['PATCH'])]
     public function updateStatus(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
     {
@@ -248,19 +219,9 @@ class VolunteerController extends AbstractController
         $volunteer->setESTADO($newStatus);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Volunteer status updated', 'newStatus' => $newStatus], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Volunteer status updated', 'newStatus' => $newStatus], 200);
     }
-    #[Route('/volunteers/{id}/status', name: 'api_volunteers_update_status_options', methods: ['OPTIONS'])]
-    public function updateStatusOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 
     #[Route('/volunteers/{id}', name: 'api_volunteers_update', methods: ['PUT'])]
     public function update(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository, ValidatorInterface $validator, CicloRepository $cicloRepository, TipoActividadRepository $tipoActividadRepository): JsonResponse
@@ -363,9 +324,7 @@ class VolunteerController extends AbstractController
 
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Volunteer updated'], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Volunteer updated'], 200);
     }
 
     #[Route('/volunteers/{id}/activities', name: 'api_volunteers_activities', methods: ['GET'])]
@@ -401,8 +360,8 @@ class VolunteerController extends AbstractController
                 'id' => $act->getCODACT(),
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
-                'date' => $act->getFECHA_INICIO()->format('d/m/y H:i'),
-                'endDate' => $act->getFECHA_FIN() ? $act->getFECHA_FIN()->format('Y-m-d') : null,
+                'date' => $act->getFECHA_INICIO()->format('Y-m-d\TH:i:s'),
+                'endDate' => $act->getFECHA_FIN() ? $act->getFECHA_FIN()->format('Y-m-d\TH:i:s') : null,
                 'location' => $act->getUBICACION(),
                 'duration' => $act->getDURACION_SESION(),
                 'status' => $act->getESTADO(),
@@ -424,20 +383,10 @@ class VolunteerController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
-    #[Route('/volunteers/{id}/activities', name: 'api_volunteers_activities_options', methods: ['OPTIONS'])]
-    public function myActivitiesOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
     #[Route('/volunteers/{id}/requests', name: 'api_volunteers_requests', methods: ['GET'])]
     public function myRequests(string $id, VolunteerRepository $volunteerRepository, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -459,20 +408,10 @@ class VolunteerController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
-    #[Route('/volunteers/{id}/requests', name: 'api_volunteers_requests_options', methods: ['OPTIONS'])]
-    public function myRequestsOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
     #[Route('/volunteers/{id}/avatar', name: 'api_volunteers_upload_avatar', methods: ['POST'])]
     public function uploadAvatar(string $id, Request $request, EntityManagerInterface $entityManager, VolunteerRepository $volunteerRepository): JsonResponse
     {
@@ -504,18 +443,8 @@ class VolunteerController extends AbstractController
         $volunteer->setAVATAR('/uploads/avatars/' . $fileName);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Avatar uploaded', 'url' => $volunteer->getAVATAR()], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Avatar uploaded', 'url' => $volunteer->getAVATAR()], 200);
     }
 
-    #[Route('/volunteers/{id}/avatar', name: 'api_volunteers_avatar_options', methods: ['OPTIONS'])]
-    public function avatarOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 }

@@ -44,6 +44,8 @@ export class EventCalendarComponent implements OnInit {
   }
 
   loadActivities() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
     if (this.organizationId) {
       this.apiService.getOrganizationActivities(this.organizationId).subscribe({
         next: (data) => {
@@ -52,6 +54,15 @@ export class EventCalendarComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: (err) => console.error('Error loading organization activities', err)
+      });
+    } else if (user && user.role === 'volunteer') {
+      this.apiService.getVolunteerActivities(user.id).subscribe({
+        next: (data) => {
+          this.activities = data;
+          this.generateCalendar();
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Error loading volunteer activities', err)
       });
     } else {
       this.apiService.getActivities().subscribe({
@@ -91,7 +102,12 @@ export class EventCalendarComponent implements OnInit {
     // Current month days
     for (let i = 1; i <= daysInMonth; i++) {
       const dateString = `${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
-      const dayEvents = this.activities.filter(a => a.date === dateString);
+      const dayEvents = this.activities.filter(a => {
+        if (!a.date) return false;
+        // Handle ISO format YYYY-MM-DDTHH:mm:ss
+        const activityDate = a.date.split('T')[0];
+        return activityDate === dateString;
+      });
 
       this.calendarDays.push({
         day: i,

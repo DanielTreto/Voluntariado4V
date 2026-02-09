@@ -1,0 +1,8 @@
+<div class="mb-3">
+    <label *ngIf="label" class="form-label fw-semibold">{{ label }}</label>
+    <input [type]="type" class="form-control rounded-3" [placeholder]="placeholder" [value]="value"
+        (input)="onInput($event)" (blur)="onTouched()" [disabled]="isDisabled" [class.is-invalid]="isInvalid">
+    <div *ngIf="isInvalid && errorMessage" class="text-danger small mt-1">
+        {{ errorMessage }}
+    </div>
+</div>

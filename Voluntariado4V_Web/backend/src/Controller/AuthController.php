@@ -173,13 +173,5 @@ class AuthController extends AbstractController
         return new JsonResponse(['error' => 'User not found or invalid credentials'], 404);
     }
 
-    #[Route('/login', name: 'api_login_options', methods: ['OPTIONS'])]
-    public function loginOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type, WebSocket-Protocol, Authorization'); 
-        return $response;
-    }
+
 }

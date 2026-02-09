@@ -68,7 +68,7 @@ class SolicitudController extends AbstractController
                 'id' => $req->getId(),
                 'status' => $req->getStatus(),
                 'message' => $req->getMensaje(),
-                'date' => $fechaSolicitud ? $fechaSolicitud->format('Y-m-d H:i:s') : null,
+                'date' => $fechaSolicitud ? $fechaSolicitud->format('Y-m-d\TH:i:s') : null,
                 'volunteer' => [
                     'id' => $volunteer->getCODVOL(),
                     'name' => $volunteer->getNOMBRE(),
@@ -79,14 +79,12 @@ class SolicitudController extends AbstractController
                 'activity' => [
                     'id' => $activity->getCODACT(),
                     'title' => $activity->getNOMBRE(),
-                    'date' => $fechaInicio ? $fechaInicio->format('Y-m-d') : null
+                    'date' => $fechaInicio ? $fechaInicio->format('Y-m-d\TH:i:s') : null
                 ]
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
     #[Route('/{id}/status', name: 'api_requests_update_status', methods: ['PATCH'])]
@@ -138,8 +136,6 @@ class SolicitudController extends AbstractController
         $solicitud->setStatus($newStatus);
         $em->flush();
 
-        $response = new JsonResponse(['id' => $solicitud->getId(), 'status' => $solicitud->getStatus()]);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['id' => $solicitud->getId(), 'status' => $solicitud->getStatus()]);
     }
 }

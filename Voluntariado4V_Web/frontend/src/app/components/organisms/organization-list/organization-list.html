@@ -162,6 +162,12 @@
                                             </button>
                                         </li>
                                         <li>
+                                            <button class="dropdown-item px-3 py-2 small" type="button"
+                                                (click)="openEditModal(org)">
+                                                <i class="bi bi-pencil me-2 text-warning"></i>Editar
+                                            </button>
+                                        </li>
+                                        <li>
                                             <hr class="dropdown-divider">
                                         </li>
                                         <li>
@@ -295,6 +301,80 @@
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" (click)="closeDetailsModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" [class.show]="showEditModal" [class.d-block]="showEditModal"
+    [style.background-color]="showEditModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1" role="dialog"
+    (click)="closeEditModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+        <div class="modal-content">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Editar Organización</h5>
+                <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <app-input-text label="Nombre" formControlName="name"
+                                [isInvalid]="editForm.get('name')?.invalid && editForm.get('name')?.touched"
+                                errorMessage="Obligatorio"></app-input-text>
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-text label="Email" formControlName="email"
+                                [isInvalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
+                                errorMessage="Email inválido"></app-input-text>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <app-input-text label="Teléfono" formControlName="phone"></app-input-text>
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-text label="Persona de Contacto"
+                                formControlName="contactPerson"></app-input-text>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <app-input-text label="Tipo" formControlName="type"></app-input-text>
+                        </div>
+                        <div class="col-md-4">
+                            <app-input-text label="Sector" formControlName="sector"></app-input-text>
+                        </div>
+                        <div class="col-md-4">
+                            <app-input-text label="Ámbito" formControlName="scope"></app-input-text>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <app-input-text label="Dirección" formControlName="address"></app-input-text>
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-text label="Web" formControlName="web"></app-input-text>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Descripción</label>
+                            <textarea class="form-control rounded-3" formControlName="description" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-light me-2 rounded-pill px-4 fw-semibold"
+                            (click)="closeEditModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold"
+                            [disabled]="editForm.invalid">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

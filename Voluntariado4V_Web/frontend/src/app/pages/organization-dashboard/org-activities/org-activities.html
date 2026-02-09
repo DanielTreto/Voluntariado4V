@@ -1,3 +1,4 @@
+<app-loading-spinner [isLoading]="isLoading"></app-loading-spinner>
 <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
     <div class="d-flex align-items-center mb-4 border-bottom pb-3">
         <div class="d-flex gap-3">
@@ -22,46 +23,65 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-md-6 col-lg-4" *ngFor="let activity of activities">
-                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden activity-card-hover">
-                    <div class="position-relative">
-                        <img [src]="activity.image || 'assets/images/activity-default.jpg'"
-                            (error)="handleImageError($event)" class="card-img-top" alt="{{ activity.title }}"
-                            style="height: 200px; object-fit: cover;">
-                        <div class="position-absolute top-0 end-0 p-3">
-                            <span class="badge rounded-pill px-3 py-2 shadow-sm" [ngClass]="{
+            <!-- Loading Skeletons -->
+            <ng-container *ngIf="isLoading">
+                <div class="col-md-6 col-lg-4" *ngFor="let i of [1,2,3]">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                        <app-skeleton height="200px" borderRadius="0"></app-skeleton>
+                        <div class="card-body p-4">
+                            <app-skeleton width="70%" height="24px" class="mb-2"></app-skeleton>
+                            <app-skeleton width="100%" height="15px" class="mb-2"></app-skeleton>
+                            <app-skeleton width="90%" height="15px" class="mb-3"></app-skeleton>
+                            <app-skeleton width="40%" height="15px" class="mb-4"></app-skeleton>
+                            <app-skeleton width="100%" height="35px" borderRadius="20px"></app-skeleton>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="!isLoading">
+                <div class="col-md-6 col-lg-4" *ngFor="let activity of activities">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden activity-card-hover">
+                        <div class="position-relative">
+                            <img [src]="activity.image || 'assets/images/activity-default.jpg'"
+                                (error)="handleImageError($event)" class="card-img-top" alt="{{ activity.title }}"
+                                style="height: 200px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 p-3">
+                                <span class="badge rounded-pill px-3 py-2 shadow-sm" [ngClass]="{
                                 'bg-success': activity.status === 'APROBADA' || activity.status === 'EN_PROGRESO',
                                 'bg-danger': activity.status === 'DENEGADA',
                                 'bg-secondary': activity.status === 'FINALIZADA',
                                 'bg-warning text-dark': activity.status === 'PENDIENTE'
                               }">
-                                {{ activity.status }}
-                            </span>
+                                    {{ activity.status }}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="card-body d-flex flex-column p-4">
-                        <h5 class="card-title fw-bold mb-2 text-dark">{{ activity.title }}</h5>
-                        <p class="card-text text-muted small flex-grow-1" style="line-height: 1.6;">{{
-                            activity.description | slice:0:100 }}...</p>
+                        <div class="card-body d-flex flex-column p-4">
+                            <h5 class="card-title fw-bold mb-2 text-dark">{{ activity.title }}</h5>
+                            <p class="card-text text-muted small flex-grow-1" style="line-height: 1.6;">{{
+                                activity.description | slice:0:100 }}...</p>
 
-                        <div class="d-flex align-items-center text-muted small mb-2">
-                            <i class="bi bi-calendar-event me-2 text-primary"></i> {{ activity.date | date:'mediumDate'
-                            }}
-                        </div>
-                        <div class="d-flex align-items-center text-muted small mb-3">
-                            <i class="bi bi-people me-2 text-primary"></i> {{ activity.volunteers.length }} / {{
-                            activity.N_MAX_VOLUNTARIOS }} Voluntarios
-                        </div>
+                            <div class="d-flex align-items-center text-muted small mb-2">
+                                <i class="bi bi-calendar-event me-2 text-primary"></i> {{ activity.date |
+                                date:'mediumDate'
+                                }}
+                            </div>
+                            <div class="d-flex align-items-center text-muted small mb-3">
+                                <i class="bi bi-people me-2 text-primary"></i> {{ activity.volunteers.length }} / {{
+                                activity.N_MAX_VOLUNTARIOS }} Voluntarios
+                            </div>
 
-                        <div class="mt-auto pt-3 border-top custom-card-actions">
-                            <button class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-semibold"
-                                (click)="openViewDetails(activity)">
-                                <i class="bi bi-eye me-1"></i> Ver detalles
-                            </button>
+                            <div class="mt-auto pt-3 border-top custom-card-actions">
+                                <button class="btn btn-outline-primary btn-sm w-100 rounded-pill fw-semibold"
+                                    (click)="openViewDetails(activity)">
+                                    <i class="bi bi-eye me-1"></i> Ver detalles
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </ng-container>
             <div *ngIf="activities.length === 0" class="col-12 text-center text-muted py-5 bg-light rounded-3">
                 <i class="bi bi-calendar-x fs-1 d-block mb-2 text-secondary"></i>
                 No tienes actividades activas o finalizadas.
@@ -77,13 +97,11 @@
 
         <form [formGroup]="requestForm" (ngSubmit)="submitRequest()">
             <div class="mb-3">
-                <label class="form-label fw-semibold">Título de la Actividad</label>
-                <input type="text" class="form-control rounded-3" formControlName="NOMBRE"
-                    placeholder="Ej: Taller de Reciclaje">
-                <div *ngIf="requestForm.get('NOMBRE')?.touched && requestForm.get('NOMBRE')?.invalid"
-                    class="text-danger small mt-1">
-                    El título es obligatorio.
-                </div>
+                <app-input-text label="Título de la Actividad" placeholder="Ej: Taller de Reciclaje"
+                    formControlName="NOMBRE"
+                    [isInvalid]="requestForm.get('NOMBRE')?.touched && requestForm.get('NOMBRE')?.invalid"
+                    errorMessage="El título es obligatorio.">
+                </app-input-text>
             </div>
 
             <div class="mb-3">
@@ -96,13 +114,10 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label fw-semibold">Ubicación</label>
-                <input type="text" class="form-control rounded-3" formControlName="UBICACION"
-                    placeholder="Ej: Calle Gran Vía 123">
-                <div *ngIf="requestForm.get('UBICACION')?.touched && requestForm.get('UBICACION')?.invalid"
-                    class="text-danger small mt-1">
-                    La ubicación es obligatoria.
-                </div>
+                <app-input-text label="Ubicación" placeholder="Ej: Calle Gran Vía 123" formControlName="UBICACION"
+                    [isInvalid]="requestForm.get('UBICACION')?.touched && requestForm.get('UBICACION')?.invalid"
+                    errorMessage="La ubicación es obligatoria.">
+                </app-input-text>
             </div>
 
             <div class="mb-3">
@@ -131,41 +146,47 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Fecha Inicio</label>
-                    <input type="date" class="form-control rounded-3" formControlName="FECHA_INICIO">
+                    <app-input-text type="date" label="Fecha Inicio" formControlName="FECHA_INICIO"
+                        [isInvalid]="requestForm.get('FECHA_INICIO')?.touched && requestForm.get('FECHA_INICIO')?.invalid"
+                        errorMessage="Campo obligatorio.">
+                    </app-input-text>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Fecha Fin</label>
-                    <input type="date" class="form-control rounded-3" formControlName="FECHA_FIN">
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Duración Sesión</label>
-                    <input type="text" class="form-control rounded-3" formControlName="DURACION_SESION"
-                        placeholder="Ej: 2 horas">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Max. Voluntarios</label>
-                    <input type="number" class="form-control rounded-3" formControlName="N_MAX_VOLUNTARIOS">
+                    <app-input-text type="date" label="Fecha Fin" formControlName="FECHA_FIN"
+                        [isInvalid]="requestForm.get('FECHA_FIN')?.touched && requestForm.get('FECHA_FIN')?.invalid"
+                        errorMessage="Campo obligatorio.">
+                    </app-input-text>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Tipo de Actividad</label>
-                    <select class="form-select rounded-3" formControlName="CODTIPO">
-                        <option [ngValue]="null">Selecciona...</option>
-                        <option *ngFor="let type of activityTypes" [value]="type.id">{{ type.name }}</option>
-                    </select>
+                    <app-input-text label="Duración Sesión" placeholder="Ej: 2 horas" formControlName="DURACION_SESION"
+                        [isInvalid]="requestForm.get('DURACION_SESION')?.touched && requestForm.get('DURACION_SESION')?.invalid"
+                        errorMessage="Campo obligatorio.">
+                    </app-input-text>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">ODS Principal</label>
-                    <select class="form-select rounded-3" formControlName="NUMODS">
-                        <option [ngValue]="null">Selecciona...</option>
-                        <option *ngFor="let ods of odsList" [value]="ods.id">{{ ods.id }} - {{ ods.name }}</option>
-                    </select>
+                    <app-input-text type="number" label="Max. Voluntarios" formControlName="N_MAX_VOLUNTARIOS"
+                        [isInvalid]="requestForm.get('N_MAX_VOLUNTARIOS')?.touched && requestForm.get('N_MAX_VOLUNTARIOS')?.invalid"
+                        errorMessage="Campo obligatorio.">
+                    </app-input-text>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <app-select-field label="Tipo de Actividad" formControlName="CODTIPO"
+                        [options]="activityTypeOptions"
+                        [isInvalid]="requestForm.get('CODTIPO')?.touched && requestForm.get('CODTIPO')?.invalid"
+                        errorMessage="Selecciona un tipo.">
+                    </app-select-field>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <app-select-field label="ODS Principal" formControlName="NUMODS" [options]="odsOptions"
+                        [isInvalid]="requestForm.get('NUMODS')?.touched && requestForm.get('NUMODS')?.invalid"
+                        errorMessage="Selecciona un ODS.">
+                    </app-select-field>
                 </div>
             </div>
 

@@ -1,8 +1,12 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { BadgeComponent } from '../../atoms/badge/badge';
 import { ApiService } from '../../../services/api.service';
+import { ToastService } from '../../../services/toast.service';
+import { InputTextComponent } from '../../atoms/input-text/input-text.component';
+import { SelectFieldComponent } from '../../atoms/select-field/select-field.component';
+import { NotificationService } from '../../../services/notification.service';
 
 interface Activity {
   id: number;
@@ -31,13 +35,17 @@ interface Organization {
 @Component({
   selector: 'app-organization-list',
   standalone: true,
-  imports: [CommonModule, BadgeComponent, FormsModule],
+  imports: [CommonModule, BadgeComponent, FormsModule, ReactiveFormsModule, InputTextComponent, SelectFieldComponent],
   templateUrl: './organization-list.html',
   styleUrl: './organization-list.css'
 })
 export class OrganizationListComponent implements OnInit {
   private apiService = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
+  private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
+  private notificationService = inject(NotificationService);
+
   activeTab: 'pending' | 'registered' = 'pending';
   selectedOrg: Organization | null = null;
   orgToSuspend: Organization | null = null;
@@ -53,10 +61,28 @@ export class OrganizationListComponent implements OnInit {
   // Dropdown and modal control
   activeDropdownId: number | null = null;
   showDetailsModal: boolean = false;
+  showEditModal: boolean = false;
+  editForm: FormGroup;
+  editingOrgId: number | null = null;
   loadingActivities: boolean = false;
 
   organizations: Organization[] = [];
   allActivities: Activity[] = [];
+
+  constructor() {
+    this.editForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      phone: [''],
+      type: [''], // Could be select
+      sector: [''], // Could be select
+      scope: [''], // Could be select
+      contactPerson: [''],
+      description: [''],
+      address: [''],
+      web: ['']
+    });
+  }
 
   ngOnInit() {
     this.loadOrganizations();
@@ -210,6 +236,8 @@ export class OrganizationListComponent implements OnInit {
     this.apiService.updateOrganizationStatus(org.id, 'ACTIVO').subscribe({
       next: () => {
         org.status = 'active';
+        this.toastService.show('Organización aceptada', 'success');
+        this.notificationService.notifyOrganizationStatusUpdate(org.id, 'ACTIVO');
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -224,6 +252,8 @@ export class OrganizationListComponent implements OnInit {
       this.apiService.updateOrganizationStatus(org.id, 'SUSPENDIDO').subscribe({
         next: () => {
           org.status = 'suspended';
+          this.toastService.show('Organización denegada', 'info');
+          this.notificationService.notifyOrganizationStatusUpdate(org.id, 'SUSPENDIDO');
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -243,6 +273,8 @@ export class OrganizationListComponent implements OnInit {
     this.apiService.updateOrganizationStatus(org.id, 'SUSPENDIDO').subscribe({
       next: () => {
         org.status = 'suspended';
+        this.toastService.show('Organización dada de baja', 'info');
+        this.notificationService.notifyOrganizationStatusUpdate(org.id, 'SUSPENDIDO');
         this.cdr.detectChanges();
         this.closeDropdown();
       },
@@ -253,17 +285,62 @@ export class OrganizationListComponent implements OnInit {
     });
   }
 
-  suspendOrg() {
-    if (this.orgToSuspend) {
-      this.apiService.updateOrganizationStatus(this.orgToSuspend.id, 'SUSPENDIDO').subscribe({
+  openEditModal(org: Organization) {
+    this.editingOrgId = org.id;
+    // Backend update supports: name, type, email, phone, sector, scope, contactPerson, description, address, web
+    // Note: frontend model 'Organization' might not have all these fields explicitly mapped in loadOrganizations initially,
+    // so it's safer to fetch details or map them if available.
+    // In loadOrganizations, we are mapping: type, phone, sector, scope, description.
+    // 'contactPerson', 'address', 'web' were NOT mapped in loadOrganizations.
+    // We should fetch full details or update loadOrganizations.
+    // Let's fetch details for editing to be safe.
+
+    this.apiService.getOrganization(org.id).subscribe({
+      next: (fullOrg) => {
+        this.editForm.patchValue({
+          name: fullOrg.name,
+          email: fullOrg.email,
+          phone: fullOrg.phone,
+          type: fullOrg.type,
+          sector: fullOrg.sector,
+          scope: fullOrg.scope,
+          contactPerson: fullOrg.contactPerson,
+          description: fullOrg.description,
+          address: fullOrg.address,
+          web: fullOrg.web
+        });
+        this.showEditModal = true;
+        this.closeDropdown();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.toastService.show("Error al cargar datos para editar", "error");
+      }
+    });
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingOrgId = null;
+    this.editForm.reset();
+  }
+
+  saveEdit() {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    if (this.editingOrgId) {
+      this.apiService.updateOrganization(this.editingOrgId, this.editForm.value).subscribe({
         next: () => {
-          this.orgToSuspend!.status = 'suspended';
-          this.cdr.detectChanges();
-          this.orgToSuspend = null;
+          this.toastService.show('Organización actualizada correctamente', 'success');
+          this.closeEditModal();
+          this.loadOrganizations();
         },
         error: (err) => {
-          console.error('Error suspending organization', err);
-          this.errorMessage = 'Error al suspender organización: ' + err.message;
+          console.error('Error updating org', err);
+          this.toastService.show('Error al actualizar: ' + (err.error?.error || 'Desconocido'), 'error');
         }
       });
     }

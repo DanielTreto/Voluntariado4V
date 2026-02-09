@@ -4,11 +4,12 @@ import { ApiService } from './services/api.service';
 
 
 import { ScrollToTopComponent } from './components/atoms/scroll-to-top/scroll-to-top';
+import { ToastComponent } from './components/atoms/toast/toast.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, ScrollToTopComponent],
+  imports: [RouterOutlet, ScrollToTopComponent, ToastComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

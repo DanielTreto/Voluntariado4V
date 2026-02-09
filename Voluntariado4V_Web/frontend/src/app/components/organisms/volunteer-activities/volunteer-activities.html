@@ -1,3 +1,4 @@
+<app-loading-spinner [isLoading]="isLoading"></app-loading-spinner>
 <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
     <!-- Header with Tabs -->
     <div class="d-flex align-items-center mb-4 border-bottom pb-3">
@@ -16,13 +17,7 @@
     </div>
 
     <!-- Feedback Message -->
-    <div *ngIf="message" class="alert mb-4 rounded-3" [ngClass]="{
-      'alert-success': !message.includes('Error'),
-      'alert-danger': message.includes('Error')
-    }">
-        <i class="bi" [ngClass]="!message.includes('Error') ? 'bi-check-circle' : 'bi-exclamation-triangle'"></i>
-        {{ message }}
-    </div>
+    <!-- Feedback Message handled by ToastService -->
 
     <!-- MY ACTIVITIES TAB -->
     <div *ngIf="currentTab === 'mis-actividades'">
@@ -32,9 +27,30 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-md-6 col-lg-4" *ngFor="let activity of myActivitiesList">
-                <ng-container *ngTemplateOutlet="activityCard; context: { activity: activity }"></ng-container>
-            </div>
+            <!-- Loading Skeletons -->
+            <ng-container *ngIf="isLoading">
+                <div class="col-md-6 col-lg-4" *ngFor="let i of [1,2,3]">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                        <app-skeleton height="200px" borderRadius="0"></app-skeleton>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <app-skeleton width="32px" height="32px" borderRadius="50%" class="me-2"></app-skeleton>
+                                <app-skeleton width="60%" height="20px"></app-skeleton>
+                            </div>
+                            <app-skeleton width="100%" height="15px" class="mb-2"></app-skeleton>
+                            <app-skeleton width="90%" height="15px" class="mb-3"></app-skeleton>
+                            <app-skeleton width="40%" height="15px" class="mb-4"></app-skeleton>
+                            <app-skeleton width="100%" height="35px" borderRadius="20px"></app-skeleton>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="!isLoading">
+                <div class="col-md-6 col-lg-4" *ngFor="let activity of myActivitiesList">
+                    <ng-container *ngTemplateOutlet="activityCard; context: { activity: activity }"></ng-container>
+                </div>
+            </ng-container>
             <div *ngIf="myActivitiesList.length === 0" class="col-12 text-center text-muted py-5 bg-light rounded-3">
                 <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
                 No tienes actividades en curso ni solicitudes pendientes.
@@ -50,9 +66,30 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-md-6 col-lg-4" *ngFor="let activity of availableActivitiesList">
-                <ng-container *ngTemplateOutlet="activityCard; context: { activity: activity }"></ng-container>
-            </div>
+            <!-- Loading Skeletons -->
+            <ng-container *ngIf="isLoading">
+                <div class="col-md-6 col-lg-4" *ngFor="let i of [1,2,3]">
+                    <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                        <app-skeleton height="200px" borderRadius="0"></app-skeleton>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <app-skeleton width="32px" height="32px" borderRadius="50%" class="me-2"></app-skeleton>
+                                <app-skeleton width="60%" height="20px"></app-skeleton>
+                            </div>
+                            <app-skeleton width="100%" height="15px" class="mb-2"></app-skeleton>
+                            <app-skeleton width="90%" height="15px" class="mb-3"></app-skeleton>
+                            <app-skeleton width="40%" height="15px" class="mb-4"></app-skeleton>
+                            <app-skeleton width="100%" height="35px" borderRadius="20px"></app-skeleton>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="!isLoading">
+                <div class="col-md-6 col-lg-4" *ngFor="let activity of availableActivitiesList">
+                    <ng-container *ngTemplateOutlet="activityCard; context: { activity: activity }"></ng-container>
+                </div>
+            </ng-container>
             <div *ngIf="availableActivitiesList.length === 0"
                 class="col-12 text-center text-muted py-5 bg-light rounded-3">
                 <i class="bi bi-emoji-frown fs-1 d-block mb-2 text-secondary"></i>

@@ -2,8 +2,11 @@ import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarComponent } from '../../atoms/avatar/avatar';
 import { BadgeComponent } from '../../atoms/badge/badge';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../services/api.service';
+import { ToastService } from '../../../services/toast.service';
+import { NotificationService } from '../../../services/notification.service';
+import { InputTextComponent } from '../../atoms/input-text/input-text.component';
 
 interface Volunteer {
   id: number;
@@ -28,13 +31,17 @@ interface Volunteer {
 @Component({
   selector: 'app-volunteer-table',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule],
+  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule, ReactiveFormsModule, InputTextComponent],
   templateUrl: './volunteer-table.html',
   styleUrl: './volunteer-table.css'
 })
 export class VolunteerTableComponent implements OnInit {
   private apiService = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
+  private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
+  private notificationService = inject(NotificationService);
+
   activeTab: 'requests' | 'registered' = 'requests';
   selectedVolunteer: Volunteer | null = null;
   volunteerToDeactivate: Volunteer | null = null;
@@ -52,8 +59,25 @@ export class VolunteerTableComponent implements OnInit {
 
   // Modal control
   showDetailsModal: boolean = false;
+  showEditModal: boolean = false;
+  editForm: FormGroup;
+  editingVolunteerId: number | null = null;
 
   volunteers: Volunteer[] = [];
+
+  constructor() {
+    this.editForm = this.fb.group({
+      name: ['', Validators.required],
+      surname1: ['', Validators.required],
+      surname2: [''],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', Validators.required],
+      dni: ['', Validators.required],
+      dateOfBirth: [''],
+      course: [''],
+      description: ['']
+    });
+  }
 
   ngOnInit() {
     this.loadVolunteers();
@@ -224,6 +248,8 @@ export class VolunteerTableComponent implements OnInit {
     this.apiService.updateVolunteerStatus(volunteer.id, 'ACTIVO').subscribe({
       next: () => {
         volunteer.status = 'active';
+        this.toastService.show('Voluntario aceptado', 'success');
+        this.notificationService.notifyVolunteerStatusUpdate(volunteer.id, 'ACTIVO');
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -238,11 +264,84 @@ export class VolunteerTableComponent implements OnInit {
       this.apiService.updateVolunteerStatus(volunteer.id, 'SUSPENDIDO').subscribe({
         next: () => {
           volunteer.status = 'suspended';
+          this.toastService.show('Voluntario denegado', 'info');
+          this.notificationService.notifyVolunteerStatusUpdate(volunteer.id, 'SUSPENDIDO');
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error denying volunteer', err);
           this.errorMessage = 'Error al denegar voluntario: ' + err.message;
+        }
+      });
+    }
+
+
+  }
+
+
+  openEditModal(volunteer: Volunteer) {
+    this.editingVolunteerId = volunteer.id;
+    this.editForm.patchValue({
+      name: volunteer.firstName,
+      surname1: volunteer.lastName.split(' ')[0] || '', // Rough estimation if not separated in frontend model
+      surname2: volunteer.lastName.split(' ').slice(1).join(' ') || '',
+      email: volunteer.email,
+      phone: volunteer.phone,
+      dni: volunteer.dni,
+      dateOfBirth: volunteer.dateOfBirth,
+      course: volunteer.project, // Mapped to project in loadVolunteers
+      description: volunteer.description
+    });
+    // Correction: loadVolunteers maps firstName to name and lastName to surname1 + surname2
+    // But backend provides name, surname1, surname2 individually. 
+    // Ideally we should store them individually in Volunteer interface or re-fetch.
+    // For now, let's try to fetch details from API to be sure or use what we have.
+    // Re-fetching full details to ensure clean data for editing
+    this.apiService.getVolunteer(volunteer.id).subscribe({
+      next: (v) => {
+        this.editForm.patchValue({
+          name: v.name,
+          surname1: v.surname1,
+          surname2: v.surname2,
+          email: v.email,
+          phone: v.phone,
+          dni: v.dni,
+          dateOfBirth: v.dateOfBirth,
+          course: v.course,
+          description: v.description
+        });
+        this.showEditModal = true;
+        this.closeDropdown();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.toastService.show("Error al cargar datos para editar", "error");
+      }
+    });
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editingVolunteerId = null;
+    this.editForm.reset();
+  }
+
+  saveEdit() {
+    if (this.editForm.invalid) {
+      this.editForm.markAllAsTouched();
+      return;
+    }
+
+    if (this.editingVolunteerId) {
+      this.apiService.updateVolunteer(this.editingVolunteerId, this.editForm.value).subscribe({
+        next: () => {
+          this.toastService.show('Voluntario actualizado correctamente', 'success');
+          this.closeEditModal();
+          this.loadVolunteers(); // Refresh list
+        },
+        error: (err) => {
+          console.error('Error updating volunteer', err);
+          this.toastService.show('Error al actualizar: ' + (err.error?.error || 'Desconocido'), 'error');
         }
       });
     }

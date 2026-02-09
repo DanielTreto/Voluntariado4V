@@ -1,17 +1,22 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LoadingSpinnerComponent } from '../../atoms/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../atoms/skeleton/skeleton.component';
+import { finalize } from 'rxjs/operators';
 import { ApiService } from '../../../services/api.service';
+import { ToastService } from '../../../services/toast.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-volunteer-activities',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSpinnerComponent, SkeletonComponent],
   templateUrl: './volunteer-activities.html',
   styleUrls: ['./volunteer-activities.scss']
 })
 export class VolunteerActivitiesComponent implements OnInit {
+  isLoading: boolean = true;
   activities: any[] = [];
   myActivitiesList: any[] = [];
   availableActivitiesList: any[] = [];
@@ -21,9 +26,10 @@ export class VolunteerActivitiesComponent implements OnInit {
   myRequestIds: Set<number> = new Set();
   userId: number | null = null;
   userRole: string | null = null;
-  message: string = '';
+  // message state removed in favor of ToastService
 
   private apiService = inject(ApiService);
+  private toastService = inject(ToastService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
@@ -59,6 +65,8 @@ export class VolunteerActivitiesComponent implements OnInit {
   loadActivities() {
     if (!this.userId) return;
 
+    this.isLoading = true;
+
     const observables: any = {
       all: this.apiService.getActivities()
     };
@@ -68,7 +76,9 @@ export class VolunteerActivitiesComponent implements OnInit {
       observables.requests = this.apiService.getVolunteerRequests(this.userId);
     }
 
-    forkJoin(observables).subscribe({
+    forkJoin(observables).pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
       next: (results: any) => {
         // Process my activities to a Set of IDs for O(1) lookup
         if (results.mine) {
@@ -108,7 +118,7 @@ export class VolunteerActivitiesComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading activities:', err);
-        this.message = 'Error al cargar las actividades.';
+        this.toastService.show('Error al cargar las actividades.', 'error');
       }
     });
   }
@@ -127,13 +137,11 @@ export class VolunteerActivitiesComponent implements OnInit {
 
     this.apiService.signUpForActivity(activityId, this.userId).subscribe({
       next: (res) => {
-        this.message = '¡Solicitud enviada correctamente! Espera a que el administrador la acepte.';
-        setTimeout(() => this.message = '', 5000);
+        this.toastService.show('¡Solicitud enviada correctamente! Espera a que el administrador la acepte.', 'success');
         this.loadActivities(); // Reload to update state
       },
       error: (err) => {
-        this.message = 'Error al enviar solicitud: ' + (err.error?.error || 'Inténtalo de nuevo');
-        setTimeout(() => this.message = '', 3000);
+        this.toastService.show('Error al enviar solicitud: ' + (err.error?.error || 'Inténtalo de nuevo'), 'error');
       }
     });
   }
@@ -145,13 +153,11 @@ export class VolunteerActivitiesComponent implements OnInit {
 
     this.apiService.unsubscribeFromActivity(activityId, this.userId).subscribe({
       next: (res) => {
-        this.message = 'Te has desapuntado correctamente.';
-        setTimeout(() => this.message = '', 3000);
+        this.toastService.show('Te has desapuntado correctamente.', 'success');
         this.loadActivities(); // Reload to update state
       },
       error: (err) => {
-        this.message = 'Error al desapuntarse: ' + (err.error?.error || 'Inténtalo de nuevo');
-        setTimeout(() => this.message = '', 3000);
+        this.toastService.show('Error al desapuntarse: ' + (err.error?.error || 'Inténtalo de nuevo'), 'error');
       }
     });
   }

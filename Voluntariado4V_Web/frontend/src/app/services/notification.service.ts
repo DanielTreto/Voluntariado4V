@@ -79,7 +79,48 @@ export class NotificationService {
       timestamp: new Date(),
       read: false,
       actionUrl: url,
-      recipientRole: 'volunteer'
+      recipientRole: 'volunteer',
+      recipientId: volunteerId
+    });
+  }
+
+  notifyVolunteerStatusUpdate(volunteerId: number | string, status: string) {
+    const isAccepted = status === 'ACTIVO';
+    const title = isAccepted ? 'Cuenta Activada' : 'Cuenta Actualizada';
+    const message = isAccepted
+      ? 'Tu cuenta de voluntario ha sido activada. Ya puedes inscribirte en actividades.'
+      : `El estado de tu cuenta ha cambiado a: ${status}.`;
+
+    this.addNotification({
+      id: Date.now().toString(),
+      type: isAccepted ? 'VOL_REGISTER' : 'VOL_REGISTER', // Reusing type or add new one
+      title: title,
+      message: message,
+      timestamp: new Date(),
+      read: false,
+      actionUrl: '/volunteer-dashboard',
+      recipientRole: 'volunteer',
+      recipientId: Number(volunteerId)
+    });
+  }
+
+  notifyOrganizationStatusUpdate(orgId: number | string, status: string) {
+    const isAccepted = status === 'ACTIVO';
+    const title = isAccepted ? 'Cuenta Activada' : 'Cuenta Actualizada';
+    const message = isAccepted
+      ? 'Tu organización ha sido aprobada. Ya puedes publicar actividades.'
+      : `El estado de tu cuenta ha cambiado a: ${status}.`;
+
+    this.addNotification({
+      id: Date.now().toString(),
+      type: isAccepted ? 'ORG_REGISTER' : 'ORG_REGISTER',
+      title: title,
+      message: message,
+      timestamp: new Date(),
+      read: false,
+      actionUrl: '/organization-dashboard',
+      recipientRole: 'organization',
+      recipientId: Number(orgId)
     });
   }
 

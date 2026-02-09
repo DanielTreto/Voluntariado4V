@@ -4,17 +4,25 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ApiService } from '../../../services/api.service';
 import { AvatarComponent } from '../../../components/atoms/avatar/avatar';
 import { BadgeComponent } from '../../../components/atoms/badge/badge';
+import { LoadingSpinnerComponent } from '../../../components/atoms/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../../components/atoms/skeleton/skeleton.component';
+import { ToastService } from '../../../services/toast.service';
+import { InputTextComponent } from '../../../components/atoms/input-text/input-text.component';
+import { SelectFieldComponent } from '../../../components/atoms/select-field/select-field.component';
+import { finalize } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
     selector: 'app-org-activities',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, AvatarComponent],
+    imports: [CommonModule, ReactiveFormsModule, AvatarComponent, LoadingSpinnerComponent, SkeletonComponent, InputTextComponent, SelectFieldComponent],
     templateUrl: './org-activities.html',
     styleUrls: ['./org-activities.css']
 })
 export class OrgActivitiesComponent implements OnInit {
+    isLoading: boolean = true;
     currentTab: 'historial' | 'solicitud' = 'historial';
     activities: any[] = [];
     requestForm: FormGroup;
@@ -26,28 +34,24 @@ export class OrgActivitiesComponent implements OnInit {
     imagePreview: string | null = null;
 
     // Lists for dropdowns
-    odsList = [
-        { id: 1, name: 'Fin de la Pobreza' },
-        { id: 2, name: 'Hambre Cero' },
-        { id: 3, name: 'Salud y Bienestar' },
-        { id: 4, name: 'Educación de Calidad' },
-    ];
+    odsList: any[] = [];
+    activityTypes: any[] = [];
 
-    activityTypes = [
-        { id: 1, name: 'Digital' },
-        { id: 2, name: 'Salud' },
-        { id: 3, name: 'Educativo' },
-        { id: 4, name: 'Ambiental' },
-        { id: 5, name: 'Deportivo' },
-        { id: 6, name: 'Social' },
-        { id: 7, name: 'Cultural' },
-        { id: 8, name: 'Tecnico' }
-    ];
+    get activityTypeOptions() {
+        return this.activityTypes.map(t => ({ value: t.id, label: t.description || t.name }));
+    }
+
+    get odsOptions() {
+        return this.odsList.map(o => ({ value: o.id, label: `${o.id} - ${o.description || o.name}` }));
+    }
+
+
 
     private apiService = inject(ApiService);
     private fb = inject(FormBuilder);
     private route = inject(ActivatedRoute);
     private cdr = inject(ChangeDetectorRef);
+    private toastService = inject(ToastService);
     private initialLoad = true;
 
     constructor() {
@@ -83,10 +87,21 @@ export class OrgActivitiesComponent implements OnInit {
         if (!user || user.role !== 'organization') return;
 
         if (user.id) {
-            this.apiService.getOrganizationActivities(user.id).subscribe({
-                next: (data) => {
+            this.isLoading = true;
+
+            forkJoin({
+                activities: this.apiService.getOrganizationActivities(user.id),
+                ods: this.apiService.getOds(),
+                types: this.apiService.getActivityTypes()
+            }).pipe(
+                finalize(() => this.isLoading = false)
+            ).subscribe({
+                next: (results) => {
+                    this.odsList = results.ods;
+                    this.activityTypes = results.types;
+
                     // Filter out PENDIENTE status as requested
-                    this.activities = data.filter((act: any) =>
+                    this.activities = results.activities.filter((act: any) =>
                         (act.ESTADO || act.status) !== 'PENDIENTE'
                     ).map((act: any) => ({
                         ...act,
@@ -99,8 +114,6 @@ export class OrgActivitiesComponent implements OnInit {
                         type: act.type || 'General',
                         location: act.UBICACION || act.location
                     }));
-
-                    this.cdr.detectChanges();
 
                     this.cdr.detectChanges();
 
@@ -117,7 +130,10 @@ export class OrgActivitiesComponent implements OnInit {
                         this.initialLoad = false;
                     }
                 },
-                error: (err) => console.error('Error loading activities', err)
+                error: (err) => {
+                    console.error('Error loading data', err);
+                    this.toastService.show('Error al cargar datos. Por favor, recarga la página.', 'error');
+                }
             });
         }
     }
@@ -153,7 +169,7 @@ export class OrgActivitiesComponent implements OnInit {
         }
 
         if (!this.selectedFile) {
-            alert('Por favor, selecciona una imagen para la actividad.');
+            this.toastService.show('Por favor, selecciona una imagen para la actividad.', 'warning');
             return;
         }
 
@@ -180,14 +196,14 @@ export class OrgActivitiesComponent implements OnInit {
                 if (this.selectedFile) {
                     this.apiService.uploadActivityImage(activityId, this.selectedFile).subscribe({
                         next: () => {
-                            alert('Solicitud enviada con éxito. Pendiente de aprobación.');
+                            this.toastService.show('Solicitud enviada con éxito. Pendiente de aprobación.', 'success');
                             this.resetForm();
                             this.currentTab = 'historial';
                             this.loadActivities();
                         },
                         error: (err) => {
                             console.error('Error uploading image', err);
-                            alert('Actividad creada, pero hubo un error al subir la imagen.');
+                            this.toastService.show('Actividad creada, pero hubo un error al subir la imagen.', 'warning');
                             this.resetForm();
                             this.currentTab = 'historial';
                             this.loadActivities();
@@ -195,7 +211,7 @@ export class OrgActivitiesComponent implements OnInit {
                     });
                 } else {
                     // Should not happen due to check above, but as fallback
-                    alert('Solicitud enviada con éxito. Pendiente de aprobación.');
+                    this.toastService.show('Solicitud enviada con éxito. Pendiente de aprobación.', 'success');
                     this.resetForm();
                     this.currentTab = 'historial';
                     this.loadActivities();
@@ -203,7 +219,7 @@ export class OrgActivitiesComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Error creating activity', err);
-                alert('Error al enviar la solicitud.');
+                this.toastService.show('Error al enviar la solicitud.', 'error');
             }
         });
     }

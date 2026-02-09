@@ -38,9 +38,7 @@ class OrganizationController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
     #[Route('/organizations/{id}', name: 'api_organizations_show', methods: ['GET'])]
@@ -68,9 +66,7 @@ class OrganizationController extends AbstractController
             'avatar' => $org->getAVATAR(),
         ];
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
     #[Route('/organizations', name: 'api_organizations_create', methods: ['POST'])]
@@ -128,25 +124,10 @@ class OrganizationController extends AbstractController
             ], 400);
         }
 
-        $response = new JsonResponse(['status' => 'Organization created', 'id' => $org->getCODORG()], 201);
-        // CORS headers for development
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-
-        return $response;
+        return new JsonResponse(['status' => 'Organization created', 'id' => $org->getCODORG()], 201);
     }
 
-    // Simple OPTIONS handler for CORS preflight
-    #[Route('/organizations', name: 'api_organizations_options', methods: ['OPTIONS'])]
-    public function options(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 
     #[Route('/organizations/{id}/status', name: 'api_organizations_update_status', methods: ['PATCH'])]
     public function updateStatus(string $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository): JsonResponse
@@ -169,20 +150,10 @@ class OrganizationController extends AbstractController
         $org->setESTADO($newStatus);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Organization status updated', 'newStatus' => $newStatus], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Organization status updated', 'newStatus' => $newStatus], 200);
     }
 
-    #[Route('/organizations/{id}/status', name: 'api_organizations_update_status_options', methods: ['OPTIONS'])]
-    public function updateStatusOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 
     #[Route('/organizations/{id}', name: 'api_organizations_update', methods: ['PUT'])]
     public function update(string $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, ValidatorInterface $validator): JsonResponse
@@ -230,9 +201,7 @@ class OrganizationController extends AbstractController
             ], 400);
         }
 
-        $response = new JsonResponse(['status' => 'Organization updated'], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Organization updated'], 200);
     }
 
     #[Route('/organizations/{id}/activities', name: 'api_organizations_activities', methods: ['GET'])]
@@ -251,8 +220,8 @@ class OrganizationController extends AbstractController
                 'id' => $act->getCODACT(),
                 'title' => $act->getNOMBRE(),
                 'description' => $act->getDESCRIPCION(),
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
-                'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
+                'date' => $act->getFECHA_INICIO()->format('Y-m-d\TH:i:s'),
+                'endDate' => $act->getFECHA_FIN()->format('Y-m-d\TH:i:s'),
                 'status' => $act->getESTADO(),
                 'image' => $act->getIMAGEN(), // Added
                 'location' => $act->getUBICACION(), // Added
@@ -283,20 +252,10 @@ class OrganizationController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
-    #[Route('/organizations/{id}/activities', name: 'api_organizations_activities_options', methods: ['OPTIONS'])]
-    public function organizationActivitiesOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
     #[Route('/organizations/{id}/avatar', name: 'api_organizations_upload_avatar', methods: ['POST'])]
     public function uploadAvatar(string $id, Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository): JsonResponse
     {
@@ -328,18 +287,8 @@ class OrganizationController extends AbstractController
         $org->setAVATAR('/uploads/avatars/' . $fileName);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Avatar uploaded', 'url' => $org->getAVATAR()], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Avatar uploaded', 'url' => $org->getAVATAR()], 200);
     }
 
-    #[Route('/organizations/{id}/avatar', name: 'api_organizations_avatar_options', methods: ['OPTIONS'])]
-    public function avatarOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 }

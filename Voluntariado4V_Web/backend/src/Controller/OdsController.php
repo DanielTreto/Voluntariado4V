@@ -23,18 +23,8 @@ class OdsController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
-    #[Route('/ods', name: 'api_ods_options', methods: ['OPTIONS'])]
-    public function options(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 }

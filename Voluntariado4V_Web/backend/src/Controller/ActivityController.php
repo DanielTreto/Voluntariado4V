@@ -68,12 +68,8 @@ class ActivityController extends AbstractController
                 // I will use Y-m-d for 'date' and 'endDate' to be standard/Web compliant, and hope Mobile parses it or I can add a specific field.
                 // Actually, looking at previous Mobile code, it used d/m/y. 
                 // I'll provide both formats to be safe.
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d'),
-                'dateFormatted' => $act->getFECHA_INICIO()->format('d/m/y'), // For Mobile display if needed
-                'requestDate' => $act->getFECHA_INICIO()->format('d/m/y'), // Trying to cover bases
-                
-                'endDate' => $act->getFECHA_FIN()->format('Y-m-d'),
-                'endDateFormatted' => $act->getFECHA_FIN()->format('d/m/y'),
+                'date' => $act->getFECHA_INICIO()->format('Y-m-d\TH:i:s'),
+                'endDate' => $act->getFECHA_FIN()->format('Y-m-d\TH:i:s'),
                 
                 'image' => $act->getIMAGEN() ?? 'assets/images/activity-1.jpg', // Web key
                 'imagen' => $act->getIMAGEN(), // Mobile key (Db column)
@@ -107,9 +103,7 @@ class ActivityController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse($data);
     }
 
     #[Route('/activities', name: 'api_activities_create', methods: ['POST'])]
@@ -203,12 +197,7 @@ class ActivityController extends AbstractController
         $entityManager->persist($actividad);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Activity created', 'id' => $actividad->getCODACT()], 201);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-
-        return $response;
+        return new JsonResponse(['status' => 'Activity created', 'id' => $actividad->getCODACT()], 201);
     }
 
     #[Route('/activities/{id}/status', name: 'api_activities_update_status', methods: ['PATCH'])]
@@ -232,14 +221,12 @@ class ActivityController extends AbstractController
         $act->setESTADO($newStatus);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Activity status updated', 'newStatus' => $newStatus], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Activity status updated', 'newStatus' => $newStatus], 200);
 
     }
 
     #[Route('/activities/{id}', name: 'api_activities_update', methods: ['PUT'])]
-    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository): JsonResponse
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository, ValidatorInterface $validator): JsonResponse
     {
         $act = $activityRepository->find($id);
 
@@ -296,42 +283,24 @@ class ActivityController extends AbstractController
              }
         }
 
+        // Validate
+        $errors = $validator->validate($act);
+        if (count($errors) > 0) {
+            $errorMessages = [];
+            foreach ($errors as $error) {
+                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+            }
+            return new JsonResponse(['errors' => $errorMessages], 400);
+        }
+
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Activity updated'], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        return new JsonResponse(['status' => 'Activity updated'], 200);
     }
 
-    #[Route('/activities/{id}', name: 'api_activities_update_options', methods: ['OPTIONS'])]
-    public function updateOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'PUT, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
 
-    #[Route('/activities', name: 'api_activities_options', methods: ['OPTIONS'])]
-    public function options(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
 
-    #[Route('/activities/{id}/status', name: 'api_activities_update_status_options', methods: ['OPTIONS'])]
-    public function updateStatusOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'PATCH, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
-    }
+
 
     #[Route('/activities/{id}/signup', name: 'api_activities_signup', methods: ['POST'])]
     public function signup(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, VolunteerRepository $volunteerRepository): JsonResponse
@@ -415,19 +384,7 @@ class ActivityController extends AbstractController
         $entityManager->persist($solicitud);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Request sent successfully'], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-    }
-
-    #[Route('/activities/{id}/signup', name: 'api_activities_signup_options', methods: ['OPTIONS'])]
-    public function signupOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
+        return new JsonResponse(['status' => 'Request sent successfully'], 200);
     }
 
     #[Route('/activities/{id}/volunteers', name: 'api_activities_volunteers', methods: ['GET'])]
@@ -451,19 +408,7 @@ class ActivityController extends AbstractController
             ];
         }
 
-        $response = new JsonResponse($data);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-    }
-
-    #[Route('/activities/{id}/volunteers', name: 'api_activities_volunteers_options', methods: ['OPTIONS'])]
-    public function activityVolunteersOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
+        return new JsonResponse($data);
     }
     #[Route('/activities/{id}/volunteers/{volunteerId}', name: 'api_activities_remove_volunteer', methods: ['DELETE'])]
     public function removeVolunteer(int $id, string $volunteerId, EntityManagerInterface $entityManager, ActivityRepository $activityRepository, VolunteerRepository $volunteerRepository): JsonResponse
@@ -485,19 +430,7 @@ class ActivityController extends AbstractController
         $act->removeVoluntario($volunteer);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Volunteer removed successfully'], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-    }
-
-    #[Route('/activities/{id}/volunteers/{volunteerId}', name: 'api_activities_remove_volunteer_options', methods: ['OPTIONS'])]
-    public function removeVolunteerOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
+        return new JsonResponse(['status' => 'Volunteer removed successfully'], 200);
     }
 
     #[Route('/activities/{id}/image', name: 'api_activities_image', methods: ['POST'])]
@@ -524,19 +457,7 @@ class ActivityController extends AbstractController
             return new JsonResponse(['error' => 'Error uploading image: ' . $e->getMessage()], 500);
         }
 
-        $response = new JsonResponse(['status' => 'Image uploaded successfully', 'path' => $act->getIMAGEN()], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-    }
-
-    #[Route('/activities/{id}/image', name: 'api_activities_image_options', methods: ['OPTIONS'])]
-    public function uploadImageOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
+        return new JsonResponse(['status' => 'Image uploaded successfully', 'path' => $act->getIMAGEN()], 200);
     }
 
     #[Route('/activities/{id}', name: 'api_activities_delete', methods: ['DELETE'])]
@@ -558,18 +479,6 @@ class ActivityController extends AbstractController
         $entityManager->remove($act);
         $entityManager->flush();
 
-        $response = new JsonResponse(['status' => 'Activity deleted'], 200);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-    }
-
-    #[Route('/activities/{id}', name: 'api_activities_delete_options', methods: ['OPTIONS'])]
-    public function deleteOptions(): JsonResponse
-    {
-        $response = new JsonResponse(null, 204);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        $response->headers->set('Access-Control-Allow-Methods', 'PUT, DELETE, OPTIONS');
-        $response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        return $response;
+        return new JsonResponse(['status' => 'Activity deleted'], 200);
     }
 }
