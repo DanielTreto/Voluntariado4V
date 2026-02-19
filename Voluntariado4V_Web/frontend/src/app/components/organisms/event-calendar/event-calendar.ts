@@ -1,14 +1,19 @@
 import { Component, OnInit, inject, Input, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BadgeComponent } from '../../atoms/badge/badge';
+import { LoadingSpinnerComponent } from '../../atoms/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../atoms/skeleton/skeleton.component';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
+import { finalize } from 'rxjs/operators';
+
 
 @Component({
   selector: 'app-event-calendar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LoadingSpinnerComponent, SkeletonComponent],
   templateUrl: './event-calendar.html',
+
   styleUrl: './event-calendar.css'
 })
 export class EventCalendarComponent implements OnInit {
@@ -21,6 +26,8 @@ export class EventCalendarComponent implements OnInit {
   weekDays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
   calendarDays: any[] = [];
   activities: any[] = [];
+  isLoading: boolean = true;
+
 
   // Day Details Modal
   selectedDay: any = null;
@@ -45,36 +52,38 @@ export class EventCalendarComponent implements OnInit {
 
   loadActivities() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.isLoading = true;
+
+    const handleData = (data: any) => {
+      this.activities = data;
+      this.generateCalendar();
+      setTimeout(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      });
+    };
+
+    const handleError = (err: any) => {
+      console.error('Error loading activities', err);
+      setTimeout(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      });
+    };
 
     if (this.organizationId) {
-      this.apiService.getOrganizationActivities(this.organizationId).subscribe({
-        next: (data) => {
-          this.activities = data;
-          this.generateCalendar();
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Error loading organization activities', err)
-      });
+      this.apiService.getOrganizationActivities(this.organizationId)
+        .subscribe({ next: handleData, error: handleError });
     } else if (user && user.role === 'volunteer') {
-      this.apiService.getVolunteerActivities(user.id).subscribe({
-        next: (data) => {
-          this.activities = data;
-          this.generateCalendar();
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Error loading volunteer activities', err)
-      });
+      this.apiService.getVolunteerActivities(user.id)
+        .subscribe({ next: handleData, error: handleError });
     } else {
-      this.apiService.getActivities().subscribe({
-        next: (data) => {
-          this.activities = data;
-          this.generateCalendar();
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Error loading activities', err)
-      });
+      this.apiService.getActivities()
+        .subscribe({ next: handleData, error: handleError });
     }
   }
+
+
 
   generateCalendar() {
     const year = this.currentDate.getFullYear();
@@ -103,11 +112,13 @@ export class EventCalendarComponent implements OnInit {
     for (let i = 1; i <= daysInMonth; i++) {
       const dateString = `${year}-${(month + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
       const dayEvents = this.activities.filter(a => {
-        if (!a.date) return false;
+        const dateToUse = a.startDate || a.date;
+        if (!dateToUse) return false;
         // Handle ISO format YYYY-MM-DDTHH:mm:ss
-        const activityDate = a.date.split('T')[0];
+        const activityDate = dateToUse.split('T')[0];
         return activityDate === dateString;
       });
+
 
       this.calendarDays.push({
         day: i,
