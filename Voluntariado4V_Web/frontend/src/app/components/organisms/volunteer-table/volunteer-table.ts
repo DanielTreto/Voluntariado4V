@@ -24,7 +24,7 @@ interface Volunteer {
   status: 'active' | 'pending' | 'inactive' | 'org-pending' | 'suspended' | 'custom';
   avatar: string;
   dni: string;
-  address: string;
+
   course: string;
   dateOfBirth: string;
   description: string;
@@ -146,7 +146,7 @@ export class VolunteerTableComponent implements OnInit {
               status: this.mapStatus(v.status),
               avatar: v.avatar ? (v.avatar.startsWith('/uploads') ? this.apiService.baseUrl + v.avatar : v.avatar) : 'assets/images/volunteer-avatar.png',
               dni: v.dni,
-              address: 'No disponible',
+
               course: v.course,
               dateOfBirth: v.dateOfBirth || 'No disponible',
               description: v.description || 'Sin descripción',
