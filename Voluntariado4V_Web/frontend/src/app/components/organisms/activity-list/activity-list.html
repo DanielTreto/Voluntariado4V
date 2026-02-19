@@ -304,13 +304,11 @@
                         <div class="col-md-6">
                             <label class="form-label">Tipo</label>
                             <select class="form-select" [(ngModel)]="selectedActivity.type" name="type">
-                                <option value="Medio Ambiente">Medio Ambiente</option>
-                                <option value="Social">Social</option>
-                                <option value="Tecnológico">Tecnológico</option>
-                                <option value="Educativo">Educativo</option>
-                                <option value="Salud">Salud</option>
+                                <option *ngFor="let type of activityTypes" [value]="type.description || type.name">{{
+                                    type.description || type.name }}</option>
                             </select>
                         </div>
+
                         <div class="col-12">
                             <label class="form-label">Imagen</label>
                             <div class="d-flex align-items-center gap-2">
@@ -517,9 +515,8 @@
 
 <!-- Create Activity Modal -->
 <div class="modal" [class.show]="showCreateModal" [class.d-block]="showCreateModal"
-    [style.background-color]="showCreateModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
-    (click)="closeCreateModal()">
-    <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    [style.background-color]="showCreateModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">Nueva Actividad</h5>
@@ -565,13 +562,19 @@
                     <div class="mb-3">
                         <label class="form-label">Tipo</label>
                         <select class="form-select" [(ngModel)]="newActivity.type" name="newType">
-                            <option value="Medio Ambiente">Medio Ambiente</option>
-                            <option value="Social">Social</option>
-                            <option value="Tecnológico">Tecnológico</option>
-                            <option value="Educativo">Educativo</option>
-                            <option value="Salud">Salud</option>
+                            <option *ngFor="let type of activityTypes" [value]="type.description || type.name">{{
+                                type.description || type.name }}</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">ODS Principal</label>
+                        <select class="form-select" [(ngModel)]="selectedOdsId" name="newOds">
+                            <option [ngValue]="null">Ninguno</option>
+                            <option *ngFor="let ods of odsList" [ngValue]="ods.id">{{ ods.id }} - {{ ods.description ||
+                                ods.name }}</option>
+                        </select>
+                    </div>
+
                 </form>
             </div>
             <div class="modal-footer">

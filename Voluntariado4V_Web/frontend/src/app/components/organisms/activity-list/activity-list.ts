@@ -33,7 +33,9 @@ interface Activity {
   description: string;
   location: string;
   date: string;
+  startDate?: string;
   image: string;
+
   organization: Organization;
   volunteers: Volunteer[];
   maxVolunteers?: number;
@@ -60,7 +62,9 @@ export class ActivityListComponent implements OnInit {
   allVolunteers: Volunteer[] = [];
   allOrganizations: Organization[] = [];
   odsList: any[] = [];
+  activityTypes: any[] = [];
   activities: Activity[] = [];
+
   requests: any[] = [];
   pendingRequestsCount: number = 0;
 
@@ -107,7 +111,9 @@ export class ActivityListComponent implements OnInit {
     this.loadVolunteers();
     this.loadOrganizations();
     this.loadOds();
+    this.loadActivityTypes();
     this.loadRequests(); // Preload requests count
+
   }
 
   loadData() {
@@ -122,7 +128,8 @@ export class ActivityListComponent implements OnInit {
           title: act.title,
           description: act.description,
           location: act.location || 'Ubicación no especificada',
-          date: act.date,
+          date: act.startDate || act.date, // Use startDate if available, otherwise fallback to date
+          startDate: act.startDate, // Map startDate explicitly
           image: act.image ? (act.image.startsWith('/uploads') || act.image.startsWith('http') ? (act.image.startsWith('/uploads') ? this.apiService.baseUrl + act.image : act.image) : act.image) : 'assets/images/activity-1.jpg',
           organization: act.organization ? {
             id: act.organization.id,
@@ -199,10 +206,11 @@ export class ActivityListComponent implements OnInit {
         const isAccepted = status === 'ACEPTADA';
         this.notificationService.notifyVolunteerJoinStatus(
           req.volunteer.id,
-          req.title || 'Actividad', // fallback title if not present in request object
+          req.activity?.title || 'Actividad',
           isAccepted,
-          req.activityId
+          req.activity?.id
         );
+
 
         alert(`Solicitud ${isAccepted ? 'aceptada' : 'rechazada'} correctamente.`);
       },
@@ -261,6 +269,14 @@ export class ActivityListComponent implements OnInit {
       error: (err) => console.error('Error loading ODS', err)
     });
   }
+
+  loadActivityTypes() {
+    this.apiService.getActivityTypes().subscribe({
+      next: (data) => this.activityTypes = data,
+      error: (err) => console.error('Error loading activity types', err)
+    });
+  }
+
 
   mapStatus(backendStatus: string): 'active' | 'pending' | 'ended' {
     const map: any = {
@@ -335,7 +351,8 @@ export class ActivityListComponent implements OnInit {
         title: this.selectedActivity.title,
         description: this.selectedActivity.description,
         location: this.selectedActivity.location,
-        date: this.selectedActivity.date,
+        date: this.selectedActivity.startDate || this.selectedActivity.date,
+
         type: this.selectedActivity.type,
         ods: this.editOdsId
       };
@@ -520,11 +537,13 @@ export class ActivityListComponent implements OnInit {
       title: this.newActivity.title,
       description: this.newActivity.description,
       location: this.newActivity.location,
-      date: this.newActivity.date,
+      date: this.newActivity.startDate || this.newActivity.date,
+
       type: this.newActivity.type,
       image: null, // Image handled via upload
       organizationId: this.selectedOrgId,
-      ods: this.selectedOdsId
+      ods: this.selectedOdsId,
+      role: 'admin'
     };
 
     this.apiService.createActivity(payload).subscribe({
