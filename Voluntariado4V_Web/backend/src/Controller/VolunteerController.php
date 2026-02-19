@@ -15,43 +15,41 @@ use App\Entity\Ciclo;
 use App\Entity\Disponibilidad;
 use App\Repository\CicloRepository;
 use App\Repository\TipoActividadRepository;
+use App\Dto\VolunteerDto;
+use App\Dto\ActivityDto;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 #[Route('/api')]
 class VolunteerController extends AbstractController
 {
     #[Route('/volunteers', name: 'api_volunteers_index', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the list of volunteers',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: VolunteerDto::class))
+        )
+    )]
+    #[OA\Tag(name: 'Volunteers')]
     public function index(VolunteerRepository $volunteerRepository): JsonResponse
     {
         $volunteers = $volunteerRepository->findAll();
-        $data = [];
-
-        foreach ($volunteers as $v) {
-            $data[] = [
-                'id' => $v->getCODVOL(),
-                'name' => $v->getNOMBRE(),
-                'surname1' => $v->getAPELLIDO1(),
-                'surname2' => $v->getAPELLIDO2(),
-                'email' => $v->getCORREO(),
-                'phone' => $v->getTELEFONO(),
-                'dni' => $v->getDNI(),
-                'dateOfBirth' => $v->getFECHA_NACIMIENTO()?->format('Y-m-d'),
-                'description' => $v->getDESCRIPCION(),
-                'course' => $v->getCODCICLO(),
-                'status' => $v->getESTADO(),
-                'avatar' => $v->getAVATAR(),
-                'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
-                'availability' => array_map(fn($d) => [
-                    'day' => $d->getDIA(),
-                    'hours' => $d->getNUM_HORAS(),
-                    'time' => method_exists($d, 'getHORA') ? $d->getHORA() : null // Support both if method exists
-                ], $v->getDisponibilidades()->toArray()),
-            ];
-        }
+        $data = array_map(fn($v) => VolunteerDto::fromEntity($v), $volunteers);
 
         return new JsonResponse($data);
     }
 
+
     #[Route('/volunteers/{id}', name: 'api_volunteers_show', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns a volunteer detail',
+        content: new Model(type: VolunteerDto::class)
+    )]
+    #[OA\Response(response: 404, description: 'Volunteer not found')]
+    #[OA\Tag(name: 'Volunteers')]
     public function show(string $id, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $v = $volunteerRepository->find($id);
@@ -60,29 +58,9 @@ class VolunteerController extends AbstractController
             return new JsonResponse(['error' => 'Volunteer not found'], 404);
         }
 
-        $data = [
-            'id' => $v->getCODVOL(),
-            'name' => $v->getNOMBRE(),
-            'surname1' => $v->getAPELLIDO1(),
-            'surname2' => $v->getAPELLIDO2(),
-            'email' => $v->getCORREO(),
-            'phone' => $v->getTELEFONO(),
-            'dni' => $v->getDNI(),
-            'dateOfBirth' => $v->getFECHA_NACIMIENTO()?->format('Y-m-d'),
-            'description' => $v->getDESCRIPCION(),
-            'course' => $v->getCODCICLO(),
-            'status' => $v->getESTADO(),
-            'avatar' => $v->getAVATAR(),
-            'preferences' => array_map(fn($t) => $t->getCODTIPO(), $v->getPreferencias()->toArray()),
-            'availability' => array_map(fn($d) => [
-                'day' => $d->getDIA(),
-                'hours' => $d->getNUM_HORAS(),
-                'time' => method_exists($d, 'getHORA') ? $d->getHORA() : null
-            ], $v->getDisponibilidades()->toArray()),
-        ];
-
-        return new JsonResponse($data);
+        return new JsonResponse(VolunteerDto::fromEntity($v));
     }
+
 
     #[Route('/volunteers', name: 'api_volunteers_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, CicloRepository $cicloRepository, VolunteerRepository $volunteerRepository, TipoActividadRepository $tipoActividadRepository): JsonResponse
@@ -328,6 +306,15 @@ class VolunteerController extends AbstractController
     }
 
     #[Route('/volunteers/{id}/activities', name: 'api_volunteers_activities', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the activities of a volunteer',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: ActivityDto::class))
+        )
+    )]
+    #[OA\Tag(name: 'Volunteers')]
     public function myActivities(string $id, VolunteerRepository $volunteerRepository): JsonResponse
     {
         $volunteer = $volunteerRepository->find($id);
@@ -336,55 +323,16 @@ class VolunteerController extends AbstractController
         }
 
         $activities = $volunteer->getActividades();
-        $data = [];
+        $data = array_map(fn($act) => ActivityDto::fromEntity($act), $activities->toArray());
+        
+        // Filter out SUSPENDIDA as per original logic if needed, 
+        // but DTO transformation logic is cleaner. 
+        // Original logic filtered SUSPENDIDA:
+        $data = array_filter($data, fn($actDto) => $actDto->status !== 'SUSPENDIDA');
 
-        foreach ($activities as $act) {
-            // Filter out SUSPENDIDA activities
-            if ($act->getESTADO() === 'SUSPENDIDA') {
-                continue;
-            }
-
-            $vols = [];
-            foreach ($act->getVoluntarios() as $v) {
-                $fullName = $v->getNOMBRE() . ' ' . $v->getAPELLIDO1();
-                if ($v->getAPELLIDO2()) {
-                    $fullName .= ' ' . $v->getAPELLIDO2();
-                }
-                $vols[] = [
-                    'id' => $v->getCODVOL(),
-                    'name' => trim($fullName),
-                    'avatar' => $v->getAVATAR()
-                ];
-            }
-            $data[] = [
-                'id' => $act->getCODACT(),
-                'title' => $act->getNOMBRE(),
-                'description' => $act->getDESCRIPCION(),
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d\TH:i:s'),
-                'endDate' => $act->getFECHA_FIN() ? $act->getFECHA_FIN()->format('Y-m-d\TH:i:s') : null,
-                'location' => $act->getUBICACION(),
-                'duration' => $act->getDURACION_SESION(),
-                'status' => $act->getESTADO(),
-                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General',
-                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
-                'imagen' => $act->getIMAGEN(),
-                'ods' => array_map(function($ods) {
-                    return [
-                        'id' => $ods->getNUMODS(),
-                        'description' => $ods->getDESCRIPCION()
-                    ];
-                }, $act->getOds()->toArray()),
-                'volunteers' => $vols,
-                'organization' => $act->getOrganizacion() ? [
-                    'id' => $act->getOrganizacion()->getCODORG(),
-                    'name' => $act->getOrganizacion()->getNOMBRE(),
-                    'avatar' => $act->getOrganizacion()->getAVATAR()
-                ] : null
-            ];
-        }
-
-        return new JsonResponse($data);
+        return new JsonResponse(array_values($data));
     }
+
 
 
     #[Route('/volunteers/{id}/requests', name: 'api_volunteers_requests', methods: ['GET'])]
