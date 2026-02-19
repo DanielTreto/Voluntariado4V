@@ -37,7 +37,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Install dependencies
-RUN composer install --no-scripts --no-interaction
+RUN composer install --no-scripts --no-interaction --no-autoloader
 
 # Set permissions
 RUN chown -R www-data:www-data var
