@@ -71,7 +71,8 @@ export class ReportsComponent implements OnInit, AfterViewInit {
     const activitiesByMonth: { [key: string]: number } = {};
     activities.forEach(act => {
       // Handle potential date format issues
-      const dateStr = act.date;
+      const dateStr = act.startDate || act.date;
+
       if (!dateStr) return; // Skip if no date exists
 
       let date = new Date(dateStr);
@@ -140,9 +141,11 @@ export class ReportsComponent implements OnInit, AfterViewInit {
 
     this.allActivities.forEach(activity => {
       // Handle date parsing safely
-      let activityDate = new Date(activity.date);
+      const dateToUse = activity.startDate || activity.date;
+      let activityDate = new Date(dateToUse);
       if (isNaN(activityDate.getTime())) {
-        const parts = activity.date.split('-');
+        const parts = dateToUse.split('-');
+
         if (parts.length === 3) {
           activityDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
         }

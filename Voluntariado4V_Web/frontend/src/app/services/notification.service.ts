@@ -86,10 +86,17 @@ export class NotificationService {
 
   notifyVolunteerStatusUpdate(volunteerId: number | string, status: string) {
     const isAccepted = status === 'ACTIVO';
-    const title = isAccepted ? 'Cuenta Activada' : 'Cuenta Actualizada';
-    const message = isAccepted
-      ? 'Tu cuenta de voluntario ha sido activada. Ya puedes inscribirte en actividades.'
-      : `El estado de tu cuenta ha cambiado a: ${status}.`;
+    const title = isAccepted ? 'Cuenta Activada' : (status === 'SUSPENDIDO' ? 'Cuenta Suspendida' : 'Cuenta Actualizada');
+
+    let message = '';
+    if (isAccepted) {
+      message = '¡Felicidades! Tu cuenta de voluntario ha sido activada. Ya puedes inscribirte en todas las actividades disponibles.';
+    } else if (status === 'SUSPENDIDO') {
+      message = 'Tu cuenta de voluntario ha sido suspendida temporalmente. No podrás inscribirte en nuevas actividades por ahora.';
+    } else {
+      message = `El estado de tu cuenta de voluntario ha cambiado a: ${status.toLowerCase()}.`;
+    }
+
 
     this.addNotification({
       id: Date.now().toString(),
@@ -106,10 +113,17 @@ export class NotificationService {
 
   notifyOrganizationStatusUpdate(orgId: number | string, status: string) {
     const isAccepted = status === 'ACTIVO';
-    const title = isAccepted ? 'Cuenta Activada' : 'Cuenta Actualizada';
-    const message = isAccepted
-      ? 'Tu organización ha sido aprobada. Ya puedes publicar actividades.'
-      : `El estado de tu cuenta ha cambiado a: ${status}.`;
+    const title = isAccepted ? 'Cuenta Activada' : (status === 'SUSPENDIDO' ? 'Cuenta Suspendida' : 'Cuenta Actualizada');
+
+    let message = '';
+    if (isAccepted) {
+      message = '¡Buenas noticias! Tu organización ha sido aprobada. Ya puedes empezar a publicar actividades.';
+    } else if (status === 'SUSPENDIDO') {
+      message = 'Tu cuenta ha sido suspendida temporalmente por un administrador. Si crees que es un error, contáctanos.';
+    } else {
+      message = `El estado de tu organización ha sido actualizado a: ${status.toLowerCase()}.`;
+    }
+
 
     this.addNotification({
       id: Date.now().toString(),

@@ -367,3 +367,29 @@ body {
   width: 250px;
   height: 250px;
 }
+/* src/styles.scss */
+
+/* Fix for table dropdowns being clipped by overflow-x: auto */
+.table-responsive-visible {
+  overflow: visible !important;
+  min-height: 350px; /* Ensure space for dropdowns even with few rows */
+}
+
+@media (max-width: 991.98px) {
+  .table-responsive-visible {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Ensure dropdown menus have higher z-index and don't affect layout */
+.dropdown-menu {
+  z-index: 1060 !important; /* Above table sticky headers if any */
+}
+
+/* Force dropdown-menu-end to align right */
+.dropdown-menu-end {
+  right: 0 !important;
+  left: auto !important;
+}
+
