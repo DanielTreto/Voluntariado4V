@@ -26,6 +26,10 @@ public class OrganizationActivity extends AppCompatActivity {
         if (userId == null) {
             android.content.SharedPreferences prefs = getSharedPreferences("UserSession", MODE_PRIVATE);
             userId = prefs.getString("USER_ID", null);
+            String token = prefs.getString("USER_TOKEN", null);
+            if (token != null) {
+                cuatrovientos.voluntariado.network.RetrofitClient.setAuthToken(token);
+            }
         }
 
         BottomNavigationView bottomNav = findViewById(R.id.org_bottom_nav);

@@ -9,6 +9,7 @@ public class LoginResponse {
     private String firebaseUid;
     private String avatar;
     private String error;
+    private String token;
 
     public boolean isSuccess() {
         return success;
@@ -44,6 +45,10 @@ public class LoginResponse {
 
     public String getStatus() {
         return status;
+    }
+
+    public String getToken() {
+        return token;
     }
 
     private String status;

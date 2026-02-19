@@ -96,7 +96,10 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("USER_EMAIL", loginResponse.getEmail());
                         editor.putString("USER_ROLE", role);
                         editor.putString("USER_AVATAR", loginResponse.getAvatar());
+                        editor.putString("USER_TOKEN", loginResponse.getToken());
                         editor.apply();
+                        
+                        cuatrovientos.voluntariado.network.RetrofitClient.setAuthToken(loginResponse.getToken());
 
                         if ("volunteer".equalsIgnoreCase(role)) {
                             Intent intent = new Intent(LoginActivity.this, StudentActivity.class);

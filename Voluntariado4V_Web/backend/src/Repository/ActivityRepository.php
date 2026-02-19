@@ -18,26 +18,31 @@ class ActivityRepository extends ServiceEntityRepository
 
     public function getMonthlyStats(string $year): array
     {
+        $startDate = new \DateTime("$year-01-01 00:00:00");
+        $endDate = new \DateTime("$year-12-31 23:59:59");
+
         $qb = $this->createQueryBuilder('a');
-        $qb->select('SUBSTRING(a.FECHA_INICIO, 6, 2) as month, COUNT(a.CODACT) as count')
-           ->where('SUBSTRING(a.FECHA_INICIO, 1, 4) = :year')
-           ->andWhere("a.ESTADO IN ('ACTIVE', 'ACTIVO', 'FINALIZADA')")
-           ->setParameter('year', $year)
-           ->groupBy('month');
+        $qb->select('a')
+           ->where('a.FECHA_INICIO >= :start')
+           ->andWhere('a.FECHA_INICIO <= :end')
+           // Filter by relevant statuses for "Activity Reports"
+           // Assuming we want to show valid activities (Ongoing, Finished, or Active)
+           ->andWhere("a.ESTADO IN ('EN_PROGRESO', 'FINALIZADA', 'ACTIVE', 'ACTIVO', 'PENDIENTE')") 
+           ->setParameter('start', $startDate)
+           ->setParameter('end', $endDate);
 
-        try {
-            $results = $qb->getQuery()->getResult();
-        } catch (\Exception $e) {
-            // Fallback for databases where SUBSTRING usually works but might differ (e.g. SQLite)
-            // returning empty to let controller/service handle via PHP if needed, but for now assuming MySQL
-            return [];
-        }
-
+        $results = $qb->getQuery()->getResult();
+        
         $monthlyData = array_fill(0, 12, 0);
-        foreach ($results as $row) {
-            $monthIndex = (int)$row['month'] - 1;
-            if ($monthIndex >= 0 && $monthIndex < 12) {
-                $monthlyData[$monthIndex] = (int)$row['count'];
+        
+        foreach ($results as $act) {
+            $date = $act->getFECHA_INICIO();
+            if ($date) {
+                // Month is 1-indexed (1=Jan, 12=Dec)
+                $month = (int)$date->format('n'); 
+                if ($month >= 1 && $month <= 12) {
+                    $monthlyData[$month - 1]++;
+                }
             }
         }
 

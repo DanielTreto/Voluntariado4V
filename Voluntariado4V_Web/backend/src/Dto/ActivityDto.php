@@ -51,8 +51,8 @@ class ActivityDto
         $dto->description = $actividad->getDESCRIPCION();
         $dto->location = $actividad->getUBICACION();
         $dto->image = $actividad->getIMAGEN();
-        $dto->startDate = $actividad->getFECHA_INICIO() ? $actividad->getFECHA_INICIO()->format(\DateTimeInterface::ATOM) : '';
-        $dto->endDate = $actividad->getFECHA_FIN() ? $actividad->getFECHA_FIN()->format(\DateTimeInterface::ATOM) : '';
+        $dto->startDate = $actividad->getFECHA_INICIO() ? $actividad->getFECHA_INICIO()->format('d/m/y') : '';
+        $dto->endDate = $actividad->getFECHA_FIN() ? $actividad->getFECHA_FIN()->format('d/m/y') : '';
         $dto->duration = $actividad->getDURACION_SESION();
         $dto->status = $actividad->getESTADO();
         $dto->maxVolunteers = $actividad->getN_MAX_VOLUNTARIOS() ?? 0;
@@ -69,6 +69,8 @@ class ActivityDto
         $tipo = $actividad->getTiposActividad()->first();
         if ($tipo) {
             $dto->type = $tipo->getDESCRIPCION();
+        } else {
+            $dto->type = 'General';
         }
 
         foreach ($actividad->getOds() as $ods) {
