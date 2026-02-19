@@ -142,7 +142,7 @@ export class VolunteerTableComponent implements OnInit {
               project: v.course || 'Sin Asignar',
               email: v.email,
               phone: v.phone,
-              lastActivity: 'Reciente',
+              lastActivity: v.lastActivity || 'Sin actividad',
               status: this.mapStatus(v.status),
               avatar: v.avatar ? (v.avatar.startsWith('/uploads') ? this.apiService.baseUrl + v.avatar : v.avatar) : 'assets/images/volunteer-avatar.png',
               dni: v.dni,

@@ -18,6 +18,7 @@ class VolunteerDto
     public ?string $description = null;
     public ?string $course = null;
     public ?string $status = null;
+    public ?string $lastActivity = null;
     /** @var string[] */
     public array $preferences = [];
     /** @var array */
@@ -50,6 +51,16 @@ class VolunteerDto
                 'time' => method_exists($disp, 'getHORA') ? $disp->getHORA() : null
             ];
         }
+
+        // Calculate last activity based on joined activities
+        $lastDate = null;
+        foreach ($volunteer->getActividades() as $act) {
+             $date = $act->getFECHA_FIN(); // Using End Date as reference
+             if ($date && ($lastDate === null || $date > $lastDate)) {
+                 $lastDate = $date;
+             }
+        }
+        $dto->lastActivity = $lastDate ? $lastDate->format('Y-m-d') : null;
 
         return $dto;
     }
