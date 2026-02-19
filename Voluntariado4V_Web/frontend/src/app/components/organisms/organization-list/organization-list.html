@@ -1,6 +1,7 @@
+<app-loading-spinner [isLoading]="isLoading"></app-loading-spinner>
 <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
     <!-- Header with Tabs -->
-    <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
         <div class="d-flex gap-3">
             <button class="btn rounded-3 px-4 fw-bold"
                 [ngClass]="activeTab === 'pending' ? 'btn-primary' : 'btn-light text-secondary'"
@@ -13,7 +14,14 @@
                 Organizaciones Registradas
             </button>
         </div>
+
+        <!-- Action Button for Registered Tab -->
+        <button *ngIf="activeTab === 'registered'" class="btn btn-primary rounded-pill px-4 fw-bold"
+            (click)="openCreateModal()">
+            <i class="bi bi-plus-lg me-2"></i> Nueva Organización
+        </button>
     </div>
+
 
     <!-- Search Bar -->
     <div class="mb-4">
@@ -37,7 +45,8 @@
     <div class="tab-content">
         <!-- Pending Organizations Tab -->
         <div *ngIf="activeTab === 'pending'" class="tab-pane fade show active">
-            <div class="table-responsive">
+            <div class="table-responsive-visible">
+
                 <table class="table table-hover align-middle">
                     <thead class="bg-light">
                         <tr>
@@ -58,38 +67,60 @@
                             </th>
                             <th class="border-0 py-3">FECHA DE SOLICITUD</th>
                             <th class="border-0 py-3">ESTADO</th>
-                            <th class="border-0 rounded-end-3 py-3 pe-3">ACCIONES</th>
+                            <th class="border-0 rounded-end-3 py-3 pe-4 text-end">ACCIONES</th>
+
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let org of pendingOrgs">
-                            <td class="ps-3">
-                                <div class="org-info d-flex align-items-center">
-                                    <img [src]="org.logo" alt="Avatar"
-                                        style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem;"
-                                        class="border">
-                                    <div class="fw-bold text-dark">{{ org.name }}</div>
-                                </div>
-                            </td>
-                            <td class="text-muted">{{ org.email }}</td>
-                            <td class="text-muted">{{ org.date }}</td>
-                            <td><app-badge label="Pendiente" type="org-pending"></app-badge></td>
-                            <td class="pe-3">
-                                <button class="btn btn-success btn-sm me-2 rounded-pill px-3"
-                                    (click)="acceptOrg(org)"><i class="bi bi-check-lg"></i> Aceptar</button>
-                                <button class="btn btn-danger btn-sm rounded-pill px-3" (click)="denyOrg(org)"><i
-                                        class="bi bi-x-lg"></i>
-                                    Denegar</button>
-                            </td>
-                        </tr>
-                        <tr *ngIf="pendingOrgs.length === 0">
-                            <td colspan="5" class="text-center py-5">
-                                <div class="d-flex flex-column align-items-center text-muted">
-                                    <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
-                                    <p class="mb-0 fw-medium">No hay solicitudes pendientes</p>
+                        <!-- Loading Skeletons -->
+                        <tr *ngIf="isLoading">
+                            <td colspan="5">
+                                <div class="p-2" *ngFor="let i of [1,2,3]">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <app-skeleton width="40px" height="40px" borderRadius="50%"
+                                            class="me-3"></app-skeleton>
+                                        <div class="flex-grow-1">
+                                            <app-skeleton width="30%" height="15px" class="mb-2"></app-skeleton>
+                                        </div>
+                                        <app-skeleton width="20%" height="15px" class="me-4"></app-skeleton>
+                                        <app-skeleton width="15%" height="15px" class="me-4"></app-skeleton>
+                                        <app-skeleton width="10%" height="20px" borderRadius="10px"></app-skeleton>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
+
+                        <ng-container *ngIf="!isLoading">
+                            <tr *ngFor="let org of pendingOrgs">
+                                <td class="ps-3">
+                                    <div class="org-info d-flex align-items-center">
+                                        <img [src]="org.logo" alt="Avatar"
+                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem;"
+                                            class="border">
+                                        <div class="fw-bold text-dark">{{ org.name }}</div>
+                                    </div>
+                                </td>
+                                <td class="text-muted">{{ org.email }}</td>
+                                <td class="text-muted">{{ org.date }}</td>
+                                <td><app-badge label="Pendiente" type="org-pending"></app-badge></td>
+                                <td class="pe-4 text-end">
+
+                                    <button class="btn btn-success btn-sm me-2 rounded-pill px-3"
+                                        (click)="acceptOrg(org)"><i class="bi bi-check-lg"></i> Aceptar</button>
+                                    <button class="btn btn-danger btn-sm rounded-pill px-3" (click)="denyOrg(org)"><i
+                                            class="bi bi-x-lg"></i>
+                                        Denegar</button>
+                                </td>
+                            </tr>
+                            <tr *ngIf="pendingOrgs.length === 0">
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center text-muted">
+                                        <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
+                                        <p class="mb-0 fw-medium">No hay solicitudes pendientes</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-container>
                     </tbody>
                 </table>
             </div>
@@ -97,7 +128,8 @@
 
         <!-- Registered Organizations Tab -->
         <div *ngIf="activeTab === 'registered'" class="tab-pane fade show active">
-            <div class="table-responsive">
+            <div class="table-responsive-visible">
+
                 <table class="table table-hover align-middle">
                     <thead class="bg-light">
                         <tr>
@@ -130,64 +162,86 @@
                                         [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
                                 </div>
                             </th>
-                            <th class="border-0 rounded-end-3 py-3 pe-3">ACCIONES</th>
+                            <th class="border-0 rounded-end-3 py-3 pe-4 text-end">ACCIONES</th>
+
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let org of registeredOrgs">
-                            <td class="ps-3">
-                                <div class="org-info d-flex align-items-center">
-                                    <img [src]="org.logo" alt="Avatar"
-                                        style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem;"
-                                        class="border">
-                                    <div class="fw-bold text-dark">{{ org.name }}</div>
-                                </div>
-                            </td>
-                            <td class="text-muted">{{ org.email }}</td>
-                            <td class="text-muted text-center">{{ org.activitiesCount }}</td>
-                            <td><app-badge [label]="org.status | titlecase" [type]="org.status"></app-badge></td>
-                            <td class="pe-3">
-                                <div class="dropdown">
-                                    <button class="btn btn-sm text-secondary p-0" type="button"
-                                        (click)="toggleDropdown(org.id, $event)">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3 py-2"
-                                        [class.show]="activeDropdownId === org.id"
-                                        [style.display]="activeDropdownId === org.id ? 'block' : 'none'">
-                                        <li>
-                                            <button class="dropdown-item px-3 py-2 small" type="button"
-                                                (click)="openDetails(org)">
-                                                <i class="bi bi-eye me-2 text-primary"></i>Ver detalles
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item px-3 py-2 small" type="button"
-                                                (click)="openEditModal(org)">
-                                                <i class="bi bi-pencil me-2 text-warning"></i>Editar
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <button class="dropdown-item px-3 py-2 small text-danger" type="button"
-                                                (click)="darDeBaja(org)">
-                                                <i class="bi bi-x-circle me-2"></i>Dar de baja
-                                            </button>
-                                        </li>
-                                    </ul>
+                        <!-- Loading Skeletons -->
+                        <tr *ngIf="isLoading">
+                            <td colspan="5">
+                                <div class="p-2" *ngFor="let i of [1,2,3,4,5]">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <app-skeleton width="40px" height="40px" borderRadius="50%"
+                                            class="me-3"></app-skeleton>
+                                        <div class="flex-grow-1">
+                                            <app-skeleton width="30%" height="15px" class="mb-2"></app-skeleton>
+                                        </div>
+                                        <app-skeleton width="20%" height="15px" class="me-4"></app-skeleton>
+                                        <app-skeleton width="10%" height="15px" class="me-4"></app-skeleton>
+                                        <app-skeleton width="15%" height="20px" borderRadius="10px"></app-skeleton>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
-                        <tr *ngIf="registeredOrgs.length === 0">
-                            <td colspan="5" class="text-center py-5">
-                                <div class="d-flex flex-column align-items-center text-muted">
-                                    <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
-                                    <p class="mb-0 fw-medium">No hay organizaciones registradas</p>
-                                </div>
-                            </td>
-                        </tr>
+
+                        <ng-container *ngIf="!isLoading">
+                            <tr *ngFor="let org of registeredOrgs">
+                                <td class="ps-3">
+                                    <div class="org-info d-flex align-items-center">
+                                        <img [src]="org.logo" alt="Avatar"
+                                            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; margin-right: 0.75rem;"
+                                            class="border">
+                                        <div class="fw-bold text-dark">{{ org.name }}</div>
+                                    </div>
+                                </td>
+                                <td class="text-muted">{{ org.email }}</td>
+                                <td class="text-muted text-center">{{ org.activitiesCount }}</td>
+                                <td><app-badge [label]="org.status | titlecase" [type]="org.status"></app-badge></td>
+                                <td class="pe-4 text-end">
+
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm text-secondary p-0" type="button"
+                                            (click)="toggleDropdown(org.id, $event)">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3 py-2"
+                                            [class.show]="activeDropdownId === org.id"
+                                            [style.display]="activeDropdownId === org.id ? 'block' : 'none'">
+                                            <li>
+                                                <button class="dropdown-item px-3 py-2 small" type="button"
+                                                    (click)="openDetails(org)">
+                                                    <i class="bi bi-eye me-2 text-primary"></i>Ver detalles
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item px-3 py-2 small" type="button"
+                                                    (click)="openEditModal(org)">
+                                                    <i class="bi bi-pencil me-2 text-warning"></i>Editar
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider">
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item px-3 py-2 small text-danger" type="button"
+                                                    (click)="darDeBaja(org)">
+                                                    <i class="bi bi-x-circle me-2"></i>Dar de baja
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr *ngIf="registeredOrgs.length === 0">
+                                <td colspan="5" class="text-center py-5">
+                                    <div class="d-flex flex-column align-items-center text-muted">
+                                        <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
+                                        <p class="mb-0 fw-medium">No hay organizaciones registradas</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-container>
                     </tbody>
                 </table>
             </div>
@@ -341,13 +395,36 @@
                     </div>
                     <div class="row">
                         <div class="col-md-4">
-                            <app-input-text label="Tipo" formControlName="type"></app-input-text>
+                            <label class="form-label fw-semibold">Tipo</label>
+                            <select class="form-select rounded-3" formControlName="type">
+                                <option value="ONG">ONG</option>
+                                <option value="FUNDACIÓN">FUNDACIÓN</option>
+                                <option value="ASOCIACIÓN">ASOCIACIÓN</option>
+                                <option value="ENTIDAD PÚBLICA">ENTIDAD PÚBLICA</option>
+                                <option value="OTRA">OTRA</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
-                            <app-input-text label="Sector" formControlName="sector"></app-input-text>
+                            <label class="form-label fw-semibold">Sector</label>
+                            <select class="form-select rounded-3" formControlName="sector">
+                                <option value="SOCIAL">SOCIAL</option>
+                                <option value="SALUD">SALUD</option>
+                                <option value="EDUCATIVO">EDUCATIVO</option>
+                                <option value="AMBIENTAL">AMBIENTAL</option>
+                                <option value="CULTURAL">CULTURAL</option>
+                                <option value="DEPORTIVO">DEPORTIVO</option>
+                                <option value="TECNOLÓGICO">TECNOLÓGICO</option>
+                                <option value="OTRO">OTRO</option>
+                            </select>
                         </div>
                         <div class="col-md-4">
-                            <app-input-text label="Ámbito" formControlName="scope"></app-input-text>
+                            <label class="form-label fw-semibold">Ámbito</label>
+                            <select class="form-select rounded-3" formControlName="scope">
+                                <option value="LOCAL">LOCAL</option>
+                                <option value="REGIONAL">REGIONAL</option>
+                                <option value="NACIONAL">NACIONAL</option>
+                                <option value="INTERNACIONAL">INTERNACIONAL</option>
+                            </select>
                         </div>
                     </div>
                     <div class="row">
@@ -372,6 +449,110 @@
                         <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold"
                             [disabled]="editForm.invalid">
                             Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Creation Modal -->
+<div class="modal" [class.show]="showCreateModal" [class.d-block]="showCreateModal"
+    [style.background-color]="showCreateModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Nueva Organización</h5>
+                <button type="button" class="btn-close" (click)="closeCreateModal()"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form [formGroup]="createForm" (ngSubmit)="saveCreate()">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <app-input-text label="Nombre" formControlName="name"
+                                [isInvalid]="(createForm.get('name')?.invalid && createForm.get('name')?.touched) ?? false"
+                                errorMessage="Obligatorio"></app-input-text>
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-text label="Email (Usuario)" formControlName="email"
+                                [isInvalid]="(createForm.get('email')?.invalid && createForm.get('email')?.touched) ?? false"
+                                errorMessage="Email inválido"></app-input-text>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <app-input-text label="Contraseña" formControlName="password" type="password"
+                                [isInvalid]="(createForm.get('password')?.invalid && createForm.get('password')?.touched) ?? false"
+                                errorMessage="Mínimo 6 caracteres"></app-input-text>
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-text label="Teléfono" formControlName="phone"
+                                [isInvalid]="(createForm.get('phone')?.invalid && createForm.get('phone')?.touched) ?? false"
+                                errorMessage="Deben ser 9 dígitos"></app-input-text>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Tipo</label>
+                            <select class="form-select rounded-3" formControlName="type">
+                                <option value="ONG">ONG</option>
+                                <option value="FUNDACIÓN">FUNDACIÓN</option>
+                                <option value="ASOCIACIÓN">ASOCIACIÓN</option>
+                                <option value="ENTIDAD PÚBLICA">ENTIDAD PÚBLICA</option>
+                                <option value="OTRA">OTRA</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Sector</label>
+                            <select class="form-select rounded-3" formControlName="sector">
+                                <option value="SOCIAL">SOCIAL</option>
+                                <option value="SALUD">SALUD</option>
+                                <option value="EDUCATIVO">EDUCATIVO</option>
+                                <option value="AMBIENTAL">AMBIENTAL</option>
+                                <option value="CULTURAL">CULTURAL</option>
+                                <option value="DEPORTIVO">DEPORTIVO</option>
+                                <option value="TECNOLÓGICO">TECNOLÓGICO</option>
+                                <option value="OTRO">OTRO</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Ámbito</label>
+                            <select class="form-select rounded-3" formControlName="scope">
+                                <option value="LOCAL">LOCAL</option>
+                                <option value="REGIONAL">REGIONAL</option>
+                                <option value="NACIONAL">NACIONAL</option>
+                                <option value="INTERNACIONAL">INTERNACIONAL</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <app-input-text label="Dirección" formControlName="address"></app-input-text>
+                        </div>
+                        <div class="col-md-6">
+                            <app-input-text label="Web" formControlName="web"></app-input-text>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Persona de Contacto</label>
+                            <input type="text" class="form-control rounded-3" formControlName="contactPerson">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-semibold">Descripción</label>
+                            <textarea class="form-control rounded-3" formControlName="description" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-light me-2 rounded-pill px-4 fw-semibold"
+                            (click)="closeCreateModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold"
+                            [disabled]="createForm.invalid">
+                            Crear Organización
                         </button>
                     </div>
                 </form>

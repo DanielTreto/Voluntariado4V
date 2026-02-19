@@ -6,7 +6,11 @@ import { ApiService } from '../../../services/api.service';
 import { ToastService } from '../../../services/toast.service';
 import { InputTextComponent } from '../../atoms/input-text/input-text.component';
 
+import { LoadingSpinnerComponent } from '../../atoms/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../atoms/skeleton/skeleton.component';
+import { finalize } from 'rxjs/operators';
 import { NotificationService } from '../../../services/notification.service';
+
 
 interface Activity {
   id: number;
@@ -35,7 +39,8 @@ interface Organization {
 @Component({
   selector: 'app-organization-list',
   standalone: true,
-  imports: [CommonModule, BadgeComponent, FormsModule, ReactiveFormsModule, InputTextComponent],
+  imports: [CommonModule, BadgeComponent, FormsModule, ReactiveFormsModule, InputTextComponent, LoadingSpinnerComponent, SkeletonComponent],
+
   templateUrl: './organization-list.html',
   styleUrl: './organization-list.css'
 })
@@ -47,7 +52,9 @@ export class OrganizationListComponent implements OnInit {
   private notificationService = inject(NotificationService);
 
   activeTab: 'pending' | 'registered' = 'pending';
+  isLoading: boolean = true;
   selectedOrg: Organization | null = null;
+
   orgToSuspend: Organization | null = null;
   errorMessage: string = '';
 
@@ -62,8 +69,11 @@ export class OrganizationListComponent implements OnInit {
   activeDropdownId: number | null = null;
   showDetailsModal: boolean = false;
   showEditModal: boolean = false;
+  showCreateModal: boolean = false;
   editForm: FormGroup;
+  createForm: FormGroup;
   editingOrgId: number | null = null;
+
   loadingActivities: boolean = false;
 
   organizations: Organization[] = [];
@@ -82,6 +92,21 @@ export class OrganizationListComponent implements OnInit {
       address: [''],
       web: ['']
     });
+
+    this.createForm = this.fb.group({
+      name: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['123456', [Validators.required, Validators.minLength(6)]], // Default password
+      phone: ['', [Validators.required, Validators.pattern(/^[0-9]{9}$/)]],
+      type: ['ONG', Validators.required],
+      sector: ['SOCIAL', Validators.required],
+      scope: ['LOCAL', Validators.required],
+      contactPerson: [''],
+      description: [''],
+      address: [''],
+      web: ['']
+    });
+
   }
 
   ngOnInit() {
@@ -90,34 +115,45 @@ export class OrganizationListComponent implements OnInit {
   }
 
   loadOrganizations() {
-    this.apiService.getOrganizations().subscribe({
-      next: (data) => {
-
-        this.organizations = data.map((org: any) => ({
-          id: org.id,
-          name: org.name,
-          email: org.email,
-          date: 'N/A',
-          activitiesCount: 0,
-          activities: [],
-          status: this.mapStatus(org.status),
-          logo: 'assets/images/org-default.png',
-          type: org.type,
-          phone: org.phone,
-          sector: org.sector,
-          scope: org.scope,
-          description: org.description
-        }));
-        // Update activities count after loading
-        this.updateActivitiesCounts();
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error loading organizations', err);
-        this.errorMessage = 'Error loading data: ' + err.message;
-      }
-    });
+    this.isLoading = true;
+    this.apiService.getOrganizations()
+      .pipe(
+        finalize(() => {
+          setTimeout(() => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          this.organizations = data.map((org: any) => ({
+            id: org.id,
+            name: org.name,
+            email: org.email,
+            date: 'N/A',
+            activitiesCount: 0,
+            activities: [],
+            status: this.mapStatus(org.status),
+            logo: 'assets/images/org-default.png',
+            type: org.type,
+            phone: org.phone,
+            sector: org.sector,
+            scope: org.scope,
+            description: org.description
+          }));
+          // Update activities count after loading
+          this.updateActivitiesCounts();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading organizations', err);
+          this.toastService.show('Error al cargar organizaciones.', 'error');
+        }
+      });
   }
+
+
 
   loadAllActivities() {
     this.apiService.getActivities().subscribe({
@@ -126,9 +162,10 @@ export class OrganizationListComponent implements OnInit {
           id: act.id,
           title: act.title,
           description: act.description,
-          date: act.date,
+          date: act.startDate || act.date,
           status: act.status,
           organizationId: act.organization?.id
+
         }));
         this.updateActivitiesCounts();
         this.cdr.detectChanges();
@@ -345,4 +382,46 @@ export class OrganizationListComponent implements OnInit {
       });
     }
   }
+
+  openCreateModal() {
+    this.showCreateModal = true;
+    this.createForm.reset({
+      type: 'ONG',
+      sector: 'SOCIAL',
+      scope: 'LOCAL',
+      password: '123456'
+    });
+  }
+
+  closeCreateModal() {
+    this.showCreateModal = false;
+    this.createForm.reset();
+  }
+
+  saveCreate() {
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
+
+    const payload = { ...this.createForm.value, role: 'admin' };
+    this.apiService.registerOrganization(payload).subscribe({
+      next: (res) => {
+        this.toastService.show('Organización creada correctamente', 'success');
+        this.closeCreateModal();
+        this.loadOrganizations();
+      },
+      error: (err) => {
+        console.error('Error creating organization', err);
+        let errorMsg = 'Error desconocido';
+        if (err.error?.errors) {
+          errorMsg = Object.values(err.error.errors).join(', ');
+        } else if (err.error?.error) {
+          errorMsg = err.error.error;
+        }
+        this.toastService.show('Error al crear organización: ' + errorMsg, 'error');
+      }
+    });
+  }
 }
+

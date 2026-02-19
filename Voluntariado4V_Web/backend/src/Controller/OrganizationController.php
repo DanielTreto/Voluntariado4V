@@ -11,8 +11,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use App\Dto\OrganizationDto;
 use App\Dto\ActivityDto;
+use App\Entity\Credenciales;
 use OpenApi\Attributes as OA;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
+
 
 #[Route('/api')]
 class OrganizationController extends AbstractController
@@ -83,7 +88,7 @@ class OrganizationController extends AbstractController
         $org->setDESCRIPCION($data['description'] ?? '');
         $org->setDIRECCION($data['address'] ?? '');
         $org->setWEB($data['web'] ?? '');
-        $org->setESTADO('PENDIENTE');
+        $org->setESTADO(($data['role'] ?? null) === 'admin' ? 'ACTIVO' : 'PENDIENTE');
 
         $newId = $orgRepository->findNextId();
         $org->setCODORG($newId);
@@ -108,7 +113,13 @@ class OrganizationController extends AbstractController
             $entityManager->persist($org);
             $entityManager->flush();
         } catch (UniqueConstraintViolationException $e) {
-            return new JsonResponse(['errors' => ['DUPLICADO' => 'Organization already exists']], 400);
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'CORREO')) {
+                return new JsonResponse(['errors' => ['CORREO' => 'Ya existe una organización con este correo electrónico.']], 400);
+            } elseif (str_contains($msg, 'TELEFONO')) {
+                return new JsonResponse(['errors' => ['TELEFONO' => 'Ya existe una organización con este número de teléfono.']], 400);
+            }
+            return new JsonResponse(['errors' => ['DUPLICADO' => 'Ya existe una organización con estos datos.']], 400);
         }
 
         return new JsonResponse(OrganizationDto::fromEntity($org), 201);
