@@ -55,9 +55,22 @@ class ApiSecuritySubscriber implements EventSubscriberInterface
             '/api/register',
             '/api/register/organization', // If exists
             '/api/doc', // If swagger is added later
+            '/api/ciclos',
+            '/api/activity-types',
+            '/api/ods',
         ];
 
         if (in_array($path, $publicRoutes)) {
+            return;
+        }
+
+        // Allow POST to registration endpoints (same path as authenticated GET)
+        $publicPostRoutes = [
+            '/api/volunteers',
+            '/api/organizations',
+        ];
+
+        if ($request->getMethod() === 'POST' && in_array($path, $publicPostRoutes)) {
             return;
         }
         

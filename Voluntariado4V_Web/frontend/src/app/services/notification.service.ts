@@ -227,11 +227,8 @@ export class NotificationService {
 
     localStorage.setItem('admin_notifications', JSON.stringify(updatedAll));
 
-    // Re-emit the current filtered view (which is 'notifications')
-    // We must ensure the subject emits exactly what was passed or a re-filtered version.
-    // Since 'notifications' might be just the filtered subset (e.g. from markAsRead),
-    // we should trust it portrays the latest state of THAT subset.
-    this.notificationsSubject.next(notifications);
+    // Reload and re-filter notifications to ensure consistent state
+    this.loadNotifications();
   }
 
   private getMockData(): AdminNotification[] {

@@ -122,7 +122,7 @@ CD ..\..
 ECHO.
 ECHO [2/4] Setting up Frontend (Angular)...
 CD Voluntariado4V_Web\frontend
-call npm install
+call npm install --legacy-peer-deps
 CD ..\..
 
 ECHO [3/4] populating Initial Data...

@@ -70,7 +70,11 @@ class ActivityRepository extends ServiceEntityRepository
     }
     public function findWithFilters(?string $organizationId = null): array
     {
-        $qb = $this->createQueryBuilder('a');
+        $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.organizacion', 'o')->addSelect('o')
+            ->leftJoin('a.voluntarios', 'v')->addSelect('v')
+            ->leftJoin('a.tiposActividad', 't')->addSelect('t')
+            ->leftJoin('a.ods', 'od')->addSelect('od');
 
         if ($organizationId) {
             $qb->andWhere('a.organizacion = :orgId')

@@ -8,7 +8,7 @@ class AdminDto
 {
     public string $id;
     public string $name;
-    public ?string $surname = null;
+    public ?string $apellidos = null;
     public string $email;
     public ?string $phone = null;
     public ?string $avatar = null;
@@ -18,7 +18,7 @@ class AdminDto
         $dto = new self();
         $dto->id = $admin->getId();
         $dto->name = $admin->getNombre();
-        $dto->surname = $admin->getApellidos();
+        $dto->apellidos = $admin->getApellidos();
         $dto->email = $admin->getCorreo();
         $dto->phone = $admin->getTelefono();
         $dto->avatar = $admin->getAVATAR();

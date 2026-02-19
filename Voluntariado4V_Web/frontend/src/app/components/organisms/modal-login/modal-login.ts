@@ -112,6 +112,22 @@ export class ModalLogin {
     if (token) {
       response.token = token;
     }
+
+    // Block login for pending or suspended volunteers/organizations
+    const status = (response.status || '').toUpperCase();
+    if (response.role === 'volunteer' || response.role === 'organization') {
+      if (status === 'PENDIENTE') {
+        this.submitting = false;
+        this.loginError = 'Tu cuenta está pendiente de aprobación por un administrador. Por favor, espera a ser activado.';
+        return;
+      }
+      if (status === 'SUSPENDIDO' || status === 'SUSPENDIDA') {
+        this.submitting = false;
+        this.loginError = 'Tu cuenta ha sido suspendida. Contacta con el administrador para más información.';
+        return;
+      }
+    }
+
     localStorage.setItem('user', JSON.stringify(response));
     this.onModalClick.emit();
     // Redirect based on role
