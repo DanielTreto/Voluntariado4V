@@ -16,6 +16,32 @@ class SolicitudRepository extends ServiceEntityRepository
         parent::__construct($registry, Solicitud::class);
     }
 
+    /**
+     * @return Solicitud[]
+     */
+    public function findByFilters(?string $organizationId = null, ?string $status = null): array
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->join('s.actividad', 'a')
+            ->join('a.organizacion', 'o')
+            ->addSelect('a')
+            ->addSelect('o');
+
+        if ($organizationId) {
+            $qb->andWhere('o.CODORG = :orgId')
+               ->setParameter('orgId', $organizationId);
+        }
+
+        if ($status) {
+            $qb->andWhere('s.status = :status')
+               ->setParameter('status', $status);
+        }
+
+        return $qb->orderBy('s.fechaSolicitud', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
 //    /**
 //     * @return Solicitud[] Returns an array of Solicitud objects
 //     */

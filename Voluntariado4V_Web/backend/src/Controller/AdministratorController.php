@@ -15,11 +15,20 @@ use App\Entity\Organizacion;
 use App\Repository\ActivityRepository;
 use App\Repository\VolunteerRepository;
 use App\Repository\OrganizationRepository;
+use App\Dto\AdminDto;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 #[Route('/api')]
 class AdministratorController extends AbstractController
 {
     #[Route('/admin/{id}', name: 'api_admin_show', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns an administrator details',
+        content: new Model(type: AdminDto::class)
+    )]
+    #[OA\Tag(name: 'Admins')]
     public function show(string $id, AdministratorRepository $repo): JsonResponse
     {
         $admin = $repo->find($id);
@@ -28,18 +37,9 @@ class AdministratorController extends AbstractController
             return new JsonResponse(['error' => 'Administrator not found'], 404);
         }
 
-        $data = [
-            'id' => $admin->getId(),
-            'name' => $admin->getNombre(),
-            'apellidos' => $admin->getApellidos(),
-            'email' => $admin->getCorreo(),
-            'phone' => $admin->getTelefono(),
-            'phone' => $admin->getTelefono(),
-            'avatar' => $admin->getAVATAR()
-        ];
-
-        return $this->json($data);
+        return new JsonResponse(AdminDto::fromEntity($admin));
     }
+
 
     #[Route('/admin/{id}', name: 'api_admin_update', methods: ['PUT'])]
     public function update(string $id, Request $request, EntityManagerInterface $em, AdministratorRepository $repo, ValidatorInterface $validator): JsonResponse
@@ -116,6 +116,21 @@ class AdministratorController extends AbstractController
 
 
     #[Route('/admin/dashboard/stats', name: 'api_admin_stats', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns dashboard statistics',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'totalActivities', type: 'integer'),
+                new OA\Property(property: 'totalVolunteers', type: 'integer'),
+                new OA\Property(property: 'activitiesInProgress', type: 'integer'),
+                new OA\Property(property: 'totalOrganizations', type: 'integer'),
+                new OA\Property(property: 'monthlyActivities', type: 'array', items: new OA\Items(type: 'object')),
+                new OA\Property(property: 'statusDistribution', type: 'array', items: new OA\Items(type: 'object'))
+            ]
+        )
+    )]
+    #[OA\Tag(name: 'Admins')]
     public function stats(Request $request, ActivityRepository $activityRepo, VolunteerRepository $volRepo, OrganizationRepository $orgRepo): JsonResponse
     {
         $totalActivities = $activityRepo->count([]);
@@ -125,28 +140,21 @@ class AdministratorController extends AbstractController
         
         $inProgressActivities = $activityRepo->count(['ESTADO' => 'EN_PROGRESO']);
         
-        // Monthly Stats for Current Year
-        $currentYear = $request->query->get('year');
-        if (!$currentYear) {
-             $currentYear = (new \DateTime())->format('Y');
-        }
+        $currentYear = $request->query->get('year') ?? (new \DateTime())->format('Y');
 
-        $monthlyData = $activityRepo->getMonthlyStats($currentYear);
-        
-        // Status Distribution
+        $monthlyData = $activityRepo->getMonthlyStats((string)$currentYear);
         $statusDistribution = $activityRepo->getStatusDistribution();
 
-        $data = [
+        return new JsonResponse([
             'totalActivities' => $totalActivities,
             'totalVolunteers' => $totalVolunteers,
             'activitiesInProgress' => $inProgressActivities,
             'totalOrganizations' => $totalOrgs,
             'monthlyActivities' => $monthlyData,
             'statusDistribution' => $statusDistribution
-        ];
-
-        return new JsonResponse($data);
+        ]);
     }
+
 
 
 }

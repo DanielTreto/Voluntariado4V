@@ -11,81 +11,34 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use App\Dto\RequestDto;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 #[Route('/api/requests')]
 class SolicitudController extends AbstractController
 {
     #[Route('', name: 'api_requests_list', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the list of volunteer requests',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: RequestDto::class))
+        )
+    )]
+    #[OA\Tag(name: 'Requests')]
     public function list(Request $request, SolicitudRepository $solicitudRepository): JsonResponse
     {
         $organizationId = $request->query->get('organizationId');
         $status = $request->query->get('status');
         
-        $criteria = [];
-        if ($status) {
-            $criteria['status'] = $status;
-        }
-
-        // If organization ID is provided, we need to filter requests by activities belonging to that org
-        // Since Solicitud is linked to Actividad, and Actividad is linked to Organizacion.
-        // SolicitudRepository default findBy operates on direct properties.
-        // We might need a custom query in repository for this, but let's try to build query builder or filter manually for MVP.
-        
-        $qb = $solicitudRepository->createQueryBuilder('s')
-            ->join('s.actividad', 'a')
-            ->join('a.organizacion', 'o')
-            ->addSelect('a')
-            ->addSelect('o');
-
-        if ($organizationId) {
-            $qb->andWhere('o.CODORG = :orgId')
-               ->setParameter('orgId', $organizationId);
-        }
-
-        if ($status) {
-            $qb->andWhere('s.status = :status')
-               ->setParameter('status', $status);
-        }
-
-        $qb->orderBy('s.fechaSolicitud', 'DESC');
-
-        $requests = $qb->getQuery()->getResult();
-
-        $data = [];
-        foreach ($requests as $req) {
-            $volunteer = $req->getVolunteer();
-            $activity = $req->getActividad();
-
-            // Skip if critical relations are missing (should not happen with strict schema, but safety first)
-            if (!$volunteer || !$activity) {
-                continue;
-            }
-
-            $fechaSolicitud = $req->getFechaSolicitud();
-            $fechaInicio = $activity->getFECHA_INICIO();
-
-            $data[] = [
-                'id' => $req->getId(),
-                'status' => $req->getStatus(),
-                'message' => $req->getMensaje(),
-                'date' => $fechaSolicitud ? $fechaSolicitud->format('Y-m-d\TH:i:s') : null,
-                'volunteer' => [
-                    'id' => $volunteer->getCODVOL(),
-                    'name' => $volunteer->getNOMBRE(),
-                    'fullName' => trim($volunteer->getNOMBRE() . ' ' . $volunteer->getAPELLIDO1() . ' ' . ($volunteer->getAPELLIDO2() ?? '')),
-                    'email' => $volunteer->getCORREO(),
-                    'avatar' => null
-                ],
-                'activity' => [
-                    'id' => $activity->getCODACT(),
-                    'title' => $activity->getNOMBRE(),
-                    'date' => $fechaInicio ? $fechaInicio->format('Y-m-d\TH:i:s') : null
-                ]
-            ];
-        }
+        $requests = $solicitudRepository->findByFilters($organizationId, $status);
+        $data = array_map(fn($req) => RequestDto::fromEntity($req), $requests);
 
         return new JsonResponse($data);
     }
+
 
     #[Route('/{id}/status', name: 'api_requests_update_status', methods: ['PATCH'])]
     public function updateStatus(int $id, Request $request, SolicitudRepository $solicitudRepository, EntityManagerInterface $em): JsonResponse
