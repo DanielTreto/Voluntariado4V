@@ -7,7 +7,7 @@ import { ApiService } from '../../../services/api.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+
 import { LoadingSpinnerComponent } from '../../atoms/loading-spinner/loading-spinner.component';
 import { SkeletonComponent } from '../../atoms/skeleton/skeleton.component';
 
@@ -125,15 +125,9 @@ export class ActivityListComponent implements OnInit {
     combineLatest([
       this.apiService.getActivities(),
       this.route.queryParams
-    ]).pipe(
-      finalize(() => {
-        setTimeout(() => {
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        });
-      })
-    ).subscribe({
+    ]).subscribe({
       next: ([data, params]) => {
+        this.isLoading = false;
 
         this.activities = data.map((act: any) => ({
           id: act.id,
@@ -180,6 +174,8 @@ export class ActivityListComponent implements OnInit {
       error: (err) => {
         console.error('Error loading data', err);
         this.errorMessage = 'Error: ' + err.message;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
