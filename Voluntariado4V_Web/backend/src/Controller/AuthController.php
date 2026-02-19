@@ -171,7 +171,23 @@ class AuthController extends AbstractController
         elseif ($email && $password) {
             $cred = $credRepo->findOneBy(['correo' => $email]);
             
-            if ($cred && $cred->getPassword() === $password) {
+            if ($cred) {
+                $storedPassword = $cred->getPassword();
+                $passwordValid = false;
+
+                // Check bcrypt hash first
+                if (str_starts_with($storedPassword, '$2y$') || str_starts_with($storedPassword, '$2a$') || str_starts_with($storedPassword, '$2b$')) {
+                    $passwordValid = password_verify($password, $storedPassword);
+                } 
+                // Legacy plaintext comparison + auto-upgrade
+                elseif ($storedPassword === $password) {
+                    $passwordValid = true;
+                    // Upgrade to hashed password
+                    $cred->setPassword($password);
+                    $entityManager->flush();
+                }
+
+            if ($passwordValid) {
                 if (in_array(strtoupper($cred->getUserType()), ['ADMIN', 'ADMINISTRADOR'])) {
                     $admin = $adminRepo->findOneBy(['correo' => $email]);
                     if (!$admin) {
@@ -269,6 +285,7 @@ class AuthController extends AbstractController
                         'status' => $org->getESTADO()
                     ]);
                 }
+            }
             }
         }
         else {

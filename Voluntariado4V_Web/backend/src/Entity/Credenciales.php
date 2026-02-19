@@ -76,7 +76,12 @@ class Credenciales
 
     public function setPassword(string $password): static
     {
-        $this->password = $password;
+        // Only hash if the value is not already a bcrypt hash
+        if (!str_starts_with($password, '$2y$') && !str_starts_with($password, '$2a$') && !str_starts_with($password, '$2b$')) {
+            $this->password = password_hash($password, PASSWORD_BCRYPT);
+        } else {
+            $this->password = $password;
+        }
 
         return $this;
     }
