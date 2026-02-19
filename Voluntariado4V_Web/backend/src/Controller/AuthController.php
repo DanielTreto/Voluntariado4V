@@ -121,11 +121,22 @@ class AuthController extends AbstractController
                 $newVolunteer = new \App\Entity\Volunteer();
                 $newVolunteer->setCORREO($tokenEmail);
                 $newVolunteer->setFirebaseUid($uid);
-                $newVolunteer->setNOMBRE($payload['name'] ?? 'Usuario');
+                $newVolunteer->setNOMBRE($payload['given_name'] ?? ($payload['name'] ?? 'Usuario'));
                 $newVolunteer->setAPELLIDO1($payload['family_name'] ?? 'Google');
                 $newVolunteer->setESTADO('ACTIVO');
                 $newVolunteer->setAVATAR($payload['picture'] ?? null);
                 
+                // Required fields for Volunteer entity
+                $newVolunteer->setTELEFONO('000000000');
+                $newVolunteer->setFECHA_NACIMIENTO(new \DateTime('2000-01-01'));
+                $newVolunteer->setDNI(substr($uid, 0, 9)); // Placeholder DNI using part of UID
+                
+                // Default Cycle (DAM)
+                $ciclo = $entityManager->getRepository(\App\Entity\Ciclo::class)->find('DAM');
+                if ($ciclo) {
+                    $newVolunteer->setCiclo($ciclo);
+                }
+
                 // Find next ID
                 $newId = $volRepo->findNextId();
                 $newVolunteer->setCODVOL((string)$newId);
@@ -139,6 +150,7 @@ class AuthController extends AbstractController
                     'email' => $tokenEmail,
                     'role' => 'volunteer'
                 ]);
+
 
                 return new JsonResponse([
                     'success' => true,

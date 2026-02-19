@@ -17,7 +17,8 @@ use App\Repository\VolunteerRepository;
 use App\Repository\OrganizationRepository;
 use App\Dto\AdminDto;
 use OpenApi\Attributes as OA;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
+
 
 #[Route('/api')]
 class AdministratorController extends AbstractController

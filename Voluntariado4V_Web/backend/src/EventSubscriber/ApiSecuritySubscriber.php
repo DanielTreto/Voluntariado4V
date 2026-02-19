@@ -80,14 +80,28 @@ class ApiSecuritySubscriber implements EventSubscriberInterface
 
         $token = substr($authHeader, 7);
 
-        // Validate Token (Manual JWT Decode)
+        // Validate Token (Manual JWT Decode and Verify)
         try {
             $tokenParts = explode('.', $token);
-            if (count($tokenParts) < 2) {
-                throw new \Exception('Invalid token structure');
+            if (count($tokenParts) !== 3) {
+                 throw new \Exception('Invalid token structure');
             }
 
-            $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $tokenParts[1])), true);
+            $header = $tokenParts[0];
+            $payloadEncoded = $tokenParts[1];
+            $signatureProvided = $tokenParts[2];
+
+            // Verify Signature
+            $secret = $this->params->get('kernel.secret');
+            $expectedSignature = hash_hmac('sha256', "$header.$payloadEncoded", $secret, true);
+            $expectedSignatureEncoded = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($expectedSignature));
+
+            if ($signatureProvided !== $expectedSignatureEncoded) {
+                $event->setResponse(new JsonResponse(['error' => 'Invalid token signature'], 401));
+                return;
+            }
+
+            $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $payloadEncoded)), true);
 
             if (!$payload) {
                 throw new \Exception('Invalid token payload');
@@ -97,6 +111,7 @@ class ApiSecuritySubscriber implements EventSubscriberInterface
             if (isset($payload['exp']) && $payload['exp'] < time()) {
                 throw new \Exception('Token expired');
             }
+
 
             $uid = $payload['sub'] ?? ($payload['user_id'] ?? null);
             if (!$uid) {
@@ -151,27 +166,48 @@ class ApiSecuritySubscriber implements EventSubscriberInterface
             }
 
             // Attach user info to request
-            $request->attributes->set('api_user', $userExists);
-            $request->attributes->set('api_user_role', str_starts_with($uid, 'admin-') ? 'admin' : (str_starts_with($uid, 'vol-') ? 'volunteer' : (str_starts_with($uid, 'org-') ? 'organization' : 'firebase')));
+            $request->attributes->set('api_user', true);
             
-            // If we want the actual object for easier use in controllers:
+            // Determine Role and Object
             $userObject = null;
+            $role = 'unknown';
+
             if (str_starts_with($uid, 'admin-')) {
                 $userObject = $this->adminRepository->find(substr($uid, 6)) ?? $this->adminRepository->find('adm001');
+                $role = 'admin';
             } elseif (str_starts_with($uid, 'vol-')) {
                 $userObject = $this->volunteerRepository->find(substr($uid, 4));
+                $role = 'volunteer';
             } elseif (str_starts_with($uid, 'org-')) {
                 $userObject = $this->organizationRepository->find(substr($uid, 4));
+                $role = 'organization';
             } else {
-                // Firebase UID lookup
-                $userObject = $this->volunteerRepository->findOneBy(['firebaseUid' => $uid]) 
-                    ?? $this->organizationRepository->findOneBy(['firebaseUid' => $uid])
-                    ?? $this->adminRepository->findOneBy(['firebaseUid' => $uid]);
+                // Firebase UID lookup - find which repository has this UID
+                $vol = $this->volunteerRepository->findOneBy(['firebaseUid' => $uid]);
+                if ($vol) {
+                    $userObject = $vol;
+                    $role = 'volunteer';
+                } else {
+                    $org = $this->organizationRepository->findOneBy(['firebaseUid' => $uid]);
+                    if ($org) {
+                        $userObject = $org;
+                        $role = 'organization';
+                    } else {
+                        $admin = $this->adminRepository->findOneBy(['firebaseUid' => $uid]);
+                        if ($admin) {
+                            $userObject = $admin;
+                            $role = 'admin';
+                        }
+                    }
+                }
             }
+
+            $request->attributes->set('api_user_role', $role);
             
             if ($userObject) {
                 $request->attributes->set('authenticated_user', $userObject);
             }
+
 
         } catch (\Exception $e) {
             $event->setResponse(new JsonResponse(['error' => 'Unauthorized: ' . $e->getMessage()], 401));

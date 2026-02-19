@@ -13,7 +13,8 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use App\Dto\RequestDto;
 use OpenApi\Attributes as OA;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
+
 
 #[Route('/api/requests')]
 class SolicitudController extends AbstractController

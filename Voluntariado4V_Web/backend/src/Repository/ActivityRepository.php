@@ -68,4 +68,16 @@ class ActivityRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+    public function findWithFilters(?string $organizationId = null): array
+    {
+        $qb = $this->createQueryBuilder('a');
+
+        if ($organizationId) {
+            $qb->andWhere('a.organizacion = :orgId')
+               ->setParameter('orgId', $organizationId);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }
+

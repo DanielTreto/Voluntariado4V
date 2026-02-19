@@ -17,7 +17,8 @@ use App\Repository\TipoActividadRepository;
 use App\Entity\Volunteer;
 use App\Dto\ActivityDto;
 use OpenApi\Attributes as OA;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
+
 
 #[Route('/api')]
 class ActivityController extends AbstractController
@@ -42,11 +43,8 @@ class ActivityController extends AbstractController
     {
         $orgId = $request->query->get('organizationId');
 
-        if ($orgId) {
-             $activities = $activityRepository->findBy(['organizacion' => $orgId]); 
-        } else {
-             $activities = $activityRepository->findAll();
-        }
+        $activities = $activityRepository->findWithFilters($orgId);
+
 
         $data = array_map(fn($act) => ActivityDto::fromEntity($act), $activities);
 
@@ -199,46 +197,28 @@ class ActivityController extends AbstractController
         }
         if (isset($data['date'])) {
             try {
-                $act->setFECHA_INICIO(new \DateTime($data['date']));
-                // Keeping end date sync logic simple for now
-                $act->setFECHA_FIN(new \DateTime($data['date'])); 
+                $newDate = new \DateTime($data['date']);
+                // Strict check: Cannot update date to the past
+                if ($newDate < new \DateTime('today')) {
+                    return new JsonResponse(['error' => 'La fecha de la actividad no puede ser anterior a hoy.'], 400);
+                }
+                $act->setFECHA_INICIO($newDate);
+                $act->setFECHA_FIN($newDate); 
             } catch (\Exception $e) {
-                // Ignore invalid date for update or handle error
-            }
-        }
-        if (isset($data['image'])) {
-            $act->setIMAGEN($data['image']);
-        }
-        
-        // Update Type (Clear existing and set new)
-        if (isset($data['typeID']) || isset($data['typeId']) || isset($data['type'])) {
-            // Clear existing types
-            foreach ($act->getTiposActividad() as $existingType) {
-                $act->getTiposActividad()->removeElement($existingType);
-            }
-
-            $newType = null;
-            if (isset($data['typeID'])) $newType = $tipoActividadRepository->find($data['typeID']);
-            elseif (isset($data['typeId'])) $newType = $tipoActividadRepository->find($data['typeId']);
-            elseif (isset($data['type'])) $newType = $tipoActividadRepository->findOneBy(['DESCRIPCION' => $data['type']]);
-
-            if ($newType) {
-                $act->addTipoActividad($newType);
+                return new JsonResponse(['error' => 'Formato de fecha inválido.'], 400);
             }
         }
 
-        // Update ODS
-        if (isset($data['ods'])) {
-             foreach ($act->getOds() as $existingOds) {
-                 $act->removeOd($existingOds);
-             }
-             $ods = $odsRepository->find($data['ods']);
-             if ($ods) {
-                 $act->addOd($ods);
-             }
+        if (isset($data['maxVolunteers'])) {
+            $max = (int) $data['maxVolunteers'];
+            // Strict check: Cannot set max volunteers below current count
+            if ($max < $act->getVoluntarios()->count()) {
+                return new JsonResponse(['error' => 'No puedes reducir el cupo por debajo del número de voluntarios ya inscritos (' . $act->getVoluntarios()->count() . ').'], 400);
+            }
+            $act->setN_MAX_VOLUNTARIOS($max);
         }
 
-        // Validate
+        // Validate entire entity constraints
         $errors = $validator->validate($act);
         if (count($errors) > 0) {
             $errorMessages = [];
@@ -249,6 +229,7 @@ class ActivityController extends AbstractController
         }
 
         $entityManager->flush();
+
 
         return new JsonResponse(['status' => 'Activity updated'], 200);
     }
