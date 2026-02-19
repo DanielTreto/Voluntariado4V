@@ -8,40 +8,42 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
-use App\Entity\Credenciales;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use App\Dto\OrganizationDto;
+use App\Dto\ActivityDto;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 #[Route('/api')]
 class OrganizationController extends AbstractController
 {
     #[Route('/organizations', name: 'api_organizations_index', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the list of organizations',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: OrganizationDto::class))
+        )
+    )]
+    #[OA\Tag(name: 'Organizations')]
     public function index(OrganizationRepository $orgRepository): JsonResponse
     {
         $orgs = $orgRepository->findAll();
-        $data = [];
-
-        foreach ($orgs as $org) {
-            $data[] = [
-                'id' => $org->getCODORG(),
-                'name' => $org->getNOMBRE(),
-                'type' => $org->getTIPO_ORG(),
-                'email' => $org->getCORREO(),
-                'phone' => $org->getTELEFONO(),
-                'sector' => $org->getSECTOR(),
-                'scope' => $org->getAMBITO(),
-                'description' => $org->getDESCRIPCION(),
-                'status' => $org->getESTADO(),
-                'contactPerson' => $org->getPERSONA_CONTACTO(),
-                'avatar' => $org->getAVATAR(),
-            ];
-        }
+        $data = array_map(fn($org) => OrganizationDto::fromEntity($org), $orgs);
 
         return new JsonResponse($data);
     }
 
+
     #[Route('/organizations/{id}', name: 'api_organizations_show', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns an organization detail',
+        content: new Model(type: OrganizationDto::class)
+    )]
+    #[OA\Response(response: 404, description: 'Organization not found')]
+    #[OA\Tag(name: 'Organizations')]
     public function show(string $id, OrganizationRepository $orgRepository): JsonResponse
     {
         $org = $orgRepository->find($id);
@@ -50,28 +52,20 @@ class OrganizationController extends AbstractController
             return new JsonResponse(['error' => 'Organization not found'], 404);
         }
 
-        $data = [
-            'id' => $org->getCODORG(),
-            'name' => $org->getNOMBRE(),
-            'type' => $org->getTIPO_ORG(),
-            'email' => $org->getCORREO(),
-            'phone' => $org->getTELEFONO(),
-            'sector' => $org->getSECTOR(),
-            'scope' => $org->getAMBITO(),
-            'description' => $org->getDESCRIPCION(),
-            'address' => $org->getDIRECCION(),
-            'web' => $org->getWEB(),
-            'status' => $org->getESTADO(),
-            'contactPerson' => $org->getPERSONA_CONTACTO(),
-            'avatar' => $org->getAVATAR(),
-        ];
-
-        return new JsonResponse($data);
+        return new JsonResponse(OrganizationDto::fromEntity($org));
     }
 
+
     #[Route('/organizations', name: 'api_organizations_create', methods: ['POST'])]
+    #[OA\Response(
+        response: 201,
+        description: 'Organization created',
+        content: new Model(type: OrganizationDto::class)
+    )]
+    #[OA\Tag(name: 'Organizations')]
     public function create(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator, OrganizationRepository $orgRepository): JsonResponse
     {
+        // ... (existing creation logic)
         $data = json_decode($request->getContent(), true);
 
         if (!$data) {
@@ -91,19 +85,16 @@ class OrganizationController extends AbstractController
         $org->setWEB($data['web'] ?? '');
         $org->setESTADO('PENDIENTE');
 
-        // Generate Custom ID
         $newId = $orgRepository->findNextId();
         $org->setCODORG($newId);
 
-        // Create Credentials
         $cred = new Credenciales();
-        $cred->setOrganizacion($org); // Link directly to object
+        $cred->setOrganizacion($org);
         $cred->setUserType('ORGANIZACION');
         $cred->setCorreo($data['email'] ?? '');
         $cred->setPassword($data['password'] ?? '');
         $entityManager->persist($cred);
 
-        // Validation
         $errors = $validator->validate($org);
         if (count($errors) > 0) {
             $errorMessages = [];
@@ -117,15 +108,12 @@ class OrganizationController extends AbstractController
             $entityManager->persist($org);
             $entityManager->flush();
         } catch (UniqueConstraintViolationException $e) {
-            return new JsonResponse([
-                'errors' => [
-                    'DUPLICADO' => 'El teléfono o el correo electrónico ya están registrados por otra organización.'
-                ]
-            ], 400);
+            return new JsonResponse(['errors' => ['DUPLICADO' => 'Organization already exists']], 400);
         }
 
-        return new JsonResponse(['status' => 'Organization created', 'id' => $org->getCODORG()], 201);
+        return new JsonResponse(OrganizationDto::fromEntity($org), 201);
     }
+
 
 
 
@@ -205,6 +193,15 @@ class OrganizationController extends AbstractController
     }
 
     #[Route('/organizations/{id}/activities', name: 'api_organizations_activities', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the activities of an organization',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: ActivityDto::class))
+        )
+    )]
+    #[OA\Tag(name: 'Organizations')]
     public function organizationActivities(string $id, OrganizationRepository $orgRepository, \App\Repository\ActivityRepository $activityRepository): JsonResponse
     {
         $org = $orgRepository->find($id);
@@ -213,47 +210,11 @@ class OrganizationController extends AbstractController
         }
 
         $activities = $activityRepository->findBy(['organizacion' => $id]);
-        $data = [];
-
-        foreach ($activities as $act) {
-            $data[] = [
-                'id' => $act->getCODACT(),
-                'title' => $act->getNOMBRE(),
-                'description' => $act->getDESCRIPCION(),
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d\TH:i:s'),
-                'endDate' => $act->getFECHA_FIN()->format('Y-m-d\TH:i:s'),
-                'status' => $act->getESTADO(),
-                'image' => $act->getIMAGEN(), // Added
-                'location' => $act->getUBICACION(), // Added
-                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(), // Added (mapped to N_MAX_VOLUNTARIOS in frontend via spread or explicit)
-                'N_MAX_VOLUNTARIOS' => $act->getN_MAX_VOLUNTARIOS(), // Explicitly adding strictly for frontend compatibility if needed
-                'duration' => $act->getDURACION_SESION(), // Added
-                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General', // Added
-                'volunteersCount' => $act->getVoluntarios()->count(),
-                'volunteers' => array_map(function($vol) {
-                     return [
-                         'id' => $vol->getCODVOL(),
-                         'name' => trim($vol->getNOMBRE() . ' ' . $vol->getAPELLIDO1() . ' ' . ($vol->getAPELLIDO2() ?? '')),
-                         'avatar' => $vol->getAVATAR()
-                     ];
-                }, $act->getVoluntarios()->toArray()),
-                'ods' => array_map(function($ods) {
-                    return [
-                        'id' => $ods->getNUMODS(),
-                        'description' => $ods->getDESCRIPCION()
-                    ];
-                }, $act->getOds()->toArray()),
-                // Add Organization info for Mapper to pick up
-                'organization' => [
-                     'id' => $org->getCODORG(), // Use the org we already fetched
-                     'name' => $org->getNOMBRE(),
-                     'avatar' => $org->getAVATAR()
-                ]
-            ];
-        }
+        $data = array_map(fn($act) => ActivityDto::fromEntity($act), $activities);
 
         return new JsonResponse($data);
     }
+
 
 
     #[Route('/organizations/{id}/avatar', name: 'api_organizations_upload_avatar', methods: ['POST'])]
