@@ -9,6 +9,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Repository\VolunteerRepository;
 use App\Repository\OrganizationRepository;
 use App\Repository\AdministratorRepository;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+
 
 class ApiSecuritySubscriber implements EventSubscriberInterface
 {
@@ -16,12 +18,18 @@ class ApiSecuritySubscriber implements EventSubscriberInterface
     private $organizationRepository;
     private $adminRepository;
 
-    public function __construct(VolunteerRepository $volunteerRepository, OrganizationRepository $organizationRepository, AdministratorRepository $adminRepository)
+    public function __construct(
+        VolunteerRepository $volunteerRepository, 
+        OrganizationRepository $organizationRepository, 
+        AdministratorRepository $adminRepository,
+        private ParameterBagInterface $params
+    )
     {
         $this->volunteerRepository = $volunteerRepository;
         $this->organizationRepository = $organizationRepository;
         $this->adminRepository = $adminRepository;
     }
+
 
     public static function getSubscribedEvents(): array
     {
