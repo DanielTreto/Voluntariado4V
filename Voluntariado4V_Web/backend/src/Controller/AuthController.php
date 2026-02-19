@@ -115,6 +115,45 @@ class AuthController extends AbstractController
                     'status' => $org->getESTADO()
                 ]);
             }
+
+            // 4. Provisioning for new Google Users (If not found anywhere)
+            if ($tokenEmail) {
+                $newVolunteer = new \App\Entity\Volunteer();
+                $newVolunteer->setCORREO($tokenEmail);
+                $newVolunteer->setFirebaseUid($uid);
+                $newVolunteer->setNOMBRE($payload['name'] ?? 'Usuario');
+                $newVolunteer->setAPELLIDO1($payload['family_name'] ?? 'Google');
+                $newVolunteer->setESTADO('ACTIVO');
+                $newVolunteer->setAVATAR($payload['picture'] ?? null);
+                
+                // Find next ID
+                $newId = $volRepo->findNextId();
+                $newVolunteer->setCODVOL((string)$newId);
+                
+                $entityManager->persist($newVolunteer);
+                $entityManager->flush();
+                
+                $generatedToken = $this->generateToken([
+                    'sub' => $uid,
+                    'user_id' => $uid,
+                    'email' => $tokenEmail,
+                    'role' => 'volunteer'
+                ]);
+
+                return new JsonResponse([
+                    'success' => true,
+                    'role' => 'volunteer',
+                    'token' => $generatedToken,
+                    'id' => $newVolunteer->getCODVOL(),
+                    'name' => $newVolunteer->getNOMBRE(),
+                    'email' => $newVolunteer->getCORREO(),
+                    'firebaseUid' => $uid,
+                    'avatar' => $newVolunteer->getAVATAR(),
+                    'status' => 'ACTIVO',
+                    'isNew' => true
+                ]);
+            }
+
         }
         // 2. SQL Email/Password Login
         elseif ($email && $password) {
@@ -229,16 +268,17 @@ class AuthController extends AbstractController
 
     private function generateToken(array $payload): string
     {
-        // Add basic JWT claims
         $payload['iat'] = time();
-        $payload['exp'] = time() + (60 * 60 * 24); // 24 hours
+        $payload['exp'] = time() + (60 * 60 * 24);
         
-        // Simple base64 encoding without real crypto signature for this dev environment
-        // The ApiSecuritySubscriber only checks structure and expiry, not signature validity.
         $header = base64_encode(json_encode(['typ' => 'JWT', 'alg' => 'HS256']));
         $payloadEncoded = base64_encode(json_encode($payload));
-        $signature = base64_encode('dummy_signature'); // Not verified by current Subscriber
         
-        return "$header.$payloadEncoded.$signature";
+        $secret = $this->getParameter('kernel.secret');
+        $signature = hash_hmac('sha256', "$header.$payloadEncoded", $secret, true);
+        $signatureEncoded = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+        
+        return "$header.$payloadEncoded.$signatureEncoded";
     }
+
 }
