@@ -16,11 +16,28 @@ use App\Repository\VolunteerRepository;
 use App\Repository\TipoActividadRepository;
 use App\Entity\Volunteer;
 use App\Dto\ActivityDto;
+use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 #[Route('/api')]
 class ActivityController extends AbstractController
 {
     #[Route('/activities', name: 'api_activities_index', methods: ['GET'])]
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the list of activities',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: ActivityDto::class))
+        )
+    )]
+    #[OA\Parameter(
+        name: 'organizationId',
+        in: 'query',
+        description: 'Filter by organization ID',
+        schema: new OA\Schema(type: 'string')
+    )]
+    #[OA\Tag(name: 'Activities')]
     public function index(Request $request, ActivityRepository $activityRepository): JsonResponse
     {
         $orgId = $request->query->get('organizationId');
@@ -38,6 +55,28 @@ class ActivityController extends AbstractController
 
 
     #[Route('/activities', name: 'api_activities_create', methods: ['POST'])]
+    #[OA\RequestBody(
+        description: 'Activity data',
+        required: true,
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(property: 'title', type: 'string'),
+                new OA\Property(property: 'description', type: 'string'),
+                new OA\Property(property: 'date', type: 'string', format: 'date-time'),
+                new OA\Property(property: 'duration', type: 'string', example: '02:00'),
+                new OA\Property(property: 'typeId', type: 'integer'),
+                new OA\Property(property: 'organizationId', type: 'string'),
+                new OA\Property(property: 'ods', type: 'integer'),
+                new OA\Property(property: 'maxVolunteers', type: 'integer')
+            ]
+        )
+    )]
+    #[OA\Response(
+        response: 201,
+        description: 'Activity created',
+        content: new Model(type: ActivityDto::class)
+    )]
+    #[OA\Tag(name: 'Activities')]
     public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository, ValidatorInterface $validator): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -50,86 +89,71 @@ class ActivityController extends AbstractController
         $actividad->setNOMBRE($data['title'] ?? '');
         $actividad->setDESCRIPCION($data['description'] ?? '');
         $actividad->setUBICACION($data['location'] ?? null);
-        $actividad->setIMAGEN($data['image'] ?? null); // Head Logic
+        $actividad->setIMAGEN($data['image'] ?? null);
         
         try {
-            $actividad->setFECHA_INICIO(new \DateTime($data['date']));
-            // Assume 2 hour session if not provided, or logic for end date
-            $endDate = new \DateTime($data['date']);
+            // Standardizing on ISO format (ATOM/ISO8601)
+            $dateStr = $data['date'] ?? null;
+            if (!$dateStr) {
+                 return new JsonResponse(['error' => 'Date is required'], 400);
+            }
+            $actividad->setFECHA_INICIO(new \DateTime($dateStr));
+            
             if (isset($data['duration'])) {
-                // Format 'H:i' -> 'H:i:00'
-                $actividad->setDURACION_SESION($data['duration'] . ':00');
+                $duration = $data['duration'];
+                if (strlen($duration) === 5) $duration .= ':00'; // H:i -> H:i:s
+                $actividad->setDURACION_SESION($duration);
             } else {
                 $actividad->setDURACION_SESION('02:00:00');
             }
-            $actividad->setFECHA_FIN($endDate); // Simplification: starts and ends same day
+            
+            // For now ends same day, we can refine this
+            $actividad->setFECHA_FIN(clone $actividad->getFECHA_INICIO());
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Invalid date format'], 400);
+            return new JsonResponse(['error' => 'Invalid date format. Use ISO 8601 (e.g. 2024-12-31T10:00:00Z)'], 400);
         }
 
         // Link Activity Type
         if (isset($data['typeId'])) {
             $tipo = $tipoActividadRepository->find($data['typeId']);
-            if ($tipo) {
-                $actividad->addTipoActividad($tipo);
-            }
-        } elseif (isset($data['type'])) {
-            $tipo = $tipoActividadRepository->findOneBy(['DESCRIPCION' => $data['type']]);
-            if ($tipo) {
-                $actividad->addTipoActividad($tipo);
-            }
+            if ($tipo) $actividad->addTipoActividad($tipo);
         }
 
         // Link ODS
         if (isset($data['ods'])) {
              $ods = $odsRepository->find($data['ods']);
-             if ($ods) {
-                 $actividad->addOd($ods);
-             }
+             if ($ods) $actividad->addOd($ods);
         }
 
         $actividad->setN_MAX_VOLUNTARIOS($data['maxVolunteers'] ?? 10);
-        
-        // Admin validation bypass
-        $role = $data['role'] ?? null;
-        if ($role === 'admin') {
-            $actividad->setESTADO('EN_PROGRESO');
-        } else {
-            $actividad->setESTADO('PENDIENTE');
-        }
+        $actividad->setESTADO(($data['role'] ?? null) === 'admin' ? 'EN_PROGRESO' : 'PENDIENTE');
 
-        // Link Organization (Merged Logic)
+        // Link Organization
         if (isset($data['organizationId'])) {
-            $orgId = $data['organizationId'];
-            $org = $orgRepository->find($orgId);
+            $org = $orgRepository->find($data['organizationId']);
             if ($org) {
                 $actividad->setOrganizacion($org);
             } else {
-                return new JsonResponse(['error' => 'Organization not found with ID: ' . $orgId], 404);
-            }
-        } else {
-            // Fallback from Mobile logic if needed
-            $orgs = $orgRepository->findAll();
-            if (count($orgs) > 0) {
-                $actividad->setOrganizacion($orgs[0]);
+                return new JsonResponse(['error' => 'Organization not found'], 404);
             }
         }
 
         // Validation
         $errors = $validator->validate($actividad);
         if (count($errors) > 0) {
-            $errorMessages = [];
+            $errorList = [];
             foreach ($errors as $error) {
-                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+                $errorList[$error->getPropertyPath()] = $error->getMessage();
             }
-            return new JsonResponse(['errors' => $errorMessages], 400);
+            return new JsonResponse(['errors' => $errorList], 400);
         }
 
         $entityManager->persist($actividad);
         $entityManager->flush();
 
-        return new JsonResponse(['status' => 'Activity created', 'id' => $actividad->getCODACT()], 201);
+        return new JsonResponse(ActivityDto::fromEntity($actividad), 201);
     }
+
 
     #[Route('/activities/{id}/status', name: 'api_activities_update_status', methods: ['PATCH'])]
     public function updateStatus(int $id, Request $request, EntityManagerInterface $entityManager, ActivityRepository $activityRepository): JsonResponse
