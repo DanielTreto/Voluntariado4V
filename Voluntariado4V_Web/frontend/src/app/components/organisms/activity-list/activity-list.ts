@@ -7,6 +7,9 @@ import { ApiService } from '../../../services/api.service';
 import { NotificationService } from '../../../services/notification.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import { LoadingSpinnerComponent } from '../../atoms/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../atoms/skeleton/skeleton.component';
 
 interface Volunteer {
   id: number;
@@ -47,7 +50,7 @@ interface Activity {
 @Component({
   selector: 'app-activity-list',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule],
+  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule, LoadingSpinnerComponent, SkeletonComponent],
   templateUrl: './activity-list.html',
   styleUrl: './activity-list.css'
 })
@@ -57,6 +60,7 @@ export class ActivityListComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
 
+  isLoading: boolean = true;
   activeTab: 'pending' | 'requests' | 'active' | 'ended' = 'active';
 
   allVolunteers: Volunteer[] = [];
@@ -117,10 +121,18 @@ export class ActivityListComponent implements OnInit {
   }
 
   loadData() {
+    this.isLoading = true;
     combineLatest([
       this.apiService.getActivities(),
       this.route.queryParams
-    ]).subscribe({
+    ]).pipe(
+      finalize(() => {
+        setTimeout(() => {
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        });
+      })
+    ).subscribe({
       next: ([data, params]) => {
 
         this.activities = data.map((act: any) => ({
