@@ -18,7 +18,8 @@ use App\Repository\TipoActividadRepository;
 use App\Dto\VolunteerDto;
 use App\Dto\ActivityDto;
 use OpenApi\Attributes as OA;
-use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Attribute\Model;
+
 
 #[Route('/api')]
 class VolunteerController extends AbstractController
@@ -102,7 +103,7 @@ class VolunteerController extends AbstractController
         }
 
 
-        $volunteer->setESTADO('PENDIENTE');
+        $volunteer->setESTADO(($data['role'] ?? null) === 'admin' ? 'ACTIVO' : 'PENDIENTE');
         
         // Generate Custom ID
         $newId = $volunteerRepository->findNextId();

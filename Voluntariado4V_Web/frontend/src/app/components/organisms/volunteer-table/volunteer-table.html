@@ -1,6 +1,7 @@
+<app-loading-spinner [isLoading]="isLoading"></app-loading-spinner>
 <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
     <!-- Header with Tabs -->
-    <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
         <div class="d-flex gap-3">
             <button class="btn rounded-3 px-4 fw-bold"
                 [ngClass]="activeTab === 'requests' ? 'btn-primary' : 'btn-light text-secondary'"
@@ -13,7 +14,14 @@
                 Voluntarios Registrados
             </button>
         </div>
+
+        <!-- Action Button for Registered Tab -->
+        <button *ngIf="activeTab === 'registered'" class="btn btn-primary rounded-pill px-4 fw-bold"
+            (click)="openCreateModal()">
+            <i class="bi bi-plus-lg me-2"></i> Nuevo Voluntario
+        </button>
     </div>
+
 
     <!-- Search Bar -->
     <div class="mb-4">
@@ -35,7 +43,8 @@
         <div class="small mt-1">Verifica que el backend esté corriendo en http://localhost:8000</div>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive-visible">
+
         <table class="table table-hover align-middle">
             <thead class="bg-light">
                 <tr>
@@ -71,96 +80,108 @@
                                 [ngClass]="sortColumn === 'status' ? (sortDirection === 'asc' ? 'bi-chevron-up' : 'bi-chevron-down') : 'bi-chevron-expand opacity-50'"></i>
                         </div>
                     </th>
-                    <th scope="col" class="border-0 rounded-end-3 py-3 pe-3" style="width: 5%;">ACCIONES</th>
+                    <th scope="col" class="border-0 rounded-end-3 py-3 pe-4 text-end">ACCIONES</th>
+
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let volunteer of filteredVolunteers">
-                    <td class="ps-3"><input class="form-check-input" type="checkbox"></td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <app-avatar [src]="volunteer.avatar" [alt]="volunteer.name" class="me-3"></app-avatar>
-                            <div>
-                                <div class="fw-bold text-dark">{{ volunteer.name }}</div>
-                                <div class="text-muted small">{{ volunteer.project }}</div>
+                <!-- Loading Skeletons -->
+                <tr *ngIf="isLoading">
+                    <td colspan="7">
+                        <div class="p-2" *ngFor="let i of [1,2,3,4,5]">
+                            <div class="d-flex align-items-center mb-2">
+                                <app-skeleton width="40px" height="40px" borderRadius="50%" class="me-3"></app-skeleton>
+                                <div class="flex-grow-1">
+                                    <app-skeleton width="30%" height="15px" class="mb-2"></app-skeleton>
+                                    <app-skeleton width="20%" height="12px"></app-skeleton>
+                                </div>
+                                <app-skeleton width="20%" height="15px" class="me-4"></app-skeleton>
+                                <app-skeleton width="15%" height="15px" class="me-4"></app-skeleton>
+                                <app-skeleton width="10%" height="20px" borderRadius="10px"></app-skeleton>
                             </div>
                         </div>
                     </td>
-                    <td class="text-muted">{{ volunteer.email }}</td>
-                    <td class="text-muted">{{ volunteer.phone }}</td>
-                    <td class="text-muted">{{ volunteer.lastActivity }}</td>
-                    <td><app-badge [label]="volunteer.status | titlecase" [type]="volunteer.status"></app-badge></td>
-                    <td class="pe-3">
-                        <!-- Actions for Registered Tab -->
-                        <div class="dropdown" *ngIf="activeTab === 'registered'">
-                            <button class="btn btn-sm text-secondary p-0" type="button"
-                                (click)="toggleDropdown(volunteer.id, $event)">
-                                <i class="bi bi-three-dots-vertical"></i>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3 py-2"
-                                [class.show]="activeDropdownId === volunteer.id"
-                                [style.display]="activeDropdownId === volunteer.id ? 'block' : 'none'">
-                                <li>
-                                    <button class="dropdown-item px-3 py-2 small" type="button"
-                                        (click)="openDetails(volunteer)">
-                                        <i class="bi bi-eye me-2 text-primary"></i>Ver detalles
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="dropdown-item px-3 py-2 small" type="button"
-                                        (click)="openEditModal(volunteer)">
-                                        <i class="bi bi-pencil me-2 text-warning"></i>Editar
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="dropdown-item px-3 py-2 small" type="button"
-                                        (click)="openEditModal(volunteer)">
-                                        <i class="bi bi-pencil me-2 text-warning"></i>Editar
-                                    </button>
-                                </li>
-                                <li>
-                                    <button class="dropdown-item px-3 py-2 small" type="button"
-                                        (click)="openEditModal(volunteer)">
-                                        <i class="bi bi-pencil me-2 text-warning"></i>Editar
-                                    </button>
-                                </li>
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
-                                <li>
-                                    <button class="dropdown-item px-3 py-2 small" type="button"
-                                        [class.text-danger]="volunteer.status === 'active'"
-                                        [class.text-success]="volunteer.status === 'suspended'"
-                                        (click)="toggleVolunteerStatus(volunteer)">
-                                        <i class="bi me-2"
-                                            [ngClass]="volunteer.status === 'suspended' ? 'bi-play-circle' : 'bi-pause-circle'"></i>
-                                        {{ volunteer.status === 'suspended' ? 'Reactivar cuenta' : 'Suspender cuenta' }}
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-                        <!-- Actions for Requests Tab -->
-                        <div *ngIf="activeTab === 'requests'" class="d-flex gap-2">
-                            <button class="btn btn-success btn-sm rounded-pill px-3"
-                                (click)="acceptVolunteer(volunteer)" title="Aceptar">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm rounded-pill px-3" (click)="denyVolunteer(volunteer)"
-                                title="Denegar">
-                                <i class="bi bi-x-lg"></i>
-                            </button>
-                        </div>
-                    </td>
                 </tr>
-                <tr *ngIf="filteredVolunteers.length === 0">
-                    <td colspan="7" class="text-center py-5">
-                        <div class="d-flex flex-column align-items-center text-muted">
-                            <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
-                            <p class="mb-0 fw-medium">No se encontraron voluntarios</p>
-                            <p class="small opacity-75">Intenta con otros filtros de búsqueda</p>
-                        </div>
-                    </td>
-                </tr>
+
+                <ng-container *ngIf="!isLoading">
+                    <tr *ngFor="let volunteer of filteredVolunteers">
+                        <td class="ps-3"><input class="form-check-input" type="checkbox"></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <app-avatar [src]="volunteer.avatar" [alt]="volunteer.name" class="me-3"></app-avatar>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ volunteer.name }}</div>
+                                    <div class="text-muted small">{{ volunteer.project }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-muted">{{ volunteer.email }}</td>
+                        <td class="text-muted">{{ volunteer.phone }}</td>
+                        <td class="text-muted">{{ volunteer.lastActivity }}</td>
+                        <td><app-badge [label]="volunteer.status | titlecase" [type]="volunteer.status"></app-badge>
+                        </td>
+                        <td class="pe-4 text-end">
+
+                            <!-- Actions for Registered Tab -->
+                            <div class="dropdown" *ngIf="activeTab === 'registered'">
+                                <button class="btn btn-sm text-secondary p-0" type="button"
+                                    (click)="toggleDropdown(volunteer.id, $event)">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3 py-2"
+                                    [class.show]="activeDropdownId === volunteer.id"
+                                    [style.display]="activeDropdownId === volunteer.id ? 'block' : 'none'">
+                                    <li>
+                                        <button class="dropdown-item px-3 py-2 small" type="button"
+                                            (click)="openDetails(volunteer)">
+                                            <i class="bi bi-eye me-2 text-primary"></i>Ver detalles
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item px-3 py-2 small" type="button"
+                                            (click)="openEditModal(volunteer)">
+                                            <i class="bi bi-pencil me-2 text-warning"></i>Editar
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item px-3 py-2 small" type="button"
+                                            [class.text-danger]="volunteer.status === 'active'"
+                                            [class.text-success]="volunteer.status === 'suspended'"
+                                            (click)="toggleVolunteerStatus(volunteer)">
+                                            <i class="bi me-2"
+                                                [ngClass]="volunteer.status === 'suspended' ? 'bi-play-circle' : 'bi-pause-circle'"></i>
+                                            {{ volunteer.status === 'suspended' ? 'Reactivar cuenta' : 'Suspender
+                                            cuenta' }}
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- Actions for Requests Tab -->
+                            <div *ngIf="activeTab === 'requests'" class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm rounded-pill px-3"
+                                    (click)="acceptVolunteer(volunteer)" title="Aceptar">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm rounded-pill px-3"
+                                    (click)="denyVolunteer(volunteer)" title="Denegar">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr *ngIf="filteredVolunteers.length === 0">
+                        <td colspan="7" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center text-muted">
+                                <i class="bi bi-inbox fs-1 mb-3 opacity-50"></i>
+                                <p class="mb-0 fw-medium">No se encontraron voluntarios</p>
+                                <p class="small opacity-75">Intenta con otros filtros de búsqueda</p>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-container>
             </tbody>
         </table>
     </div>
@@ -289,6 +310,173 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal" (click)="deactivateVolunteer()">Sí,
                     suspender</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Volunteer Modal -->
+<div class="modal" [class.show]="showEditModal" [class.d-block]="showEditModal"
+    [style.background-color]="showEditModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1"
+    (click)="closeEditModal()">
+    <div class="modal-dialog modal-lg modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Editar Voluntario</h5>
+                <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form [formGroup]="editForm" (ngSubmit)="saveEdit()">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Nombre</label>
+                            <input type="text" class="form-control" formControlName="name">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Primer Apellido</label>
+                            <input type="text" class="form-control" formControlName="surname1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Segundo Apellido</label>
+                            <input type="text" class="form-control" formControlName="surname2">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Email</label>
+                            <input type="email" class="form-control" formControlName="email">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Teléfono</label>
+                            <input type="text" class="form-control" formControlName="phone">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">DNI</label>
+                            <input type="text" class="form-control" formControlName="dni">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Fecha de
+                                Nascimento</label>
+                            <input type="date" class="form-control" formControlName="dateOfBirth"
+                                [class.is-invalid]="editForm.get('dateOfBirth')?.invalid && editForm.get('dateOfBirth')?.touched">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Ciclo / Curso</label>
+                            <select class="form-select" formControlName="course"
+                                [class.is-invalid]="editForm.get('course')?.invalid && editForm.get('course')?.touched">
+                                <option value="" disabled>Selecciona un ciclo...</option>
+                                <option *ngFor="let ciclo of ciclos" [value]="ciclo.id">{{ ciclo.name }} ({{ ciclo.curso
+                                    }})</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Descripción / Bio</label>
+                            <textarea class="form-control" rows="3" formControlName="description"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light rounded-pill px-4"
+                    (click)="closeEditModal()">Cancelar</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" (click)="saveEdit()">
+                    <i class="bi bi-save me-2"></i> Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Creation Modal -->
+<div class="modal" [class.show]="showCreateModal" [class.d-block]="showCreateModal"
+    [style.background-color]="showCreateModal ? 'rgba(0,0,0,0.5)' : 'transparent'" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Nuevo Voluntario</h5>
+                <button type="button" class="btn-close" (click)="closeCreateModal()"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form [formGroup]="createForm" (ngSubmit)="saveCreate()">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Nombre</label>
+                            <input type="text" class="form-control rounded-3" formControlName="name"
+                                [class.is-invalid]="createForm.get('name')?.invalid && createForm.get('name')?.touched">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Primer Apellido</label>
+                            <input type="text" class="form-control rounded-3" formControlName="surname1"
+                                [class.is-invalid]="createForm.get('surname1')?.invalid && createForm.get('surname1')?.touched">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Segundo Apellido</label>
+                            <input type="text" class="form-control rounded-3" formControlName="surname2">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email (Usuario)</label>
+                            <input type="email" class="form-control rounded-3" formControlName="email"
+                                [class.is-invalid]="createForm.get('email')?.invalid && createForm.get('email')?.touched">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Contraseña</label>
+                            <input type="password" class="form-control rounded-3" formControlName="password"
+                                [class.is-invalid]="createForm.get('password')?.invalid && createForm.get('password')?.touched">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Teléfono</label>
+                            <input type="text" class="form-control rounded-3" formControlName="phone"
+                                [class.is-invalid]="createForm.get('phone')?.invalid && createForm.get('phone')?.touched">
+                            <div class="invalid-feedback" *ngIf="createForm.get('phone')?.errors?.['pattern']">
+                                El teléfono debe empezar por 6, 7, 8 o 9 y tener 9 dígitos.
+                            </div>
+                            <div class="invalid-feedback" *ngIf="createForm.get('phone')?.errors?.['required']">
+                                El teléfono es obligatorio.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">DNI</label>
+                            <input type="text" class="form-control rounded-3" formControlName="dni"
+                                [class.is-invalid]="createForm.get('dni')?.invalid && createForm.get('dni')?.touched">
+                            <div class="invalid-feedback">El DNI debe tener 9 caracteres.</div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control rounded-3" formControlName="dateOfBirth"
+                                [class.is-invalid]="createForm.get('dateOfBirth')?.invalid && createForm.get('dateOfBirth')?.touched">
+                            <div class="invalid-feedback">La fecha de nacimiento es obligatoria.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Ciclo / Curso</label>
+                            <select class="form-select rounded-3" formControlName="course"
+                                [class.is-invalid]="createForm.get('course')?.invalid && createForm.get('course')?.touched">
+                                <option value="" disabled>Selecciona un ciclo...</option>
+                                <option *ngFor="let ciclo of ciclos" [value]="ciclo.id">{{ ciclo.name }} ({{ ciclo.curso
+                                    }})</option>
+                            </select>
+                            <div class="invalid-feedback">El ciclo formativo es obligatorio.</div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Descripción / Notas</label>
+                            <textarea class="form-control rounded-3" formControlName="description" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                        <button type="button" class="btn btn-light me-2 rounded-pill px-4 fw-semibold"
+                            (click)="closeCreateModal()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold"
+                            [disabled]="createForm.invalid">
+                            Crear Voluntario
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

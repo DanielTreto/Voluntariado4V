@@ -6,6 +6,10 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { ApiService } from '../../../services/api.service';
 import { ToastService } from '../../../services/toast.service';
 import { NotificationService } from '../../../services/notification.service';
+import { LoadingSpinnerComponent } from '../../atoms/loading-spinner/loading-spinner.component';
+import { SkeletonComponent } from '../../atoms/skeleton/skeleton.component';
+import { finalize } from 'rxjs/operators';
+
 
 
 interface Volunteer {
@@ -31,7 +35,8 @@ interface Volunteer {
 @Component({
   selector: 'app-volunteer-table',
   standalone: true,
-  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, AvatarComponent, BadgeComponent, FormsModule, ReactiveFormsModule, LoadingSpinnerComponent, SkeletonComponent],
+
   templateUrl: './volunteer-table.html',
   styleUrl: './volunteer-table.css'
 })
@@ -43,7 +48,9 @@ export class VolunteerTableComponent implements OnInit {
   private notificationService = inject(NotificationService);
 
   activeTab: 'requests' | 'registered' = 'requests';
+  isLoading: boolean = true;
   selectedVolunteer: Volunteer | null = null;
+
   volunteerToDeactivate: Volunteer | null = null;
   errorMessage: string = '';
 
@@ -60,8 +67,12 @@ export class VolunteerTableComponent implements OnInit {
   // Modal control
   showDetailsModal: boolean = false;
   showEditModal: boolean = false;
+  showCreateModal: boolean = false;
   editForm: FormGroup;
+  createForm: FormGroup;
   editingVolunteerId: number | null = null;
+  ciclos: any[] = [];
+
 
   volunteers: Volunteer[] = [];
 
@@ -71,53 +82,87 @@ export class VolunteerTableComponent implements OnInit {
       surname1: ['', Validators.required],
       surname2: [''],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', Validators.required],
-      dni: ['', Validators.required],
-      dateOfBirth: [''],
-      course: [''],
+      phone: ['', [Validators.required, Validators.pattern(/^[6-9][0-9]{8}$/)]],
+      dni: ['', [Validators.required, Validators.minLength(9), Validators.maxLength(9)]],
+      dateOfBirth: ['', Validators.required],
+      course: ['', Validators.required],
       description: ['']
     });
+
+    this.createForm = this.fb.group({
+      name: ['', Validators.required],
+      surname1: ['', Validators.required],
+      surname2: [''],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['123456', [Validators.required, Validators.minLength(6)]], // Default password
+      phone: ['', [Validators.required, Validators.pattern(/^[6-9][0-9]{8}$/)]],
+      dni: ['', [Validators.required, Validators.minLength(9), Validators.maxLength(9)]],
+      dateOfBirth: ['', Validators.required],
+      course: ['', Validators.required],
+      description: ['']
+    });
+
   }
 
   ngOnInit() {
     this.loadVolunteers();
+    this.loadCiclos();
+  }
+
+  loadCiclos() {
+    this.apiService.getCiclos().subscribe({
+      next: (data) => this.ciclos = data,
+      error: (err) => console.error('Error loading ciclos', err)
+    });
   }
 
   loadVolunteers() {
-    this.apiService.getVolunteers().subscribe({
-      next: (data) => {
-
-        this.volunteers = data.map((v: any) => {
-          const firstName = v.name || '';
-          const lastName = `${v.surname1 || ''} ${v.surname2 || ''}`.trim();
-          return {
-            id: v.id,
-            name: `${firstName} ${lastName}`.trim(),
-            firstName: firstName,
-            lastName: lastName,
-            project: v.course || 'Sin Asignar',
-            email: v.email,
-            phone: v.phone,
-            lastActivity: 'Reciente',
-            status: this.mapStatus(v.status),
-            avatar: v.avatar ? (v.avatar.startsWith('/uploads') ? this.apiService.baseUrl + v.avatar : v.avatar) : 'assets/images/volunteer-avatar.png',
-            dni: v.dni,
-            address: 'No disponible',
-            course: v.course,
-            dateOfBirth: v.dateOfBirth || 'No disponible',
-            description: v.description || 'Sin descripción',
-            availability: [],
-            interests: []
-          };
-        });
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error loading volunteers', err);
-        this.errorMessage = 'Error loading data: ' + err.message;
-      }
-    });
+    this.isLoading = true;
+    this.apiService.getVolunteers()
+      .pipe(
+        finalize(() => {
+          setTimeout(() => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
+        })
+      )
+      .subscribe({
+        next: (data) => {
+          this.volunteers = data.map((v: any) => {
+            const firstName = v.name || v.NOMBRE || '';
+            const surname1 = v.surname1 || v.APELLIDO1 || '';
+            const surname2 = v.surname2 || v.APELLIDO2 || '';
+            const lastName = `${surname1} ${surname2}`.trim();
+            return {
+              id: v.id,
+              name: `${firstName} ${lastName}`.trim(),
+              firstName: firstName,
+              lastName: lastName,
+              project: v.course || 'Sin Asignar',
+              email: v.email,
+              phone: v.phone,
+              lastActivity: 'Reciente',
+              status: this.mapStatus(v.status),
+              avatar: v.avatar ? (v.avatar.startsWith('/uploads') ? this.apiService.baseUrl + v.avatar : v.avatar) : 'assets/images/volunteer-avatar.png',
+              dni: v.dni,
+              address: 'No disponible',
+              course: v.course,
+              dateOfBirth: v.dateOfBirth || 'No disponible',
+              description: v.description || 'Sin descripción',
+              availability: [],
+              interests: []
+            };
+          });
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading volunteers', err);
+          this.toastService.show('Error al cargar voluntarios.', 'error');
+        }
+      });
   }
+
 
   mapStatus(status: string): 'active' | 'pending' | 'inactive' | 'org-pending' | 'suspended' | 'custom' {
     const map: any = {
@@ -346,4 +391,43 @@ export class VolunteerTableComponent implements OnInit {
       });
     }
   }
+
+  openCreateModal() {
+    this.showCreateModal = true;
+    this.createForm.reset({
+      password: '123456'
+    });
+  }
+
+  closeCreateModal() {
+    this.showCreateModal = false;
+    this.createForm.reset();
+  }
+
+  saveCreate() {
+    if (this.createForm.invalid) {
+      this.createForm.markAllAsTouched();
+      return;
+    }
+
+    const payload = { ...this.createForm.value, role: 'admin' };
+    this.apiService.registerVolunteer(payload).subscribe({
+      next: (res) => {
+        this.toastService.show('Voluntario creado correctamente', 'success');
+        this.closeCreateModal();
+        this.loadVolunteers();
+      },
+      error: (err) => {
+        console.error('Error creating volunteer', err);
+        let errorMsg = 'Error desconocido';
+        if (err.error?.errors) {
+          errorMsg = Object.values(err.error.errors).join(', ');
+        } else if (err.error?.error) {
+          errorMsg = err.error.error;
+        }
+        this.toastService.show('Error al crear voluntario: ' + errorMsg, 'error');
+      }
+    });
+  }
 }
+
