@@ -179,6 +179,7 @@ class OrganizationController extends AbstractController
         if (isset($data['description'])) $org->setDESCRIPCION($data['description']);
         if (isset($data['address'])) $org->setDIRECCION($data['address']);
         if (isset($data['web'])) $org->setWEB($data['web']);
+        if (isset($data['status'])) $org->setESTADO($data['status']);
 
         // Validate
         $errors = $validator->validate($org);

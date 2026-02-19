@@ -84,13 +84,14 @@ export class OrganizationListComponent implements OnInit {
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       phone: [''],
-      type: [''], // Could be select
-      sector: [''], // Could be select
-      scope: [''], // Could be select
+      type: [''],
+      sector: [''],
+      scope: [''],
       contactPerson: [''],
       description: [''],
       address: [''],
-      web: ['']
+      web: [''],
+      status: ['ACTIVO']
     });
 
     this.createForm = this.fb.group({
@@ -344,7 +345,8 @@ export class OrganizationListComponent implements OnInit {
           contactPerson: fullOrg.contactPerson,
           description: fullOrg.description,
           address: fullOrg.address,
-          web: fullOrg.web
+          web: fullOrg.web,
+          status: fullOrg.status
         });
         this.showEditModal = true;
         this.closeDropdown();

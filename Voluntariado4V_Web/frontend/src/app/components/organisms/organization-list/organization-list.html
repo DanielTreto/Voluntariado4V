@@ -429,6 +429,16 @@
                     </div>
                     <div class="row">
                         <div class="col-md-6">
+                            <label class="form-label fw-semibold">Estado</label>
+                            <select class="form-select rounded-3" formControlName="status">
+                                <option value="ACTIVO">ACTIVO</option>
+                                <option value="PENDIENTE">PENDIENTE</option>
+                                <option value="SUSPENDIDO">SUSPENDIDO</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
                             <app-input-text label="Dirección" formControlName="address"></app-input-text>
                         </div>
                         <div class="col-md-6">
