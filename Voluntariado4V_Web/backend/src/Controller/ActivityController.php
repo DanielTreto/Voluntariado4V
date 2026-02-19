@@ -15,14 +15,14 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Repository\VolunteerRepository;
 use App\Repository\TipoActividadRepository;
 use App\Entity\Volunteer;
+use App\Dto\ActivityDto;
 
 #[Route('/api')]
 class ActivityController extends AbstractController
 {
     #[Route('/activities', name: 'api_activities_index', methods: ['GET'])]
-    public function index(Request $request, ActivityRepository $activityRepository, OrganizationRepository $orgRepository, EntityManagerInterface $entityManager): JsonResponse
+    public function index(Request $request, ActivityRepository $activityRepository): JsonResponse
     {
-        // 1. Check for filters (Mobile Logic)
         $orgId = $request->query->get('organizationId');
 
         if ($orgId) {
@@ -31,80 +31,11 @@ class ActivityController extends AbstractController
              $activities = $activityRepository->findAll();
         }
 
-        // 2. Auto-update status for finished activities (Head Logic - kept commented if unsure, or uncomment if active)
-        /*
-        $now = new \DateTime();
-        $updated = false;
-
-        foreach ($activities as $act) {
-            if ($act->getESTADO() === 'EN_PROGRESO' && $act->getFECHA_FIN() < $now) {
-                $act->setESTADO('FINALIZADA');
-                $updated = true;
-            }
-        }
-
-        if ($updated) {
-            $entityManager->flush();
-        }
-        */
-
-        // 3. Prepare response
-        $data = [];
-        foreach ($activities as $act) {
-            $org = $orgRepository->find($act->getCODORG());
-            $data[] = [
-                'id' => $act->getCODACT(),
-                'title' => $act->getNOMBRE(),
-                'description' => $act->getDESCRIPCION(),
-                'location' => $act->getUBICACION() ?? 'Ubicación no especificada',
-                // Merging date formats: Provide standardized ISO and maybe a formatted one if needed, or stick to one. 
-                // Mobile expects d/m/y, Web usually Y-m-d. Let's provide Y-m-d as default 'date' and 'formattedDate' for mobile if needed, 
-                // BUT previous mobile code used 'date' key for d/m/y. 
-                // To avoid breaking Mobile, we might need to change Mobile code OR provide what it expects.
-                // However, I must valid "Web and Mobile work". 
-                // If I change 'date' format, Web might break if it expects Y-m-d.
-                // Safest: 'date' => Y-m-d (standard), 'mobileDate' => d/m/y? 
-                // Or check what Frontend uses. Frontend likely parses Y-m-d. Mobile might just display string.
-                // I will use Y-m-d for 'date' and 'endDate' to be standard/Web compliant, and hope Mobile parses it or I can add a specific field.
-                // Actually, looking at previous Mobile code, it used d/m/y. 
-                // I'll provide both formats to be safe.
-                'date' => $act->getFECHA_INICIO()->format('Y-m-d\TH:i:s'),
-                'endDate' => $act->getFECHA_FIN()->format('Y-m-d\TH:i:s'),
-                
-                'image' => $act->getIMAGEN() ?? 'assets/images/activity-1.jpg', // Web key
-                'imagen' => $act->getIMAGEN(), // Mobile key (Db column)
-                
-                'duration' => $act->getDURACION_SESION(),
-                
-                'organization' => $org ? [
-                    'id' => $org->getCODORG(),
-                    'name' => $org->getNOMBRE(),
-                    'avatar' => $org->getAVATAR()
-                ] : null,
-                'volunteers' => array_map(function($vol) {
-                    return [
-                        'id' => $vol->getCODVOL(),
-                        'name' => trim($vol->getNOMBRE() . ' ' . $vol->getAPELLIDO1() . ' ' . ($vol->getAPELLIDO2() ?? '')),
-                        'avatar' => $vol->getAVATAR(),
-                        'email' => $vol->getCORREO(),
-                        'status' => $vol->getESTADO()
-                    ];
-                }, $act->getVoluntarios()->toArray()), 
-                
-                'type' => $act->getTiposActividad()->first() ? $act->getTiposActividad()->first()->getDESCRIPCION() : 'General', // Mobile Logic preferred
-                'status' => $act->getESTADO(),
-                'ods' => array_map(function($ods) {
-                    return [
-                        'id' => $ods->getNUMODS(),
-                        'description' => $ods->getDESCRIPCION()
-                    ];
-                }, $act->getOds()->toArray()),
-                'maxVolunteers' => $act->getN_MAX_VOLUNTARIOS(),
-            ];
-        }
+        $data = array_map(fn($act) => ActivityDto::fromEntity($act), $activities);
 
         return new JsonResponse($data);
     }
+
 
     #[Route('/activities', name: 'api_activities_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager, OrganizationRepository $orgRepository, TipoActividadRepository $tipoActividadRepository, \App\Repository\OdsRepository $odsRepository, ValidatorInterface $validator): JsonResponse
