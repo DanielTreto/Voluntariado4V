@@ -223,6 +223,7 @@ class ApiSecuritySubscriber implements EventSubscriberInterface
 
 
         } catch (\Exception $e) {
+            error_log('ApiSecuritySubscriber 401 Error: ' . $e->getMessage());
             $event->setResponse(new JsonResponse(['error' => 'Unauthorized: ' . $e->getMessage()], 401));
         }
     }

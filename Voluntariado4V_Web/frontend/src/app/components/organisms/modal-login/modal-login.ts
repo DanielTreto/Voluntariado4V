@@ -109,9 +109,6 @@ export class ModalLogin {
   }
 
   private handleLoginSuccess(response: any, token?: string) {
-    if (token) {
-      response.token = token;
-    }
 
     // Block login for pending or suspended volunteers/organizations
     const status = (response.status || '').toUpperCase();
