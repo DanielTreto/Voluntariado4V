@@ -3,8 +3,7 @@ import { Component, inject, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
-import { Auth, signInWithPopup, signInWithEmailAndPassword } from '@angular/fire/auth';
-import { GoogleAuthProvider } from 'firebase/auth';
+import { Auth, signInWithPopup, signInWithEmailAndPassword, GoogleAuthProvider } from '@angular/fire/auth';
 
 @Component({
   selector: 'app-modal-login',
