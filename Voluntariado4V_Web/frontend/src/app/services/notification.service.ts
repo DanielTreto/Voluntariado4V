@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { AdminNotification, NotificationType } from '../models/admin-notification.model';
 
 @Injectable({
@@ -8,6 +9,9 @@ import { AdminNotification, NotificationType } from '../models/admin-notificatio
 export class NotificationService {
   private notificationsSubject = new BehaviorSubject<AdminNotification[]>([]);
   notifications$ = this.notificationsSubject.asObservable();
+
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8000/api';
 
   constructor() {
     this.loadNotifications();
@@ -47,7 +51,10 @@ export class NotificationService {
     this.saveNotifications(updated);
   }
 
-  // Helper to trigger types of notifications easily
+  // -----------------------------------------------------------------------
+  // Helper methods to trigger specific notification types
+  // -----------------------------------------------------------------------
+
   notifyOrgRegistration(orgName: string) {
     this.addNotification({
       id: Date.now().toString(),
@@ -58,6 +65,20 @@ export class NotificationService {
       timestamp: new Date(),
       read: false,
       actionUrl: '/dashboard/organizations',
+      recipientRole: 'admin'
+    });
+  }
+
+  /** Notifies the ADMIN that a volunteer has submitted a new join request */
+  notifyAdminNewJoinRequest(volunteerName: string, activityTitle: string) {
+    this.addNotification({
+      id: Date.now().toString(),
+      type: 'VOL_JOIN_ACTIVITY',
+      title: 'Nueva Solicitud de Voluntario',
+      message: `${volunteerName} ha solicitado unirse a "${activityTitle}".`,
+      timestamp: new Date(),
+      read: false,
+      actionUrl: '/dashboard/activities',
       recipientRole: 'admin'
     });
   }
@@ -160,6 +181,93 @@ export class NotificationService {
     });
   }
 
+  /**
+   * Checks the API for pending volunteer join requests and creates admin notifications
+   * for any that don't already have a corresponding notification in storage.
+   * Should be called when admin loads the dashboard.
+   */
+  checkPendingRequestsForAdmin(): void {
+    const userJson = localStorage.getItem('user');
+    const user = userJson ? JSON.parse(userJson) : null;
+    if (!user || user.role !== 'admin') return;
+
+    this.http.get<any[]>(`${this.apiUrl}/requests?status=PENDIENTE`).subscribe({
+      next: (requests) => {
+        if (!requests || requests.length === 0) return;
+
+        const stored = this.loadNotificationsFromStorage();
+
+        requests.forEach((req: any) => {
+          // Create a stable ID for this request notification to avoid duplicates
+          const notifId = `join_req_${req.id}`;
+          const alreadyExists = stored.some(n => n.id === notifId);
+
+          if (!alreadyExists) {
+            const volunteerName = req.volunteer?.fullName || req.volunteer?.name || 'Un voluntario';
+            const activityTitle = req.activity?.title || 'una actividad';
+            this.addNotification({
+              id: notifId,
+              type: 'VOL_JOIN_ACTIVITY',
+              title: 'Solicitud Pendiente',
+              message: `${volunteerName} quiere unirse a "${activityTitle}".`,
+              timestamp: new Date(req.createdAt || Date.now()),
+              read: false,
+              actionUrl: '/dashboard/activities',
+              recipientRole: 'admin'
+            });
+          }
+        });
+      },
+      error: (err) => console.warn('Could not fetch pending requests for notification check', err)
+    });
+  }
+
+  /**
+   * Checks volunteer's own requests from the API for status changes and creates
+   * notifications for any accepted/denied requests not yet notified.
+   * Should be called when a volunteer loads their dashboard.
+   */
+  checkVolunteerRequestStatuses(volunteerId: number): void {
+    this.http.get<any[]>(`${this.apiUrl}/volunteers/${volunteerId}/requests`).subscribe({
+      next: (requests) => {
+        if (!requests || requests.length === 0) return;
+
+        const stored = this.loadNotificationsFromStorage();
+
+        requests.forEach((req: any) => {
+          if (req.status === 'ACEPTADA' || req.status === 'DENEGADA') {
+            const accepted = req.status === 'ACEPTADA';
+            const notifId = `req_status_${req.id}_${req.status}`;
+            const alreadyExists = stored.some(n => n.id === notifId);
+
+            if (!alreadyExists) {
+              const activityId = req.activityId || req.activity?.id;
+              const activityTitle = req.activityTitle || req.activity?.title || 'una actividad';
+              const url = activityId
+                ? `/volunteer-dashboard/activities?openId=${activityId}`
+                : '/volunteer-dashboard/activities';
+
+              this.addNotification({
+                id: notifId,
+                type: accepted ? 'JOIN_REQUEST_ACCEPTED' : 'JOIN_REQUEST_DENIED',
+                title: accepted ? 'Solicitud Aceptada' : 'Solicitud Denegada',
+                message: accepted
+                  ? `Has sido aceptado en la actividad "${activityTitle}".`
+                  : `Tu solicitud para "${activityTitle}" ha sido denegada.`,
+                timestamp: new Date(),
+                read: false,
+                actionUrl: url,
+                recipientRole: 'volunteer',
+                recipientId: volunteerId
+              });
+            }
+          }
+        });
+      },
+      error: (err) => console.warn('Could not fetch volunteer requests for notification check', err)
+    });
+  }
+
   private loadNotifications() {
     // Determine current user context
     const userJson = localStorage.getItem('user');
@@ -204,9 +312,6 @@ export class NotificationService {
 
   private loadNotificationsFromStorage(): AdminNotification[] {
     const data = localStorage.getItem('admin_notifications');
-    // If no data, separate mock data for filtered loading? 
-    // Actually if localStorage is empty we load default mock.
-    // But default mock is for admin. Let's add some mock for volunteer if empty.
     let all = data ? JSON.parse(data) : this.getMockData();
     return all;
   }

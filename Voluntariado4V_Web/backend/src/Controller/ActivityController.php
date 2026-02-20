@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Controller;
 
@@ -216,6 +216,39 @@ class ActivityController extends AbstractController
                 return new JsonResponse(['error' => 'No puedes reducir el cupo por debajo del número de voluntarios ya inscritos (' . $act->getVoluntarios()->count() . ').'], 400);
             }
             $act->setN_MAX_VOLUNTARIOS($max);
+        }
+
+        if (isset($data['location'])) {
+            $act->setUBICACION($data['location']);
+        }
+
+        // Update activity type by description
+        if (isset($data['type']) && $data['type']) {
+            $allTypes = $tipoActividadRepository->findAll();
+            $matchedType = null;
+            foreach ($allTypes as $t) {
+                if ($t->getDESCRIPCION() === $data['type']) {
+                    $matchedType = $t;
+                    break;
+                }
+            }
+            if ($matchedType) {
+                foreach ($act->getTiposActividad() as $existingType) {
+                    $act->removeTipoActividad($existingType);
+                }
+                $act->addTipoActividad($matchedType);
+            }
+        }
+
+        // Update ODS if provided
+        if (array_key_exists('ods', $data) && $data['ods'] !== null) {
+            foreach ($act->getOds() as $existingOds) {
+                $act->removeOd($existingOds);
+            }
+            $ods = $odsRepository->find($data['ods']);
+            if ($ods) {
+                $act->addOd($ods);
+            }
         }
 
         // Validate entire entity constraints

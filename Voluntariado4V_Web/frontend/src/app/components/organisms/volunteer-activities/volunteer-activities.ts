@@ -5,6 +5,7 @@ import { SkeletonComponent } from '../../atoms/skeleton/skeleton.component';
 import { finalize } from 'rxjs/operators';
 import { ApiService } from '../../../services/api.service';
 import { ToastService } from '../../../services/toast.service';
+import { NotificationService } from '../../../services/notification.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
@@ -30,6 +31,7 @@ export class VolunteerActivitiesComponent implements OnInit {
 
   private apiService = inject(ApiService);
   private toastService = inject(ToastService);
+  private notificationService = inject(NotificationService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
@@ -40,6 +42,8 @@ export class VolunteerActivitiesComponent implements OnInit {
     if (user && user.role === 'volunteer') {
       this.userId = user.id;
       this.userRole = user.role;
+      // Check if any requests were accepted/denied since last visit
+      this.notificationService.checkVolunteerRequestStatuses(user.id);
       this.loadActivities();
     } else {
       this.userId = user.id; // temporary fallback
@@ -135,8 +139,16 @@ export class VolunteerActivitiesComponent implements OnInit {
   signUp(activityId: number) {
     if (!this.userId) return;
 
+    const activity = this.activities.find((a: any) => a.id === activityId);
+
     this.apiService.signUpForActivity(activityId, this.userId).subscribe({
       next: (res) => {
+        // Notify admin about the new pending join request
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const volunteerName = user.name || 'Un voluntario';
+        const activityTitle = activity?.title || 'una actividad';
+        this.notificationService.notifyAdminNewJoinRequest(volunteerName, activityTitle);
+
         this.toastService.show('¡Solicitud enviada correctamente! Espera a que el administrador la acepte.', 'success');
         this.loadActivities(); // Reload to update state
       },

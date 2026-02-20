@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Entity;
 
@@ -223,6 +223,13 @@ class Actividad
     public function getTiposActividad(): \Doctrine\Common\Collections\Collection
     {
         return $this->tiposActividad;
+    }
+
+
+    public function removeTipoActividad(TipoActividad $tipoActividad): static
+    {
+        $this->tiposActividad->removeElement($tipoActividad);
+        return $this;
     }
 
     public function addTipoActividad(TipoActividad $tipoActividad): static
