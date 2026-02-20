@@ -200,4 +200,26 @@ export class VolunteerActivitiesComponent implements OnInit {
   handleImageError(event: any) {
     event.target.src = 'assets/images/activity-default.jpg';
   }
+
+  parseDate(dateString: string): Date | null {
+    if (!dateString) return null;
+
+    // Pattern: dd/MM/yy
+    const match = dateString.match(/^(\d{2})\/(\d{2})\/(\d{2})$/);
+    if (match) {
+      const day = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10) - 1; // Month is 0-indexed
+      let year = parseInt(match[3], 10);
+      // Assume 2000s for two digit years if it makes sense, e.g., 2026
+      year += 2000;
+
+      return new Date(year, month, day);
+    }
+
+    // Fallback if the date is already in standard ISO or other format passing Date constructor
+    const d = new Date(dateString);
+    if (!isNaN(d.getTime())) return d;
+
+    return null;
+  }
 }
